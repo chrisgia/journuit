@@ -12,7 +12,7 @@
 	<body class="tm-frameborder">
 		<?php require $_SERVER['DOCUMENT_ROOT']."/include/navbar.php"; ?>
 		<div class="uk-margin-bottom uk-margin-large-top tm-frame">
-			<h1></h1>
+			<h1>Journuit</h1>
 		</div>
 		<script>
 			$(document).ready(function() {
