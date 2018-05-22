@@ -1,0 +1,39 @@
+body{
+	background-color: #e8e8e8;
+}
+
+#white {
+	color: white;
+}
+
+#black {
+	color: black;
+}
+
+#navbar {
+	background-color: grey;
+}
+
+.uk-navbar-item {
+	color: black;
+	font-size: 1.5em;
+}
+
+.uk-logo {
+	color: black;
+	font-size: 2em;
+}
+
+#slogan {
+	color: black;
+}
+
+#slogan {
+	font-family: 'Indie Flower', cursive;
+}
+
+#beschreibung {
+	font-family: 'EB Garamond', serif;
+	font-size: 2em;
+	color: black;
+}
