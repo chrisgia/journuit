@@ -14,9 +14,10 @@ body{
 	background-color: grey;
 }
 
-.uk-navbar-item {
+.nav_link {
 	color: black;
 	font-size: 1.5em;
+	font-weight: 300;
 }
 
 .uk-logo {
@@ -36,4 +37,8 @@ body{
 	font-family: 'EB Garamond', serif;
 	font-size: 2em;
 	color: black;
+}
+
+#journuit_big {
+	font-size: 3.5em;
 }
