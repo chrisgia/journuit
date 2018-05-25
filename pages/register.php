@@ -1,3 +1,6 @@
+<?php 
+	session_start();
+?>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -107,8 +110,8 @@
     						echo 	"<p>".$error."</p>";
 							echo "</div>";
 						} else {
-							$statement = $db->prepare("INSERT INTO users_data(vorname, nachname) VALUES(?, ?)");
-							$statement->execute(array(htmlspecialchars($vorname), htmlspecialchars($nachname)));
+							$insertUserData = $db->prepare("INSERT INTO users_data(vorname, nachname) VALUES(?, ?)");
+							$insertUserData->execute(array(htmlspecialchars($vorname), htmlspecialchars($nachname)));
 							echo "<script>window.location.replace('http://landausflugsplaner.de/index.php?register=success');</script>";
 						}
 					}
