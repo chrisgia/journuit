@@ -70,8 +70,8 @@
 
 							$error = "";
 
-							$vorname = str_replace(" ", "", trim($_POST['vorname']));
-							$nachname = str_replace(" ", "", trim($_POST['nachname']));
+							$vorname = ucfirst(str_replace(" ", "", trim($_POST['vorname'])));
+							$nachname = ucfirst(str_replace(" ", "", trim($_POST['nachname'])));
 							if(empty($vorname)){
 								$error = "Der Vorname darf nicht leer sein.";
 							} 

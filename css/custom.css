@@ -20,6 +20,18 @@ body{
 	font-weight: 300;
 }
 
+.nav_username {
+	color: black;
+	font-size: 1em;
+	font-weight: 300;
+	font-style: italic;
+}
+
+.nav_icon {
+	color: white;
+}
+
+
 .uk-logo {
 	color: black;
 	font-size: 2em;

@@ -1,24 +1,43 @@
 <?php
     session_start();
-    require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php';
-    $id = $auth->getUserId(); 
-    error_reporting(E_ALL);
-    ini_set('display_errors', '1');
+    require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php'; 
 ?>
 <nav class="uk-navbar-container uk-height-1-1" id="navbar" uk-navbar>
 	<div class="uk-navbar-left">
         <?php 
             if(isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] == true) {
+                $id = $auth->getUserId();
                 $selectUserData = $db->prepare("SELECT * FROM users_data WHERE id = ?");
                 $selectUserData->execute(array($id));
                 $userData = $selectUserData->fetchAll(\PDO::FETCH_ASSOC);
         ?>
         <div class="uk-navbar-item">
-            <?php echo $userData[0]['vorname']." ".$userData[0]['nachname']." (#".str_pad($id, 4, '0', STR_PAD_LEFT).")";?>
+            <ul class="uk-navbar-nav">
+                <li>
+                    <a class="uk-link-heading" href="/pages/profile.php">
+                        <span class="nav_username">
+                            <?php echo $userData[0]['vorname']." ".$userData[0]['nachname'][0].". (#".str_pad($id, 4, '0', STR_PAD_LEFT).")";?>
+                        </span>
+                    </a>
+                </li>
+            </ul>
+            <div uk-dropdown="animation: uk-animation-slide-top-small; duration: 500">
+                <ul class="uk-nav uk-dropdown-nav">
+                    <li><a href="/pages/logout.php" uk-icon="icon: sign-out">ABMELDEN  </a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="uk-navbar-item">
+            <img src="http://landausflugsplaner.de/pictures/dot.png" alt="dot" uk-img">
         </div>
         <div class="uk-navbar-item">
             <ul class="uk-navbar-nav">
-                <li><a class="uk-link-heading" href="/pages/logout.php"><span class="nav_link">ABMELDEN</span></a></li>
+                <li><a class="nav_icon" href="/pages/reisetagebuecher.php" uk-icon="icon: thumbnails; ratio: 1.5"></a></li>
+            </ul>
+        </div>
+        <div class="uk-navbar-item">
+            <ul class="uk-navbar-nav">
+                <li><a class="nav_icon" href="/pages/reisetagebuecher.php" uk-icon="icon: plus; ratio: 1.5"></a></li>
             </ul>
         </div>
         <?php } else {

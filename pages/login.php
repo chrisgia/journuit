@@ -68,7 +68,7 @@
     						echo 	"<p>".$error."</p>";
 							echo "</div>";
 						} else {
-							echo "<script>window.location.replace('/?login=success');</script>";
+							echo "<script>window.location.replace('/pages/reisetagebuecher.php?login=success');</script>";
 						}
 					}
 				?>
