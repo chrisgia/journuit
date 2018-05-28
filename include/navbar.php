@@ -1,5 +1,4 @@
 <?php
-    session_start();
     require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php'; 
 ?>
 <nav class="uk-navbar-container uk-height-1-1" id="navbar" uk-navbar>
@@ -16,7 +15,7 @@
                 <li>
                     <a class="uk-link-heading" href="/pages/profile.php">
                         <span class="nav_username">
-                            <?php echo $userData[0]['vorname']." ".$userData[0]['nachname'][0].". (#".str_pad($id, 4, '0', STR_PAD_LEFT).")";?>
+                            <?php echo $userData[0]['vorname']." ".$userData[0]['nachname'][0].".";?>
                         </span>
                     </a>
                 </li>
@@ -32,12 +31,12 @@
         </div>
         <div class="uk-navbar-item">
             <ul class="uk-navbar-nav">
-                <li><a class="nav_icon" href="/pages/reisetagebuecher.php" uk-icon="icon: thumbnails; ratio: 1.5"></a></li>
+                <li><a class="nav_icon" href="/pages/reisetagebuecher.php?view=meine-reisetagebuecher" uk-icon="icon: thumbnails; ratio: 1.5"></a></li>
             </ul>
         </div>
         <div class="uk-navbar-item">
             <ul class="uk-navbar-nav">
-                <li><a class="nav_icon" href="/pages/reisetagebuecher.php" uk-icon="icon: plus; ratio: 1.5"></a></li>
+                <li><a class="nav_icon" href="/pages/reisetagebuecher.php?view=neues-reisetagebuch" uk-icon="icon: plus; ratio: 1.5"></a></li>
             </ul>
         </div>
         <?php } else {
@@ -61,12 +60,3 @@
         <a class="uk-navbar-item uk-logo" href="/"><span id="white">jour</span><span id="black">nuit</span> <img data-src="/pictures/journuit-logo_mini.png" alt="journuit Logo" uk-img></a>
     </div>
 </nav>
-
-<script>
-    // Warum funktionniert das nicht ?
-    $(document).ready(function() {
-        console.log(location.pathname);
-        console.log("test");
-        $('a[href="http://landausflugsplaner.de' + location.pathname + '"]').addClass('active');
-    });
-</script>
