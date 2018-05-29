@@ -1,10 +1,12 @@
-<?php session_start(); ?>
+<?php 
+	require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php';
+	session_start(); 
+?>
 <!DOCTYPE html>
 <html>
 	<head>
 		<?php 
 			require $_SERVER['DOCUMENT_ROOT']."/include/header.php"; 
-			require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php'; 
 		?>
 		<title>journuit - Zugriff verweigert</title>
 	</head>

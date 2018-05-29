@@ -1,21 +1,19 @@
-<?php
-    require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php'; 
-?>
 <nav class="uk-navbar-container uk-height-1-1" id="navbar" uk-navbar>
 	<div class="uk-navbar-left">
         <?php 
             if(isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] == true) {
                 $id = $auth->getUserId();
-                $selectUserData = $db->prepare("SELECT * FROM users_data WHERE id = ?");
+                $selectUserData = $db->prepare("SELECT vorname, nachname, users.username FROM users_data JOIN users ON (users_data.id = users.id) WHERE users_data.id = ?");
                 $selectUserData->execute(array($id));
                 $userData = $selectUserData->fetchAll(\PDO::FETCH_ASSOC);
+                $username = $userData[0]['username'];
         ?>
         <div class="uk-navbar-item">
             <ul class="uk-navbar-nav">
                 <li>
                     <a class="uk-link-heading" href="/pages/profile.php">
                         <span class="nav_username">
-                            <?php echo $userData[0]['vorname']." ".$userData[0]['nachname'][0].".";?>
+                            <?php echo $username." (".$userData[0]['vorname']." ".$userData[0]['nachname'][0].".)";?>
                         </span>
                     </a>
                 </li>

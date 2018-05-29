@@ -1,4 +1,5 @@
 <?php 
+	require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php'; 
 	ob_start();
 ?>
 <!DOCTYPE html>
@@ -6,7 +7,6 @@
 	<head>
 		<?php 
 			require $_SERVER['DOCUMENT_ROOT']."/include/header.php"; 
-			require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php'; 
 		?>
 		<title>journuit - Anmeldung</title>
 	</head>
@@ -40,7 +40,7 @@
 
 					    </fieldset>
 					    <div class="uk-flex uk-flex-center uk-flex-middle">
-					    	<button class="uk-button uk-button-default" name="login" value="true">Anmelden</button>
+					    	<button class="uk-button uk-button-default" name="login">Anmelden</button>
 					    </div>
 					</form>
 				</div>
