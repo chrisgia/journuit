@@ -1,7 +1,4 @@
-<?php 
-	require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php';
-	session_start(); 
-?>
+<?php require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php'; ?>
 <!DOCTYPE html>
 <html>
 	<head>

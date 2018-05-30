@@ -1,6 +1,5 @@
 <?php 
 	require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php';
-	session_start();
 ?>
 <!DOCTYPE html>
 <html>
@@ -62,7 +61,7 @@
 					        <div class="uk-margin">
 					        	<div class="uk-inline">
 						            <span class="uk-form-icon" uk-icon="icon: lock"></span>
-						            <input name="passwort_confirm" class="uk-input" type="password" placeholder="Passwortbestätigung...">
+						            <input name="passwort_confirm" class="uk-input" type="password" placeholder="Passwort wiederholen...">
 						        </div>
 					        </div>
 					    </fieldset>

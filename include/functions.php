@@ -38,10 +38,9 @@
 	  return $sign * ($degrees + $minutes/60 + $seconds/3600);
 	}
 
-	function insertBild($db, $username, $id, $filename) {
-		$exifSupportedFileExts = array('.jpg', '.jpeg', '.jpe', '.jif', '.jfif', '.jfi');
-		$fullPath = "../users/$username/".$filename;
-		$file_ext = substr($filename, strpos($filename, "."));
+	function insertBild($db, $username, $id, $file_ext) {
+		$exifSupportedFileExts = array('jpg', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi');
+		$fullPath = "../users/$username/".$id.".".$file_ext;
 	    if(in_array(strtolower($file_ext), $exifSupportedFileExts)){
 		    $exif = exif_read_data($fullPath);
 		    $dateTime = $exif['DateTimeOriginal'];
@@ -52,11 +51,11 @@
 				$lat = gps($exif["GPSLatitude"], $exif['GPSLatitudeRef']);
 				$lon = gps($exif["GPSLongitude"], $exif['GPSLongitudeRef']);
 			}
-		    $insertPictureData = $db->prepare("INSERT INTO bilder(id, datum, lat, lon) VALUES(?, ?, ?, ?)");
-			$result = $insertPictureData->execute(array(htmlspecialchars($id), htmlspecialchars($dateTime), htmlspecialchars($lat), htmlspecialchars($lon)));
+		    $insertPictureData = $db->prepare("INSERT INTO bilder(id, datum, lat, lon, file_ext) VALUES(?, ?, ?, ?, ?)");
+			$result = $insertPictureData->execute(array(htmlspecialchars($id), htmlspecialchars($dateTime), htmlspecialchars($lat), htmlspecialchars($lon), htmlspecialchars($file_ext)));
 		} else {
-			$insertPictureData = $db->prepare("INSERT INTO bilder(id) VALUES(?)");
-			$result = $insertPictureData->execute(array(htmlspecialchars($id)));
+			$insertPictureData = $db->prepare("INSERT INTO bilder(id, file_ext) VALUES(?, ?)");
+			$result = $insertPictureData->execute(array(htmlspecialchars($id), htmlspecialchars($file_ext)));
 		}
 		return $result;
 	}
