@@ -17,17 +17,28 @@ if(isset($_FILES['files'])){
     $file_type = $_FILES['files']['type'][0];
     $file_ext = substr($file_name, strpos($file_name, ".") + 1);
     $pictureId = uniqueDbId($db, 'bilder', 'id');
-    $filename = $pictureId.$file_ext;
+    $filename = $pictureId.".".$file_ext;
     $fullPath = "../users/$username/".$filename;
 
     // Sicherstellen, dass es die Datei noch nicht gibt
     while(file_exists($fullPath)){
 		$pictureId = uniqueDbId($db, 'bilder', 'id');
-		$filename = $pictureId.$file_ext;
+		$filename = $pictureId.".".$file_ext;
     	$fullPath = "../users/$username/".$filename;
     }
 
-    move_uploaded_file($file_tmp, $fullPath);
+    // Das Bild wird mittels TinyPNG API kompressiert
+    $source = \Tinify\fromFile($file_tmp);
+    // Man behält das Erstellungsdatum und die GPS-Daten
+	$sourcePreservedEXIF = $source->preserve("creation", "location");
+	// Das Bild wird für Titelbilder angepasst
+	$resizedPicture = $sourcePreservedEXIF->resize(array(
+	    "method" => "cover",
+	    "width" => 350,
+	    "height" => 350
+	));
+	// Die Datei wird in das Benutzerverzeichnis verschoben
+	$resizedPicture->toFile($fullPath);
 
 	$infos = array(
 		'pictureId' => $pictureId, 

@@ -43,7 +43,13 @@
 		$fullPath = "../users/$username/".$id.".".$file_ext;
 	    if(in_array(strtolower($file_ext), $exifSupportedFileExts)){
 		    $exif = exif_read_data($fullPath);
-		    $dateTime = $exif['DateTimeOriginal'];
+		    
+		    $dateTime = NULL;
+		     // Speichern des Datums andem das Bild genommen wurde, falls es vorhanden ist
+		    if(isset($exif["DateTimeOriginal"])){
+		    	$dateTime = $exif['DateTimeOriginal'];
+		    }
+
 		    $lat = NULL;
 		    $lon = NULL;
 		    // Speichern der Latitude und Longitude Werte, falls diese vorhanden sind

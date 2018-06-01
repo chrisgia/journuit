@@ -33,11 +33,11 @@
 	                $reisetagebuecher = $selectReisetagebuecher->fetchAll(\PDO::FETCH_ASSOC);
 				?>
 				<div uk-grid>
-					<div class="uk-child-width-1-3@s uk-margin-top uk-margin-bottom uk-text-center uk-flex-middle" uk-grid>
+					<div class="uk-child-width-1-4 uk-margin-top uk-margin-bottom uk-text-center uk-flex-middle" uk-grid>
 						<?php
 						foreach($reisetagebuecher as $reisetagebuch){
 						?>
-					    <div>
+					    <div class="uk-width-auto">
 					        <div class="uk-card uk-card-default uk-card-hover">
 					            <div class="uk-card-media-top">
 					            	<?php 
@@ -212,6 +212,7 @@
 		                bar.setAttribute('hidden', 'hidden');
 		            }, 1000);
 
+		            console.log(data.response);
 		            var infos = JSON.parse(data.response);
 		            var fullPath = '../users/'+username+'/'+infos.pictureId+'.'+infos.file_ext;
 

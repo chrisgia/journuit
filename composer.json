@@ -1,5 +1,6 @@
 {
     "require": {
-        "delight-im/auth": "^8.0"
+        "delight-im/auth": "^8.0",
+        "tinify/tinify": "^1.5"
     }
 }
