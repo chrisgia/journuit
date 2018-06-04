@@ -7,13 +7,14 @@
                 $selectUserData->execute(array($id));
                 $userData = $selectUserData->fetchAll(\PDO::FETCH_ASSOC);
                 $username = $userData[0]['username'];
+                $fullname = $userData[0]['vorname']." ".$userData[0]['nachname'][0];
         ?>
         <div class="uk-navbar-item">
             <ul class="uk-navbar-nav">
                 <li>
                     <a class="uk-link-heading" href="/pages/profile.php">
                         <span class="nav_username">
-                            <?php echo $username." (".$userData[0]['vorname']." ".$userData[0]['nachname'][0].".)";?>
+                            <?php echo $username." (".$fullname.".)";?>
                         </span>
                     </a>
                 </li>

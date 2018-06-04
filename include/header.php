@@ -10,3 +10,11 @@
 <script src="/js/uikit.min.js"></script>
 <script src="/js/uikit-icons.min.js"></script>
 <script src="/js/jquery-3.3.1.min.js"></script>
+<script>
+	// Funktion zum Anzeigen der verbleibenden Zeichen in einem Eingabefeld
+	function countChars(textbox, counter, max) {
+		var count = max - document.getElementById(textbox).value.length;
+		if (count < 0) { document.getElementById(counter).innerHTML = "<span style=\"color: red;\">" + count + "</span>"; }
+		else { document.getElementById(counter).innerHTML = count; }
+	}
+</script>

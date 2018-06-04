@@ -9,6 +9,10 @@
 	} else {
 		$view = "meine-reisetagebuecher";
 	}
+
+	if(isset($_GET['rtb'])){
+		$view = "reisetagebuch";
+	}
 ?>
 <!DOCTYPE html>
 <html>
@@ -38,7 +42,9 @@
 						foreach($reisetagebuecher as $reisetagebuch){
 						?>
 					    <div class="uk-width-auto">
-					        <div class="uk-card uk-card-default uk-card-hover">
+					        <?php
+					        echo "<div class=\"uk-card uk-card-default uk-card-hover\" style=\"cursor:pointer;\" onclick=\"document.location='reisetagebuecher.php?rtb=".$reisetagebuch['url']."'\">";
+					        ?>
 					            <div class="uk-card-media-top">
 					            	<?php 
 					            		if(!empty($reisetagebuch['bild_id'])){
@@ -77,7 +83,8 @@
 					    <fieldset class="uk-fieldset">
 
 					        <div class="uk-margin">
-						        <input name="titel" class="uk-input" type="text" placeholder="Titel..." required>
+					        	<i><span id="char_count">30</span> verbleibend</i>
+						        <input name="titel" id="titel" class="uk-input" type="text" placeholder="Titel (maximal 30 Zeichen)" onFocus="countChars('titel','char_count',30)" onKeyDown="countChars('titel','char_count',30)" onKeyUp="countChars('titel','char_count',30)" maxlength="30" required>
 					        </div>
 
 					        <div class="uk-margin">
@@ -94,6 +101,8 @@
 								    <span class="uk-text-middle">Titelbild hochladen (per Drag & Drop oder </span>
 								    <div uk-form-custom>
 								        <input type="file" name="files">
+								        <!-- Dateigröße auf 5MB limitieren -->
+								        <input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
 								        <span class="uk-link">direkter Auswahl</span>)
 								    </div>
 								</div>
@@ -148,6 +157,23 @@
 					}
 				}
 				break;
+
+				case 'reisetagebuch':
+				// Die Daten des Reisetagebuchs mit der ID ausgeben
+				$url = htmlspecialchars($_GET['rtb']);
+                $selectReisetagebuchDaten = $db->prepare("SELECT titel, beschreibung, public, erstellt_am, bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) WHERE url = ?");
+                $selectReisetagebuchDaten->execute(array($url));
+                $reisetagebuchDaten = $selectReisetagebuchDaten->fetchAll(\PDO::FETCH_ASSOC);
+				?>
+				<div class="uk-margin-top uk-margin-bottom">
+					<h1 class="uk-text-center"><?=$reisetagebuchDaten[0]['titel'];?> <span class="uk-text-small">von <?=$fullname;?>.</span></h1>
+
+					<div id="titelbild" class="uk-margin uk-text-center">
+			        	<?php echo '<img class="uk-border-rounded" data-src="../users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img>'; ?>
+			        </div>
+			    </div>
+				<?php 
+				break;
 				}
 			?>
 			</div>
@@ -158,19 +184,7 @@
 		<script>
 			var createdFiles = [];
 			var bar = document.getElementById('js-progressbar');
-			var username = "<?php echo $userData[0]['username']; ?>";
-
-			// Per Ajax wird beim Versenden des Formulars ein Skript aufgerufen der die Bilder die hochgeladen, aber im Endeffekt nicht benutzt wurden löscht.
-			$(document).on('submit','form#neues-reisetagebuch', function(){
-		    	if(createdFiles.length > 1){
-		    		createdFiles = JSON.stringify(createdFiles);
-				    $.ajax({
-					  method: "POST",
-					  url: '/include/cleanFolder.php',
-					  data: { createdFiles : createdFiles, username : username }
-					});
-				}
-			});
+			var username = "<?php echo $username; ?>";
 
 			// Skript zum uploaden von Bildern
 		    UIkit.upload('.js-upload', {
@@ -187,6 +201,7 @@
 		        load: function () {
 		        },
 		        error: function () {
+		        	console.log('test');
 		        },
 		        complete: function () {
 		        },
@@ -212,9 +227,8 @@
 		                bar.setAttribute('hidden', 'hidden');
 		            }, 1000);
 
-		            console.log(data.response);
 		            var infos = JSON.parse(data.response);
-		            var fullPath = '../users/'+username+'/'+infos.pictureId+'.'+infos.file_ext;
+		            var fullPath = '../users/'+username+'/tmp_'+infos.pictureId+'.'+infos.file_ext;
 
 		            createdFiles.push(infos.pictureId+'.'+infos.file_ext);
 

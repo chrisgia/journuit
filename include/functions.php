@@ -40,7 +40,9 @@
 
 	function insertBild($db, $username, $id, $file_ext) {
 		$exifSupportedFileExts = array('jpg', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi');
+		$tempPath = "../users/$username/tmp_".$id.".".$file_ext;
 		$fullPath = "../users/$username/".$id.".".$file_ext;
+		rename($tempPath, $fullPath);
 	    if(in_array(strtolower($file_ext), $exifSupportedFileExts)){
 		    $exif = exif_read_data($fullPath);
 		    
