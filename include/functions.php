@@ -67,4 +67,11 @@
 		}
 		return $result;
 	}
+
+	// Datum aus Formulareingabe für MySQL Insert aufbereiten
+	function getMySqlDate($date) {
+	    $date = date("d.m.Y", strtotime($date));
+	    return $date;
+	}
+
 ?>

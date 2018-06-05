@@ -31,8 +31,8 @@ if(isset($_FILES['files'])){
 	// Das Bild wird für Titelbilder angepasst
 	$resizedPicture = $sourcePreservedEXIF->resize(array(
 	    "method" => "cover",
-	    "width" => 350,
-	    "height" => 350
+	    "width" => 640,
+	    "height" => 462
 	));
 	// Die Datei wird in das Benutzerverzeichnis verschoben
 	$resizedPicture->toFile($fullPath);
