@@ -36,36 +36,33 @@
                 $selectReisetagebuecher->execute(array($id));
                 $reisetagebuecher = $selectReisetagebuecher->fetchAll(\PDO::FETCH_ASSOC);
 			?>
-			<div class="uk-child-width-1-4@l uk-child-width-1-1@s uk-margin-top uk-text-center" uk-grid>
+			<div class="uk-child-width-1-3@l uk-child-width-1-1@s uk-margin-top uk-margin-bottom uk-text-center" uk-grid>
 				<?php
 				foreach($reisetagebuecher as $reisetagebuch){
 				?>
 			    <div>
-			        <?php
-			        echo "<div class=\"uk-card uk-card-default uk-card-hover uk-animation-toggle\" style=\"cursor:pointer;\" onclick=\"document.location='reisetagebuecher.php?rtb=".$reisetagebuch['url']."'\">";
-			        ?>
-				        <div class="uk-inline">
-				        	<div class="uk-card-badge uk-label">
-				        		<?php if($reisetagebuch['public'] == 1){
-				        			echo "<i class=\"far fa-eye\"></i>";
-				        		} else {
-				        			echo "<i class=\"far fa-eye-slash\"></i>";
-				        		}
-				        		?>
-				        	</div>
-				            <?php 
-				            		if(!empty($reisetagebuch['bild_id'])){
-				            			echo '<img src="/users/'.$username.'/'.$reisetagebuch['bild_id'].'.'.$reisetagebuch['file_ext'].'">';
-				            		} else {
-				            			echo '<img src="/pictures/default_picture.jpg">';
-				            		} 
-				            	?>
-				            <div class="uk-overlay uk-overlay-default uk-position-bottom">
-				                <span class="uk-h2"><?=$reisetagebuch['titel'];?></span>
-				                <p><?=$reisetagebuch['beschreibung'];?></p>
-				                <span class="uk-text-small uk-float-right"><i>erstellt am <?=getMySqlDate($reisetagebuch['erstellt_am']);?></i></span><br/>
-				            </div>
-				        </div>    
+		        <?php
+		        echo "<div class=\"uk-card uk-card-default uk-card-hover uk-animation-toggle uk-height-large rtbCard\" style=\"cursor:pointer;\" onclick=\"document.location='reisetagebuecher.php?rtb=".$reisetagebuch['url']."'\">"; ?>
+			        	<div class="uk-card-badge uk-label">
+			        		<?php if($reisetagebuch['public'] == 1){
+			        			echo "<i class=\"far fa-eye\"></i>";
+			        		} else {
+			        			echo "<i class=\"far fa-eye-slash\"></i>";
+			        		}
+			        		?>
+			        	</div>
+			            <?php 
+		            		if(!empty($reisetagebuch['bild_id'])){
+		            			echo '<img class="titelbild" src="/users/'.$username.'/'.$reisetagebuch['bild_id'].'.'.$reisetagebuch['file_ext'].'">';
+		            		} else {
+		            			echo '<img class="titelbild" src="/pictures/default_picture.jpg">';
+		            		} 
+		            	?>
+			            <div class="uk-overlay uk-overlay-default uk-position-bottom">
+			                <span class="uk-h2"><?=$reisetagebuch['titel'];?></span>
+			                <p><?=$reisetagebuch['beschreibung'];?></p>
+			                <span class="uk-text-small uk-float-right"><i>erstellt am <?=getMySqlDate($reisetagebuch['erstellt_am']);?></i></span><br/>
+			            </div>   
 			        </div>
 			    </div>
 			    <?php
@@ -89,8 +86,8 @@
 				    <fieldset class="uk-fieldset">
 
 				        <div class="uk-margin">
-				        	<i><span id="char_count">30</span> verbleibend</i>
-					        <input name="titel" id="titel" class="uk-input" type="text" placeholder="Titel (maximal 30 Zeichen)" onFocus="countChars('titel','char_count',30)" onKeyDown="countChars('titel','char_count',30)" onKeyUp="countChars('titel','char_count',30)" maxlength="30" required>
+				        	<i><span id="char_count">25</span> verbleibend</i>
+					        <input name="titel" id="titel" class="uk-input" type="text" placeholder="Titel (maximal 25 Zeichen)" onFocus="countChars('titel','char_count',25)" onKeyDown="countChars('titel','char_count',25)" onKeyUp="countChars('titel','char_count',25)" maxlength="25" required>
 				        </div>
 
 				        <div class="uk-margin">
@@ -167,28 +164,67 @@
 			case 'reisetagebuch':
 			// Die Daten des Reisetagebuchs mit der ID ausgeben
 			$url = htmlspecialchars($_GET['rtb']);
-            $selectReisetagebuchDaten = $db->prepare("SELECT titel, beschreibung, public, erstellt_am, bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) WHERE url = ?");
+            $selectReisetagebuchDaten = $db->prepare("SELECT reisetagebuecher.id, titel, beschreibung, public, erstellt_am, bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) WHERE url = ?");
             $selectReisetagebuchDaten->execute(array($url));
             $reisetagebuchDaten = $selectReisetagebuchDaten->fetchAll(\PDO::FETCH_ASSOC);
+            $rtbId = $reisetagebuchDaten[0]['id'];
 			?>
-			<div class="uk-margin-top uk-margin-bottom">
+			<div class="uk-flex uk-flex-center uk-flex-column uk-flex-middle">
+				<div class="uk-margin-top">
+					<div>
+						<div><a href="" class="uk-icon-link uk-float-left" uk-icon="icon: file-edit; ratio: 1.5"></a></div>
+						<div><a href="" class="uk-icon-link uk-float-right" uk-icon="icon: social; ratio: 1.5"></a></div>
+						<div><a href="" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right"></a></div>
+						<div class="uk-text-center uk-text-lead" id="rtbTitel"><?=$reisetagebuchDaten[0]['titel'];?> <span class="uk-text-small">von <?=$username;?></span></div>
+					</div>
 
-				<div>
-					<div><a href="" class="uk-icon-link uk-float-left" uk-icon="icon: file-edit; ratio: 1.5"></a></div>
-					<div><a href="" class="uk-icon-link uk-float-right" uk-icon="icon: social; ratio: 1.5"></a></div>
-					<div><a href="" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right"></a></div>
-					<div class="uk-text-center uk-text-lead" id="rtbTitel"><?=$reisetagebuchDaten[0]['titel'];?> <span class="uk-text-small">von <?=$username;?></span></div>
+					<div id="titelbild" class="uk-margin uk-text-center">
+			        	<?php echo '<img class="uk-border-rounded" data-src="../users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img>'; ?>
+			        </div>				    
+
+				    <table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
+					    <thead>
+					        <tr>
+						        <th class="uk-text-right">Einträge</th>
+					            <th class="uk-text-right"><a href="eintraege.php?view=neuer-eintrag"><i uk-icon="plus"></i> Neuer Eintrag</a></th>
+					        </tr>
+					    </thead>
+					    <tbody>
+					    	<?php
+				            $selectDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ?");
+				            $selectDates->execute(array($rtbId));
+				            $dates = $selectDates->fetchAll(\PDO::FETCH_ASSOC);
+
+					    	foreach($dates as $datum){
+					    		$selectEintraege = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ?");
+					            $selectEintraege->execute(array($rtbId, $datum['datum']));
+					            $eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
+					    	?>
+					        <tr>
+					            <td>
+					            <span class="uk-text-bold"><?=$datum['datum'];?> </span>
+					            <i>
+					            <?php
+					            foreach($eintraege as $eintrag){
+					            	echo $eintrag['titel'].", ";
+					            }
+					            ?>
+					            ...
+					            </i>	
+					            </td>
+					            <td class="uk-text-right"><a href="eintraege.php?edit=neuer-eintrag"><i uk-icon="file-edit"></i></a></td>
+					        </tr>
+					        <?php
+					    	}
+					    	?>
+					    </tbody>
+					</table>
 				</div>
-
-				<div id="titelbild" class="uk-margin uk-text-center">
-		        	<?php echo '<img class="uk-border-rounded" data-src="../users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img>'; ?>
-		        </div>
-		    </div>
+			</div>
 			<?php 
 			break;
 			}
 		?>
-			
 		</div>
 		<?php 
 			if(isset($_GET['login'])){echo "<script>UIkit.notification({message: 'Sie sind angemeldet.', status: 'success'});</script>";}
@@ -250,6 +286,7 @@
 		            UIkit.notification({message: 'Ihr Titelbild wurde erfolgreich hochgeladen.', status: 'success'});
 		        }
 		    });
+
 		</script>
 	</body>
 </html>
