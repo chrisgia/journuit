@@ -17,6 +17,7 @@
                             <span class="nav_username">
                                 <?php echo $username." (".$fullname.".)";?>
                             </span>
+                            <span uk-icon="icon: triangle-down; ratio: 1.5"></span>
                         </a>
                     </li>
                 </ul>

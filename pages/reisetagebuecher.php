@@ -91,7 +91,7 @@
 				        </div>
 
 				        <div class="uk-margin">
-					        <input name="beschreibung" class="uk-input" type="text" placeholder="Beschreibung..." required>
+					        <textarea name="beschreibung" class="uk-textarea" rows="5" type="text" placeholder="Beschreibung..." required></textarea>
 				        </div>
 
 				        <div class="uk-margin">

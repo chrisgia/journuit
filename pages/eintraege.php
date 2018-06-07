@@ -14,7 +14,7 @@
 		<?php 
 			require $_SERVER['DOCUMENT_ROOT']."/include/header.php"; 
 		?>
-		<title>journuit - Reisetagebücher</title>
+		<title>journuit - Neuer Eintrag</title>
 	</head>
 
 	<body class="uk-height-viewport">
@@ -28,30 +28,36 @@
 					<h1 class="uk-text-center">Neuer Eintrag</h1>
 					<hr class="uk-width-1-1">
 
-					<div id="titelbild" class="uk-margin uk-text-center">
-			        	<!-- Hier erscheint das Titelbild sobald eins hochgeladen wird -->
-			        </div>
-
 					<form id="neuer-eintrag" method="POST">
 					    <fieldset class="uk-fieldset">
 
-					        <div class="uk-margin">
-					        	<i><span id="char_count">25</span> verbleibend</i>
-						        <input name="titel" id="titel" class="uk-input" type="text" placeholder="Titel (maximal 25 Zeichen)" onFocus="countChars('titel','char_count',25)" onKeyDown="countChars('titel','char_count',25)" onKeyUp="countChars('titel','char_count',25)" maxlength="25" required>
+					    	<div class="uk-margin">
+						    	<label>Zusammenfassung <input name="zusammenfassung" class="uk-checkbox" type="checkbox" value="1"></label>
 					        </div>
 
 					        <div class="uk-margin">
-						        <input name="beschreibung" class="uk-input" type="text" placeholder="Beschreibung..." required>
+					        	<!-- Selectbox mit Standorten -->
 					        </div>
 
 					        <div class="uk-margin">
-						    	<label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="1"></label>
+					        	<div class="uk-inline">
+	    							<span class="uk-form-icon uk-form-icon-flip" uk-icon="icon: calendar"></span>
+						        	<input type="text" name="dateTime" class="uk-input uk-form-width-medium flatpickr" placeholder="Datum & Uhrzeit" required>
+					        	</div>
 					        </div>
-					        
+
+					        <div class="uk-margin">
+						        <input name="titel" class="uk-input" type="text" placeholder="Titel..." required>
+					        </div>
+
+					        <div class="uk-margin">
+						        <textarea name="beschreibung" class="uk-textarea" rows="5" placeholder="Eintrag..." required></textarea>
+					        </div>
+
 					        <div class="uk-margin">
 						    	<div class="js-upload uk-placeholder uk-text-center">
 						    		<span uk-icon="icon: cloud-upload"></span>
-								    <span class="uk-text-middle">Titelbild hochladen (per Drag & Drop oder </span>
+								    <span class="uk-text-middle">Bilder hochladen (max. 3, per Drag & Drop oder </span>
 								    <div uk-form-custom>
 								        <input type="file" name="files">
 								        <!-- Dateigröße auf 5MB limitieren -->
@@ -62,11 +68,17 @@
 								<progress id="js-progressbar" class="uk-progress" value="0" max="100" hidden></progress>
 					        </div>
 
-					        <input id="pictureId" name="pictureId" type="hidden" value="">
-					        <input id="file_ext" name="file_ext" type="hidden" value="">
+					        <div class="uk-margin">
+						    	<label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="1"></label>
+					        </div>
+					        
+					        <div id="bilder" class="uk-margin uk-text-center">
+			        		<!-- Hier erscheinen die hochgeladene Bilder-->
+			        		</div>
 
 					    </fieldset>
 					    <div class="uk-flex uk-flex-center uk-flex-middle">
+					    	<button class="uk-button uk-button-default uk-margin-right" name="entwurf">Als Entwurf speichern</button>
 					    	<button class="uk-button uk-button-default" name="create">Erstellen</button>
 					    </div>
 					</form>
@@ -113,5 +125,17 @@
 			}
 			?>
 		</div>
+		<script>
+			// Einstellungen des Datepickers
+			$(".flatpickr").flatpickr({
+				enableTime: true,
+			    altInput: true,
+			    altFormat: "j. F Y H:i",
+			    dateFormat: "m-d-Y H:i",
+			    /*minTime: "16:00",
+    			maxTime: "22:00",*/
+			    time_24hr: true
+			});
+		</script>
 	</body>
 </html>	
