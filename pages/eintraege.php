@@ -23,6 +23,13 @@
 			<?php 
 			switch ($view) {
 				case 'neuer-eintrag':
+
+				// Gespeicherte Standorte des Benutzers 
+				$id = $auth->getUserId();
+                $selectStandorte = $db->prepare("SELECT id, name FROM standorte WHERE users_id = ?");
+                $selectStandorte->execute(array($id));
+                $standorte = $selectStandorte->fetchAll(\PDO::FETCH_ASSOC);
+
 				?>
 				<div class="uk-margin-top uk-margin-bottom">
 					<h1 class="uk-text-center">Neuer Eintrag</h1>
@@ -36,7 +43,16 @@
 					        </div>
 
 					        <div class="uk-margin">
-					        	<!-- Selectbox mit Standorten -->
+					        	<!-- Selectbox mit den gespeicherten Standorten des Benutzers -->
+					        	<select id="standorte" class="uk-select uk-form-width-medium" name="standorte">
+					        		<option value="default">Standort auswählen</option>
+					        		<option value="neuer-standort" class="uk-text-bold">Neuer Standort</option>
+					        		<?php 
+					        		foreach($standorte as $standort){
+					        			echo "<option value=\"".$standort['id']."\">".$standort['name']."</option>";
+					        		}
+					        		?>
+					        	</select>
 					        </div>
 
 					        <div class="uk-margin">
@@ -136,6 +152,15 @@
     			maxTime: "22:00",*/
 			    time_24hr: true
 			});
+
+			 $('#standorte').change(function () {
+			    var selectedOption = $(this).find("option:selected");
+			    var selectedValue  = selectedOption.val();
+			    if(selectedValue == 'neuer-standort'){
+			    	selectedOption.prop("selected", false);
+			    	window.location = "standorte.php?view=neuer-standort";
+			    }
+			 });
 		</script>
 	</body>
 </html>	

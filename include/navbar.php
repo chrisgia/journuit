@@ -58,7 +58,7 @@
              <?php } ?>
         </div>
         <div class="uk-navbar-right">
-            <a class="uk-navbar-item uk-logo" href="/"><span id="white">jour</span><span id="black">nuit</span> <img data-src="/pictures/journuit-logo_mini.png" alt="journuit Logo" uk-img></a>
+            <a class="uk-navbar-item uk-logo" href="/"><span class="white">jour</span><span class="black">nuit</span> <img data-src="/pictures/journuit-logo_mini.png" alt="journuit Logo" uk-img></a>
         </div>
     </nav>
 </div>

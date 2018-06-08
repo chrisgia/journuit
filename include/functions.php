@@ -38,29 +38,42 @@
 	  return $sign * ($degrees + $minutes/60 + $seconds/3600);
 	}
 
+	function getExifData($filePath){
+		$exif = exif_read_data($filePath);
+		    
+	    $dateTime = NULL;
+	     // Speichern des Datums andem das Bild genommen wurde, falls es vorhanden ist
+	    if(isset($exif["DateTimeOriginal"])){
+	    	$dateTime = $exif['DateTimeOriginal'];
+	    }
+
+	    $lat = NULL;
+	    $lon = NULL;
+	    // Speichern der Latitude und Longitude Werte, falls diese vorhanden sind
+	    if(isset($exif["GPSLatitude"], $exif["GPSLongitude"])){
+			$lat = gps($exif["GPSLatitude"], $exif['GPSLatitudeRef']);
+			$lon = gps($exif["GPSLongitude"], $exif['GPSLongitudeRef']);
+		}
+
+		$result = array(
+			'dateTime' => $dateTime, 
+			'lat' => $lat,
+			'lon' => $lon
+		);
+
+		return $result;
+	}
+
 	function insertBild($db, $username, $id, $file_ext) {
 		$exifSupportedFileExts = array('jpg', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi');
 		$tempPath = "../users/$username/tmp_".$id.".".$file_ext;
 		$fullPath = "../users/$username/".$id.".".$file_ext;
 		rename($tempPath, $fullPath);
 	    if(in_array(strtolower($file_ext), $exifSupportedFileExts)){
-		    $exif = exif_read_data($fullPath);
+		    $exifData = getExifData($fullPath);
 		    
-		    $dateTime = NULL;
-		     // Speichern des Datums andem das Bild genommen wurde, falls es vorhanden ist
-		    if(isset($exif["DateTimeOriginal"])){
-		    	$dateTime = $exif['DateTimeOriginal'];
-		    }
-
-		    $lat = NULL;
-		    $lon = NULL;
-		    // Speichern der Latitude und Longitude Werte, falls diese vorhanden sind
-		    if(isset($exif["GPSLatitude"], $exif["GPSLongitude"])){
-				$lat = gps($exif["GPSLatitude"], $exif['GPSLatitudeRef']);
-				$lon = gps($exif["GPSLongitude"], $exif['GPSLongitudeRef']);
-			}
 		    $insertPictureData = $db->prepare("INSERT INTO bilder(id, datum, lat, lon, file_ext) VALUES(?, ?, ?, ?, ?)");
-			$result = $insertPictureData->execute(array(htmlspecialchars($id), htmlspecialchars($dateTime), htmlspecialchars($lat), htmlspecialchars($lon), htmlspecialchars($file_ext)));
+			$result = $insertPictureData->execute(array(htmlspecialchars($id), htmlspecialchars($exifData['dateTime']), htmlspecialchars($exifData['lat']), htmlspecialchars($exifData['lon']), htmlspecialchars($file_ext)));
 		} else {
 			$insertPictureData = $db->prepare("INSERT INTO bilder(id, file_ext) VALUES(?, ?)");
 			$result = $insertPictureData->execute(array(htmlspecialchars($id), htmlspecialchars($file_ext)));

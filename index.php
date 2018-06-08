@@ -13,8 +13,8 @@ if(isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] == true) {
 	<body class="uk-height-viewport">
 		<?php require "include/navbar.php"; ?>
 		<div id="banner" class="uk-height-large uk-flex uk-flex-center uk-flex-middle uk-background-cover" data-src="pictures/sunset-1920w.png" data-srcset="pictures/sunset-375w.png 375w, pictures/sunset-1920w.png 1920w" uk-img>
-			<h1 id="slogan" class="uk-text-center uk-margin-large-top">Verewige deine Erlebnisse. <br/><span id="white">Tag</span> und Nacht.</h1>
-			<!-- <h1 id="slogan" class="uk-text-top uk-margin-large-top uk-hidden@m">Verewige deine Errinerungen. <br/><span id="white">Tag</span> und Nacht.</h1> -->
+			<h1 id="slogan" class="uk-text-center uk-margin-large-top">Verewige deine Erlebnisse. <br/><span class="white">Tag</span> und Nacht.</h1>
+			<!-- <h1 id="slogan" class="uk-text-top uk-margin-large-top uk-hidden@m">Verewige deine Errinerungen. <br/><span class="white">Tag</span> und Nacht.</h1> -->
 		</div>
 
 		<div class="uk-container uk-container-large">

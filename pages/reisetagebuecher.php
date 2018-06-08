@@ -230,7 +230,6 @@
 			if(isset($_GET['login'])){echo "<script>UIkit.notification({message: 'Sie sind angemeldet.', status: 'success'});</script>";}
 		?>
 		<script>
-			var createdFiles = [];
 			var bar = document.getElementById('js-progressbar');
 			var username = "<?php echo $username; ?>";
 
@@ -278,15 +277,12 @@
 		            var infos = JSON.parse(data.response);
 		            var fullPath = '../users/'+username+'/tmp_'+infos.pictureId+'.'+infos.file_ext;
 
-		            createdFiles.push(infos.pictureId+'.'+infos.file_ext);
-
 		            $('#pictureId').val(infos.pictureId);
 		            $('#file_ext').val(infos.file_ext);
 		            $('#titelbild').empty().append('<div uk-scrollspy="cls:uk-animation-fade"><img data-src="'+fullPath+'" uk-img></div>');
 		            UIkit.notification({message: 'Ihr Titelbild wurde erfolgreich hochgeladen.', status: 'success'});
 		        }
 		    });
-
 		</script>
 	</body>
 </html>

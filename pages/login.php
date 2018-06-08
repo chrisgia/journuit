@@ -17,7 +17,7 @@
 			<div class="uk-flex uk-flex-column uk-flex-center uk-flex-middle">
 				<div>
 					<span id="journuit_big">
-						<span id="white">jour</span><span id="black">nuit</span> <img data-src="/pictures/journuit-logo_big.png" alt="journuit Logo" uk-img>
+						<span class="white">jour</span><span class="black">nuit</span> <img data-src="/pictures/journuit-logo_big.png" alt="journuit Logo" uk-img>
 					</span>
 				</div>
 				<div class="uk-margin-top uk-margin-bottom">
