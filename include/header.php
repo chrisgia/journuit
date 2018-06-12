@@ -13,9 +13,6 @@
 <link href="https://fonts.googleapis.com/css?family=EB+Garamond:400i" rel="stylesheet">
 
 <!-- JavaScript Bibliotheken -->
-<!-- EasyAutocomplete -->
-<script src="/js/jquery.easy-autocomplete.min.js"></script> 
-<link rel="stylesheet" href="/css/easy-autocomplete.min.css">
 <!-- Google Maps API -->
 <script type="text/javascript" src='http://maps.google.com/maps/api/js?key=AIzaSyBorwcLkiG4pMmrgLLRlPltsxFSe4__1kU&libraries=places'></script>
 <!-- locationpicker -->

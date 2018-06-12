@@ -25,9 +25,25 @@ if(isset($_FILES['files'])){
 			'lat' => $exifData['lat'], 
 			'lon' => $exifData['lon']
 		);
+		
+	} else {
+		$error = array(
+			'error' => "Dieser Dateityp enthält keine EXIF Daten."
+		);
+	}
+
+	if(!isset($error)){
+		if(empty($exifData['lat']) || empty($exifData['lon'])){
+			$error = array(
+				'error' => "Der Standort konnte nicht ermittelt werden."
+			);
+		}
+	}
+	
+	if(!isset($error)){
 		echo json_encode($latLon);
 	} else {
-		echo "Der Standort konnte nicht ermittelt werden.";
+		echo json_encode($error);
 	}
 }
 ?>

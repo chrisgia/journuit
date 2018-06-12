@@ -29,10 +29,26 @@
                 $selectStandorte = $db->prepare("SELECT id, name FROM standorte WHERE users_id = ?");
                 $selectStandorte->execute(array($id));
                 $standorte = $selectStandorte->fetchAll(\PDO::FETCH_ASSOC);
+                if(isset($_POST['rtbId']) && !empty($_POST['rtbId'])){
+                	$rtbId = htmlspecialchars($_POST['rtbId']);
+                	$_SESSION['rtbId'] = $rtbId;
 
+                	$selectRtbTitel = $db->prepare("SELECT titel FROM reisetagebuecher WHERE id = ?");
+		            $selectRtbTitel->execute(array($rtbId));
+		            $rtbTitel = $selectRtbTitel->fetchAll(\PDO::FETCH_ASSOC);
+		            $rtbTitel = $rtbTitel[0]['titel'];
+                } else {
+                	?>
+                	<div class="uk-margin-top uk-alert-danger" uk-alert>
+					    <p>Dieses Reisetagebuch ist nicht vorhanden.</p>
+					</div>
+				<?php
+					break;
+                }
 				?>
 				<div class="uk-margin-top uk-margin-bottom">
 					<h1 class="uk-text-center">Neuer Eintrag</h1>
+					<h2 class="uk-text-center uk-margin-remove-top"><?=$rtbTitel;?></h2>
 					<hr class="uk-width-1-1">
 
 					<form id="neuer-eintrag" method="POST">
@@ -42,16 +58,24 @@
 						    	<label>Zusammenfassung <input name="zusammenfassung" class="uk-checkbox" type="checkbox" value="1"></label>
 					        </div>
 
+					        <div id="standorteModal" class="uk-flex-top" uk-modal>
+							    <div class="uk-modal-dialog uk-margin-auto-vertical">
+							    	<button class="uk-modal-close-default" type="button" uk-close></button>
+							    </div>
+							</div>
+
 					        <div class="uk-margin">
 					        	<!-- Selectbox mit den gespeicherten Standorten des Benutzers -->
-					        	<select id="standorte" class="uk-select uk-form-width-medium" name="standorte">
-					        		<option value="default">Standort auswählen</option>
+					        	<select id="standorte" class="uk-select uk-form-width-medium" name="standort">
+					        		<option value="default" selected disabled hidden>Standort auswählen</option>
 					        		<option value="neuer-standort" class="uk-text-bold">Neuer Standort</option>
-					        		<?php 
-					        		foreach($standorte as $standort){
-					        			echo "<option value=\"".$standort['id']."\">".$standort['name']."</option>";
-					        		}
-					        		?>
+					        		<optgroup label="Meine Standorte">
+						        		<?php 
+						        		foreach($standorte as $standort){
+						        			echo "<option value=\"".$standort['id']."\">".$standort['name']."</option>";
+						        		}
+						        		?>
+						        	</optgroup>
 					        	</select>
 					        </div>
 
@@ -67,7 +91,7 @@
 					        </div>
 
 					        <div class="uk-margin">
-						        <textarea name="beschreibung" class="uk-textarea" rows="5" placeholder="Eintrag..." required></textarea>
+						        <textarea name="eintrag" class="uk-textarea" rows="5" placeholder="Eintrag..." required></textarea>
 					        </div>
 
 					        <div class="uk-margin">
@@ -92,6 +116,8 @@
 			        		<!-- Hier erscheinen die hochgeladene Bilder-->
 			        		</div>
 
+			        		<input type="hidden" name="rtbId" value="<?=$rtbId;?>" />
+
 					    </fieldset>
 					    <div class="uk-flex uk-flex-center uk-flex-middle">
 					    	<button class="uk-button uk-button-default uk-margin-right" name="entwurf">Als Entwurf speichern</button>
@@ -102,20 +128,32 @@
 				</div>
 				<?php 
 				// Formularverarbeitung 
-				if(isset($_POST['create'])){
+				if(isset($_POST['create'], $_POST['standort'], $_POST['dateTime'], $_POST['titel'], $_POST['eintrag'])){
 					$errors = array();
 					if (ctype_space(htmlspecialchars($_POST['titel'])) || empty($_POST['titel'])) {
 						array_push($errors, 'Der Titel darf nicht leer sein.');
 					}
 
-					if (ctype_space(htmlspecialchars($_POST['beschreibung'])) || empty($_POST['beschreibung'])) {
-						array_push($errors, 'Die Beschreibung darf nicht leer sein.');
+					if (ctype_space(htmlspecialchars($_POST['eintrag'])) || empty($_POST['eintrag'])) {
+						array_push($errors, 'Der Eintrag darf nicht leer sein.');
+					}
+
+					if (isset($_POST['zusammenfassung']) && ($_POST['zusammenfassung'] == "1")) {
+						$zusammenfassung = 1;
+					} else {
+						$zusammenfassung = 0;
 					}
 
 					if (isset($_POST['public']) && ($_POST['public'] == "1")) {
 						$public = 1;
 					} else {
 						$public = 0;
+					}
+
+					if (isset($_POST['entwurf']) && ($_POST['entwurf'] == "1")) {
+						$entwurf = 1;
+					} else {
+						$entwurf = 0;
 					}
 
 					if($_POST['pictureId'] != "" && empty($errors)){
@@ -126,9 +164,8 @@
 
 					if(empty($errors)){
 						$userId = $auth->getUserId();
-						$url = uniqueDbId($db, 'reisetagebuecher', 'url');
-						$insertReisetagebuch = $db->prepare("INSERT INTO reisetagebuecher(users_id, titel, beschreibung, url, public, bild_id) VALUES(?, ?, ?, ?, ?, ?)");
-						$insertReisetagebuch->execute(array(htmlspecialchars($userId), htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['beschreibung']), $url, $public, htmlspecialchars($_POST['pictureId'])));
+						$insertEintrag = $db->prepare("INSERT INTO eintraege(reisetagebuch_id, titel, text, datum, uhrzeit, standort_id, entwurf, zusammenfassung, public) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+						$insertEintrag->execute(array($rtbId, htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['eintrag']), $datum, $uhrzeit, htmlspecialchars($_POST['standort']), $entwurf, $zusammenfassung, $public));
 					} else {
 						echo "<ul>";
 						foreach($errors as $error){
@@ -153,14 +190,23 @@
 			    time_24hr: true
 			});
 
-			 $('#standorte').change(function () {
-			    var selectedOption = $(this).find("option:selected");
-			    var selectedValue  = selectedOption.val();
+			$('#standorte').val("default").prop("selected", true);
+
+			$('#standorte').change(function () {
+				var selectedOption = $(this).find("option:selected");
+			    var selectedValue = selectedOption.val();
 			    if(selectedValue == 'neuer-standort'){
 			    	selectedOption.prop("selected", false);
-			    	window.location = "standorte.php?view=neuer-standort";
+			    	$.ajax({
+						url: "standorte.php",
+						type: 'POST',
+						success : function(response) {    
+							$('#standorteModal').append(response);
+						}
+					});
+			    	UIkit.modal('#standorteModal').show();
 			    }
-			 });
+			});
 		</script>
 	</body>
 </html>	

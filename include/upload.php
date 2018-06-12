@@ -28,12 +28,23 @@ if(isset($_FILES['files'])){
     $source = \Tinify\fromFile($file_tmp);
     // Man behält das Erstellungsdatum und die GPS-Daten
 	$sourcePreservedEXIF = $source->preserve("creation", "location");
-	// Das Bild wird für Titelbilder angepasst
+	
+	// Wenn keine Maßangaben übergeben wurden, normales Titelbild Format
+	if(isset($_POST['width'], $_POST['height'])){
+		$width = (int)$_POST['width'];
+		$height = (int)$_POST['height'];
+	} else {
+		$width = 820;
+		$height = 462;
+	}
+
+	// Bildgröße anpassen
 	$resizedPicture = $sourcePreservedEXIF->resize(array(
 	    "method" => "fit",
-	    "width" => 820,
-	    "height" => 462
+	    "width" => $width,
+	    "height" => $height
 	));
+
 	// Die Datei wird in das Benutzerverzeichnis verschoben
 	$resizedPicture->toFile($fullPath);
 

@@ -186,7 +186,12 @@
 					    <thead>
 					        <tr>
 						        <th class="uk-text-right">Einträge</th>
-					            <th class="uk-text-right"><a href="eintraege.php?view=neuer-eintrag"><i uk-icon="plus"></i> Neuer Eintrag</a></th>
+					            <th class="uk-text-right">
+					            	<form method="POST" action="eintraege.php?view=neuer-eintrag">
+					            		<input type="text" name="rtbId" value="<?=$rtbId;?>" hidden>
+					            		<button class="uk-button uk-button-text" name="neuer-eintrag"><i uk-icon="plus"></i> Neuer Eintrag</button>
+					            	</form>
+					            </th>
 					        </tr>
 					    </thead>
 					    <tbody>
@@ -212,7 +217,13 @@
 					            ...
 					            </i>	
 					            </td>
-					            <td class="uk-text-right"><a href="eintraege.php?edit=neuer-eintrag"><i uk-icon="file-edit"></i></a></td>
+					            <td class="uk-text-right">
+					            	<form method="POST" action="eintraege.php?view=eintrag-bearbeiten">
+					            		<input type="text" name="rtbId" value="<?=$rtbId;?>" hidden>
+					            		<input type="text" name="datum" value="<?=$datum['datum'];?>" hidden>
+					            		<button class="uk-button uk-button-text" name="eintrag-bearbeiten"><i uk-icon="file-edit"></i></button>
+					            	</form>
+					            </td>
 					        </tr>
 					        <?php
 					    	}
