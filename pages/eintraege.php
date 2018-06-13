@@ -148,7 +148,7 @@
 					    <fieldset class="uk-fieldset">
 
 					    	<div class="uk-margin">
-						    	<label>Zusammenfassung <input name="zusammenfassung" class="uk-checkbox" type="checkbox" value="1"></label>
+						    	<label>Zusammenfassung <input id="zusammenfassung" name="zusammenfassung" class="uk-checkbox" type="checkbox" value="1"></label>
 					        </div>
 
 					        <div class="uk-margin">
@@ -165,7 +165,7 @@
 					        </div>
 
 					        <div class="uk-margin">
-					        	<div class="uk-inline">
+					        	<div class="uk-inline" id="dateInput">
 	    							<span class="uk-form-icon uk-form-icon-flip" uk-icon="icon: calendar"></span>
 						        	<input type="text" name="dateTime" class="uk-input uk-form-width-medium flatpickr" placeholder="Datum & Uhrzeit" required>
 					        	</div>
@@ -180,7 +180,7 @@
 					        </div>
 
 					        <div class="uk-margin">
-						    	<div class="js-upload uk-placeholder uk-text-center">
+						    	<div id="eintragsBildUpload" class="js-upload uk-placeholder uk-text-center">
 						    		<span uk-icon="icon: cloud-upload"></span>
 								    <span class="uk-text-middle">Bilder hochladen (max. 3, per Drag & Drop oder </span>
 								    <div uk-form-custom>
@@ -190,7 +190,7 @@
 								        <span class="uk-link">direkter Auswahl</span>)
 								    </div>
 								</div>
-								<progress id="js-progressbar" class="uk-progress" value="0" max="100" hidden></progress>
+								<progress id="js-progressbar3" class="uk-progress" value="0" max="100" hidden></progress>
 					        </div>
 
 					        <div class="uk-margin">
@@ -207,6 +207,8 @@
 						    <input id="file2_ext" name="file2_ext" type="hidden" value="">
 						    <input id="picture3Id" name="picture3Id" type="hidden" value="">
 						    <input id="file3_ext" name="file3_ext" type="hidden" value="">
+
+						    <input id="rtbId" name="rtbId" type="hidden" value="<?=$rtbId;?>">
 
 					    </fieldset>
 					    <div class="uk-flex uk-flex-center uk-flex-middle">
@@ -264,6 +266,9 @@
 						}
 					}
 
+					$datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
+					$uhrzeit = str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5));
+
 					if(empty($errors)){
 						$userId = $auth->getUserId();
 						$insertEintrag = $db->prepare("INSERT INTO eintraege(reisetagebuch_id, titel, text, datum, uhrzeit, standort_id, entwurf, zusammenfassung, public) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -281,18 +286,29 @@
 			?>
 		</div>
 		<script>
+			var username = "<?php echo $username; ?>";
+			// Wenn der Eintrag eine Zusammenfassung ist, kann man weder Standort noch Datum eingeben
+			$('#zusammenfassung').change(function(){
+			    if($(this).is(':checked')){
+			        $('#standorte').hide();
+			        $('#dateInput').hide();
+			    }
+			    else {
+			    	$('#standorte').show();
+			        $('#dateInput').show();
+			    }    
+			});
+
 			// Einstellungen des Datepickers
 			$(".flatpickr").flatpickr({
 				enableTime: true,
 			    altInput: true,
 			    altFormat: "j. F Y H:i",
-			    dateFormat: "m-d-Y H:i",
+			    dateFormat: "Y-m-d H:i",
 			    /*minTime: "16:00",
     			maxTime: "22:00",*/
 			    time_24hr: true
 			});
-
-			$('#standorte').val("default").prop("selected", true);
 
 			$('#standorte').change(function () {
 				var selectedOption = $(this).find("option:selected");
@@ -388,7 +404,6 @@
 		    });
 
 		    var bar2 = document.getElementById('js-progressbar2');
-		    var username = "<?php echo $username; ?>";
 
 		    // Skript zum uploaden vom Standortbild
 		    UIkit.upload('#standortBildUpload', {
@@ -470,6 +485,63 @@
 			            }
 			        }
 		    	});
+		    });
+
+		    var bar3 = document.getElementById('js-progressbar3');
+
+		    // Skript zum uploaden vom Standortbild
+		    UIkit.upload('#eintragsBildUpload', {
+
+		        url: '/include/upload.php',
+		        multiple: false,
+		        mime: 'image/*',
+		        method: 'POST',
+		        params: {
+		        	width: 300,
+		        	height: 300
+		        },
+
+		        beforeSend: function () {
+		        },
+		        beforeAll: function () {
+		        },
+		        load: function () {
+		        },
+		        error: function () {
+		        	console.log('test');
+		        },
+		        complete: function () {
+		        },
+
+		        loadStart: function (e) {
+		            bar3.removeAttribute('hidden');
+		            bar3.max = e.total;
+		            bar3.value = e.loaded;
+		        },
+
+		        progress: function (e) {
+		            bar3.max = e.total;
+		            bar3.value = e.loaded;
+		        },
+
+		        loadEnd: function (e) {
+		            bar3.max = e.total;
+		            bar3.value = e.loaded;
+		        },
+
+		        completeAll: function (data) {
+		            setTimeout(function () {
+		                bar3.setAttribute('hidden', 'hidden');
+		            }, 1000);
+
+		            var infos = JSON.parse(data.response);
+		            var fullPath = '../users/'+username+'/tmp_'+infos.pictureId+'.'+infos.file_ext;
+
+		            $('#picture1Id').val(infos.pictureId);
+		            $('#file1_ext').val(infos.file_ext);
+		            $('#standortBild').empty().append('<div class="uk-animation-fade"><img data-src="'+fullPath+'" uk-img></div>');
+		            UIkit.notification({message: 'Ihr Standortbild wurde erfolgreich hochgeladen.', status: 'success'});
+		        }
 		    });
 		</script>
 	</body>
