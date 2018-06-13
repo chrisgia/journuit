@@ -71,3 +71,14 @@ body{
 textarea {
     resize: none;
 }
+
+/* Fix damit autocomplete im Modal angezeigt wird. */
+.pac-container {
+  z-index: 1040 !important;
+}
+
+#pickerMap{
+	margin: 0 auto 0 auto;
+	width: 500px;
+	height: 400px;
+}

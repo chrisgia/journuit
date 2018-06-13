@@ -290,7 +290,7 @@
 
 		            $('#pictureId').val(infos.pictureId);
 		            $('#file_ext').val(infos.file_ext);
-		            $('#titelbild').empty().append('<div uk-scrollspy="cls:uk-animation-fade"><img data-src="'+fullPath+'" uk-img></div>');
+		            $('#titelbild').empty().append('<div class="uk-animation-fade"><img data-src="'+fullPath+'" uk-img></div>');
 		            UIkit.notification({message: 'Ihr Titelbild wurde erfolgreich hochgeladen.', status: 'success'});
 		        }
 		    });
