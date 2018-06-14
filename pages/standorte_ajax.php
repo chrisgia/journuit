@@ -4,7 +4,6 @@
 
 	// Formularverarbeitung 
 	if(isset($_POST['standortname'], $_POST['lat'], $_POST['lon'])){
-		$userId = $auth->getUserId();
 		$errors = array();
 		if (ctype_space(htmlspecialchars($_POST['standortname'])) || empty($_POST['standortname'])) {
 			array_push($errors, 'Der Name darf nicht leer sein.');
@@ -33,12 +32,28 @@
 		if(empty($errors)){
 			$insertStandort = $db->prepare("INSERT INTO standorte(users_id, name, beschreibung, lat, lon, bild_id) VALUES(?, ?, ?, ?, ?, ?)");
 			$insertStandort->execute(array(htmlspecialchars($userId), htmlspecialchars($_POST['standortname']), htmlspecialchars($_POST['beschreibung']), htmlspecialchars($_POST['lat']), htmlspecialchars($_POST['lon']), htmlspecialchars($_POST['pictureId'])));
-
-			$insertId = $db->lastInsertId();
 			
+			$insertedStandortId = $db->lastInsertId();
+
+			$selectStandorte = $db->prepare("SELECT id, name FROM standorte WHERE users_id = ? ORDER BY name");
+            $selectStandorte->execute(array($userId));
+            $standorte = $selectStandorte->fetchAll(\PDO::FETCH_ASSOC);
+
+            $standorteSelectBox = "<option value=\"default\">Standort auswählen</option>";
+            $standorteSelectBox .= "<option value=\"neuer-standort\" class=\"uk-text-bold\">Neuer Standort</option>";
+
+            $selected = "";
+
+            foreach($standorte as $standort){
+            	if($standort['id'] == $insertedStandortId){
+            		$selected = "selected";
+            	}
+                $standorteSelectBox .= "<option value=\"".$standort['id']."\" ".$selected.">".$standort['name']."</option>";
+            }
+
 			$result = array(
 				'status' => 'OK',
-				'data' => '<option value="'.$insertId.'">'.htmlspecialchars($_POST['standortname']).'</option>'
+				'data' => $standorteSelectBox
 			);
 
 		} else {

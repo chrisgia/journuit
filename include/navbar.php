@@ -3,9 +3,8 @@
     	<div class="uk-navbar-left">
             <?php 
                 if(isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] == true) {
-                    $id = $auth->getUserId();
                     $selectUserData = $db->prepare("SELECT vorname, nachname, users.username FROM users_data JOIN users ON (users_data.id = users.id) WHERE users_data.id = ?");
-                    $selectUserData->execute(array($id));
+                    $selectUserData->execute(array($userId));
                     $userData = $selectUserData->fetchAll(\PDO::FETCH_ASSOC);
                     $username = $userData[0]['username'];
                     $fullname = $userData[0]['vorname']." ".$userData[0]['nachname'][0];

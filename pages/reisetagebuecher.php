@@ -10,9 +10,20 @@
 		$view = "meine-reisetagebuecher";
 	}
 
-	if(isset($_GET['rtb'])){
-		$view = "reisetagebuch";
-	}
+	if(isset($_POST['rtbId'])){
+        $rtbId = htmlspecialchars($_POST['rtbId']);
+    } elseif(isset($_GET['rtbId'])){
+        $rtbId = htmlspecialchars($_POST['rtbId']);
+    }
+
+    if(isset($_POST['rtb'])){
+    	$view = "reisetagebuch";
+        $rtbUrl = htmlspecialchars($_POST['rtb']);
+    } elseif(isset($_GET['rtb'])){
+    	$view = "reisetagebuch";
+        $rtbUrl = htmlspecialchars($_GET['rtb']);
+    }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -31,45 +42,54 @@
 			switch ($view) {
 				case 'meine-reisetagebuecher':	
 				// Fügt die Reisetagebücher des Benutzers in ein Array
-				$id = $auth->getUserId();
                 $selectReisetagebuecher = $db->prepare("SELECT titel, beschreibung, url, public, erstellt_am, bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) WHERE users_id = ?");
-                $selectReisetagebuecher->execute(array($id));
+                $selectReisetagebuecher->execute(array($userId));
                 $reisetagebuecher = $selectReisetagebuecher->fetchAll(\PDO::FETCH_ASSOC);
-			?>
-			<div class="uk-child-width-1-3@l uk-child-width-1-1@s uk-margin-top uk-margin-bottom uk-text-center" uk-grid>
+                if(!empty($reisetagebuecher)){
+					?>
+					<div class="uk-child-width-1-3@l uk-child-width-1-1@s uk-margin-top uk-margin-bottom uk-text-center" uk-grid>
+					<?php
+					foreach($reisetagebuecher as $reisetagebuch){
+					?>
+					    <div>
+				        <?php
+				        echo "<div class=\"uk-card uk-card-default uk-card-hover uk-animation-toggle uk-height-large rtbCard\" onclick=\"document.location='reisetagebuecher.php?rtb=".$reisetagebuch['url']."'\">"; ?>
+					        	<div class="uk-card-badge uk-label">
+					        		<?php if($reisetagebuch['public'] == 1){
+					        			echo "<i class=\"far fa-eye\"></i>";
+					        		} else {
+					        			echo "<i class=\"far fa-eye-slash\"></i>";
+					        		}
+					        		?>
+					        	</div>
+					            <?php 
+				            		if(!empty($reisetagebuch['bild_id'])){
+				            			echo '<img class="titelbild" src="/users/'.$username.'/'.$reisetagebuch['bild_id'].'.'.$reisetagebuch['file_ext'].'">';
+				            		} else {
+				            			echo '<img class="titelbild" src="/pictures/default_picture.jpg">';
+				            		} 
+				            	?>
+					            <div class="uk-overlay uk-overlay-default uk-position-bottom">
+					                <span class="uk-h2"><?=$reisetagebuch['titel'];?></span>
+					                <p><?=$reisetagebuch['beschreibung'];?></p>
+					                <span class="uk-text-small uk-float-right"><i>erstellt am <?=getMySqlDate($reisetagebuch['erstellt_am']);?></i></span><br/>
+					            </div>   
+					        </div>
+					    </div>
+				    <?php
+					}
+				    ?>
+					</div>
 				<?php
-				foreach($reisetagebuecher as $reisetagebuch){
-				?>
-			    <div>
-		        <?php
-		        echo "<div class=\"uk-card uk-card-default uk-card-hover uk-animation-toggle uk-height-large rtbCard\" style=\"cursor:pointer;\" onclick=\"document.location='reisetagebuecher.php?rtb=".$reisetagebuch['url']."'\">"; ?>
-			        	<div class="uk-card-badge uk-label">
-			        		<?php if($reisetagebuch['public'] == 1){
-			        			echo "<i class=\"far fa-eye\"></i>";
-			        		} else {
-			        			echo "<i class=\"far fa-eye-slash\"></i>";
-			        		}
-			        		?>
-			        	</div>
-			            <?php 
-		            		if(!empty($reisetagebuch['bild_id'])){
-		            			echo '<img class="titelbild" src="/users/'.$username.'/'.$reisetagebuch['bild_id'].'.'.$reisetagebuch['file_ext'].'">';
-		            		} else {
-		            			echo '<img class="titelbild" src="/pictures/default_picture.jpg">';
-		            		} 
-		            	?>
-			            <div class="uk-overlay uk-overlay-default uk-position-bottom">
-			                <span class="uk-h2"><?=$reisetagebuch['titel'];?></span>
-			                <p><?=$reisetagebuch['beschreibung'];?></p>
-			                <span class="uk-text-small uk-float-right"><i>erstellt am <?=getMySqlDate($reisetagebuch['erstellt_am']);?></i></span><br/>
-			            </div>   
-			        </div>
-			    </div>
-			    <?php
+				} else {
+					?>
+					<div class="uk-margin-top uk-text-center">
+						<span>Sie haben noch kein Reisetagebuch angelegt.</span><br/>
+						<button class="uk-button uk-button-text uk-text-uppercase"><a class="uk-heading uk-link-reset newRtbLink" href="reisetagebuecher.php?view=neues-reisetagebuch">Neues Reisetagebuch anlegen</a></button>
+					</div>
+				<?php
 				}
-			    ?>
-			</div>
-			<?php 
+
 			break;
 
 			case 'neues-reisetagebuch':
@@ -147,10 +167,10 @@
 				}
 
 				if(empty($errors)){
-					$userId = $auth->getUserId();
-					$url = uniqueDbId($db, 'reisetagebuecher', 'url');
+					$uniqueUrl = uniqueDbId($db, 'reisetagebuecher', 'url');
 					$insertReisetagebuch = $db->prepare("INSERT INTO reisetagebuecher(users_id, titel, beschreibung, url, public, bild_id) VALUES(?, ?, ?, ?, ?, ?)");
-					$insertReisetagebuch->execute(array(htmlspecialchars($userId), htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['beschreibung']), $url, $public, htmlspecialchars($_POST['pictureId'])));
+					$insertReisetagebuch->execute(array(htmlspecialchars($userId), htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['beschreibung']), $uniqueUrl, $public, htmlspecialchars($_POST['pictureId'])));
+					echo "<script>window.location.href = 'reisetagebuecher.php?view=meine-reisetagebuecher&success=true';</script>";
 				} else {
 					echo "<ul>";
 					foreach($errors as $error){
@@ -163,11 +183,9 @@
 
 			case 'reisetagebuch':
 			// Die Daten des Reisetagebuchs mit der ID ausgeben
-			$url = htmlspecialchars($_GET['rtb']);
             $selectReisetagebuchDaten = $db->prepare("SELECT reisetagebuecher.id, titel, beschreibung, public, erstellt_am, bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) WHERE url = ?");
-            $selectReisetagebuchDaten->execute(array($url));
+            $selectReisetagebuchDaten->execute(array($rtbUrl));
             $reisetagebuchDaten = $selectReisetagebuchDaten->fetchAll(\PDO::FETCH_ASSOC);
-            $rtbId = $reisetagebuchDaten[0]['id'];
 			?>
 			<div class="uk-flex uk-flex-center uk-flex-column uk-flex-middle">
 				<div class="uk-margin-top">
@@ -179,57 +197,81 @@
 					</div>
 
 					<div id="titelbild" class="uk-margin uk-text-center">
-			        	<?php echo '<img class="uk-border-rounded" data-src="../users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img>'; ?>
+			        	<?php 
+			        	if(!empty($reisetagebuch['bild_id'])){
+	            			echo '<img class="uk-border-rounded" data-src="../users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img>'; 
+	            		} else {
+	            			echo '<img class="uk-border-rounded" data-src="/pictures/default_picture.jpg" uk-img>';
+	            		} 
+			        	?>
 			        </div>				    
+			        <?php 
+			        $rtbId = getRtbIdFromUrl($db, $userId, $rtbUrl);
+		            $selectDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ? ORDER BY datum DESC");
+		            $selectDates->execute(array($rtbId));
+		            $dates = $selectDates->fetchAll(\PDO::FETCH_ASSOC);
+		            if(!empty($dates)){
+		            ?>
+					    <table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
+						    <thead>
+						        <tr>
+							        <th class="uk-text-center">Einträge</th>
+						            <th class="uk-text-right">
+						            	<form method="POST" action="eintraege.php?view=neuer-eintrag">
+						            		<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
+						            		<button class="uk-button uk-button-text" name="neuer-eintrag"><i uk-icon="plus"></i> Neuer Eintrag</button>
+						            	</form>
+						            </th>
+						        </tr>
+						    </thead>
+						    <tbody>
+						    	<?php
+							    	foreach($dates as $datum){
+							    		$selectEintraege = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ?");
+							            $selectEintraege->execute(array($rtbId, $datum['datum']));
+							            $eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
 
-				    <table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
-					    <thead>
-					        <tr>
-						        <th class="uk-text-right">Einträge</th>
-					            <th class="uk-text-right">
-					            	<form method="POST" action="eintraege.php?view=neuer-eintrag">
-					            		<input type="text" name="rtbId" value="<?=$rtbId;?>" hidden>
-					            		<button class="uk-button uk-button-text" name="neuer-eintrag"><i uk-icon="plus"></i> Neuer Eintrag</button>
-					            	</form>
-					            </th>
-					        </tr>
-					    </thead>
-					    <tbody>
-					    	<?php
-				            $selectDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ?");
-				            $selectDates->execute(array($rtbId));
-				            $dates = $selectDates->fetchAll(\PDO::FETCH_ASSOC);
-
-					    	foreach($dates as $datum){
-					    		$selectEintraege = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ?");
-					            $selectEintraege->execute(array($rtbId, $datum['datum']));
-					            $eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
-					    	?>
-					        <tr>
-					            <td>
-					            <span class="uk-text-bold"><?=$datum['datum'];?> </span>
-					            <i>
-					            <?php
-					            foreach($eintraege as $eintrag){
-					            	echo $eintrag['titel'].", ";
-					            }
-					            ?>
-					            ...
-					            </i>	
-					            </td>
-					            <td class="uk-text-right">
-					            	<form method="POST" action="eintraege.php?view=eintrag-bearbeiten">
-					            		<input type="text" name="rtbId" value="<?=$rtbId;?>" hidden>
-					            		<input type="text" name="datum" value="<?=$datum['datum'];?>" hidden>
-					            		<button class="uk-button uk-button-text" name="eintrag-bearbeiten"><i uk-icon="file-edit"></i></button>
-					            	</form>
-					            </td>
-					        </tr>
-					        <?php
-					    	}
-					    	?>
-					    </tbody>
-					</table>
+							            setlocale(LC_TIME, "de_DE");
+							            $formatiertesDatum = strftime("%e. %B %Y", strtotime($datum['datum']));
+								    	?>
+								        <tr class="eintragBox" onclick="document.location='eintraege.php?rtb=<?=$rtbUrl;?>&datum=<?=$datum['datum'];?>'">
+								            <td>
+								            <span class="uk-text-bold"><?=$formatiertesDatum;?> </span>
+								            <i>
+								            <?php
+								            foreach($eintraege as $eintrag){
+								            	echo $eintrag['titel'].", ";
+								            }
+								            ?>
+								            ...
+								            </i>	
+								            </td>
+								            <td class="uk-text-right">
+								            	<form method="POST" action="eintraege.php?view=eintrag-bearbeiten">
+								            		<input type="text" name="rtbId" value="<?=$rtbId;?>" hidden>
+								            		<input type="text" name="datum" value="<?=$datum['datum'];?>" hidden>
+								            		<button class="uk-button uk-button-text" name="eintrag-bearbeiten"><i uk-icon="file-edit"></i></button>
+								            	</form>
+								            </td>
+								        </tr>
+							        <?php
+							    	}
+							    	?>
+						    </tbody>
+						</table>
+					<?php
+					} else {
+				    	?>
+				    	<div class="uk-margin-top uk-text-center">
+							<span>Sie haben zu diesem Reisetagebuch noch keinen Eintrag geschrieben.</span><br/>
+							<form method="POST" action="eintraege.php?view=neuer-eintrag">
+			            		<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
+			            		<button class="uk-button uk-button-text" name="neuer-eintrag">Neuer Eintrag</button>
+			            	</form>
+						</div>
+				    	<?php
+				    }
+			    	?>
 				</div>
 			</div>
 			<?php 
@@ -238,7 +280,10 @@
 		?>
 		</div>
 		<?php 
+			// Success Benachrichtigungen 
 			if(isset($_GET['login'])){echo "<script>UIkit.notification({message: 'Sie sind angemeldet.', status: 'success'});</script>";}
+			if(isset($_GET['success'])){echo "<script>UIkit.notification({message: 'Ihr Reisetagebuch wurde erfolgreich erstellt.', status: 'success'});</script>";}
+			if(isset($_GET['eintragErfolgreich'])){echo "<script>UIkit.notification({message: 'Ihr Eintrag wurde erfolgreich erstellt.', status: 'success'});</script>";}
 		?>
 		<script>
 			var bar = document.getElementById('js-progressbar');

@@ -1,25 +1,33 @@
+/* TODO: Für Smartphones anpassen */
+
+/* Hintergrundfarbe definieren */
 body{
 	background-color: #d8d8d8;
 }
 
+/* 'jour' im Logo weiß anzeigen */
 .white {
 	color: white;
 }
 
+/* 'nuit' im Logo schwarz anzeigen */
 .black {
 	color: black;
 }
 
+/* Hintergrundfarbe der Navbar */
 #navbar {
 	background-color: grey;
 }
 
+/* Designanpassungen für Links in der Navbar */
 .nav_link {
 	color: black;
 	font-size: 1.5em;
 	font-weight: 300;
 }
 
+/* Designanpassungen für den Benutzernamen in der Navbar */
 .nav_username {
 	color: black;
 	font-size: 1em;
@@ -30,7 +38,6 @@ body{
 .nav_icon {
 	color: white;
 }
-
 
 .uk-logo {
 	color: black;
@@ -55,6 +62,10 @@ body{
 	font-size: 3.5em;
 }
 
+.rtbCard{
+	cursor: pointer;
+}
+
 #rtbTitel {
 	font-size: 2em;
 }
@@ -68,17 +79,28 @@ body{
 	height:100%;
 }
 
+/* Resizable-Kanten von Textareas entfernen */
 textarea {
     resize: none;
 }
 
-/* Fix damit autocomplete im Modal angezeigt wird. */
+/* Fix damit Locationpicker-Autocomplete im Modal angezeigt wird. */
 .pac-container {
   z-index: 1040 !important;
 }
 
+/* Google-Map Formatierung */
 #pickerMap{
 	margin: 0 auto 0 auto;
 	width: 500px;
 	height: 400px;
+}
+
+/* Pointer anzeigen wenn über eine Eintragsbox gehovert wird */
+.eintragBox{
+	cursor: pointer;
+}
+
+.newRtbLink{
+	font-size: 1.5em;
 }

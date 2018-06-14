@@ -4,9 +4,9 @@
 		$randomId = $db->prepare("
 			SELECT random_num
 			FROM (
-			  SELECT FLOOR(RAND() * 99999) AS random_num 
+			  SELECT FLOOR(RAND() * 99999999999999) AS random_num 
 			  UNION
-			  SELECT FLOOR(RAND() * 99999) AS random_num
+			  SELECT FLOOR(RAND() * 99999999999999) AS random_num
 			) AS numbers_mst_plus_1
 			WHERE `random_num` NOT IN (SELECT ? FROM ".htmlspecialchars($table).")
 			LIMIT 1"
@@ -67,18 +67,23 @@
 	function insertBild($db, $username, $id, $file_ext) {
 		$exifSupportedFileExts = array('jpg', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi');
 		$tempPath = "../users/$username/tmp_".$id.".".$file_ext;
-		$fullPath = "../users/$username/".$id.".".$file_ext;
-		rename($tempPath, $fullPath);
-	    if(in_array(strtolower($file_ext), $exifSupportedFileExts)){
-		    $exifData = getExifData($fullPath);
-		    
-		    $insertPictureData = $db->prepare("INSERT INTO bilder(id, datum, lat, lon, file_ext) VALUES(?, ?, ?, ?, ?)");
-			$result = $insertPictureData->execute(array(htmlspecialchars($id), htmlspecialchars($exifData['dateTime']), htmlspecialchars($exifData['lat']), htmlspecialchars($exifData['lon']), htmlspecialchars($file_ext)));
+		// Falls der Benutzer im Formular eine eigene pictureId übergibt
+		if(file_exists($tempPath)){
+			$fullPath = "../users/$username/".$id.".".$file_ext;
+			rename($tempPath, $fullPath);
+		    if(in_array(strtolower($file_ext), $exifSupportedFileExts)){
+			    $exifData = getExifData($fullPath);
+			    
+			    $insertPictureData = $db->prepare("INSERT INTO bilder(id, datum, lat, lon, file_ext) VALUES(?, ?, ?, ?, ?)");
+				$result = $insertPictureData->execute(array(htmlspecialchars($id), htmlspecialchars($exifData['dateTime']), htmlspecialchars($exifData['lat']), htmlspecialchars($exifData['lon']), htmlspecialchars($file_ext)));
+			} else {
+				$insertPictureData = $db->prepare("INSERT INTO bilder(id, file_ext) VALUES(?, ?)");
+				$result = $insertPictureData->execute(array(htmlspecialchars($id), htmlspecialchars($file_ext)));
+			}
+			return $result;
 		} else {
-			$insertPictureData = $db->prepare("INSERT INTO bilder(id, file_ext) VALUES(?, ?)");
-			$result = $insertPictureData->execute(array(htmlspecialchars($id), htmlspecialchars($file_ext)));
+			return false;
 		}
-		return $result;
 	}
 
 	// Datum aus Formulareingabe für MySQL Insert aufbereiten
@@ -87,4 +92,38 @@
 	    return $date;
 	}
 
+	// Funktion um sicherzustellen dass der Benutzer auf sein eigenes Reisetagebuch zugreifft
+	function isOwner($db, $userId, $rtbId = null, $rtbUrl = null){
+		if(is_null($rtbUrl)){
+			$selectRtbFromId = $db->prepare("SELECT id FROM reisetagebuecher WHERE id = ? AND users_id = ?");
+	        $selectRtbFromId->execute(array($rtbId, $userId));
+	        $rtbFromId = $selectRtbFromId->fetchAll(\PDO::FETCH_ASSOC);
+	        if(!empty($rtbFromId)){
+	        	return $rtbFromId[0]['id'] == $rtbId;
+	        }
+	        return false;  
+	    } 
+
+	    if(is_null($rtbId)){
+	    	$selectRtbFromURL = $db->prepare("SELECT url FROM reisetagebuecher WHERE users_id = ? AND url = ?");
+	        $selectRtbFromURL->execute(array($userId, $rtbUrl));
+	        $rtbFromURL = $selectRtbFromURL->fetchAll(\PDO::FETCH_ASSOC);
+	        if(!empty($rtbFromURL)){
+	        	return $rtbFromURL[0]['url'] == $rtbUrl;
+	    	}
+	    	return false;
+	    }
+
+	    return false;
+	}
+
+	function getRtbIdFromUrl($db, $userId, $rtbUrl){
+		$selectRtbIdFromURL = $db->prepare("SELECT id FROM reisetagebuecher WHERE users_id = ? AND url = ?");
+        $selectRtbIdFromURL->execute(array($userId, $rtbUrl));
+        $rtbId = $selectRtbIdFromURL->fetchAll(\PDO::FETCH_ASSOC);
+        if(!empty($rtbId)){
+        	return $rtbId[0]['id'];
+    	}
+    	return false;
+	}
 ?>
