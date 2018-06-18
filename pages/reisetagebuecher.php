@@ -39,6 +39,13 @@
 		<div class="uk-container uk-container-large">
 			
 			<?php 
+			if(isset($rtbUrl) && !empty($rtbUrl)){
+				$rtbId = getRtbIdFromUrl($db, $rtbUrl);
+	            $selectReisetagebuchDaten = $db->prepare("SELECT reisetagebuecher.id, users.username, titel, beschreibung, public, erstellt_am, bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) JOIN users ON (users_id = users.id) WHERE reisetagebuecher.id = ?");
+	            $selectReisetagebuchDaten->execute(array($rtbId));
+	            $reisetagebuchDaten = $selectReisetagebuchDaten->fetchAll(\PDO::FETCH_ASSOC);
+			}
+
 			switch ($view) {
 				case 'meine-reisetagebuecher':	
 				// Fügt die Reisetagebücher des Benutzers in ein Array
@@ -66,7 +73,7 @@
 				            		if(!empty($reisetagebuch['bild_id'])){
 				            			echo '<img class="titelbild" src="/users/'.$username.'/'.$reisetagebuch['bild_id'].'.'.$reisetagebuch['file_ext'].'">';
 				            		} else {
-				            			echo '<img class="titelbild" src="/pictures/default_picture.jpg">';
+				            			echo '<img class="titelbild" src="/pictures/no-picture.png">';
 				            		} 
 				            	?>
 					            <div class="uk-overlay uk-overlay-default uk-position-bottom">
@@ -182,13 +189,13 @@
 			break;
 
 			case 'reisetagebuch':
-			// Die Daten des Reisetagebuchs mit der ID ausgeben
-            $selectReisetagebuchDaten = $db->prepare("SELECT reisetagebuecher.id, titel, beschreibung, public, erstellt_am, bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) WHERE url = ?");
-            $selectReisetagebuchDaten->execute(array($rtbUrl));
-            $reisetagebuchDaten = $selectReisetagebuchDaten->fetchAll(\PDO::FETCH_ASSOC);
+			
 			?>
 			<div class="uk-flex uk-flex-center uk-flex-column uk-flex-middle">
 				<div class="uk-margin-top">
+				<?php 
+				if(isOwner($db, $userId, $rtbId)){
+				?>
 					<div>
 						<div><a href="" class="uk-icon-link uk-float-left" uk-icon="icon: file-edit; ratio: 1.5"></a></div>
 						<div><a href="" class="uk-icon-link uk-float-right" uk-icon="icon: social; ratio: 1.5"></a></div>
@@ -198,15 +205,14 @@
 
 					<div id="titelbild" class="uk-margin uk-text-center">
 			        	<?php 
-			        	if(!empty($reisetagebuch['bild_id'])){
-	            			echo '<img class="uk-border-rounded" data-src="../users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img>'; 
+			        	if(!empty($reisetagebuchDaten[0]['bild_id'])){
+	            			echo '<img data-src="../users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img>'; 
 	            		} else {
-	            			echo '<img class="uk-border-rounded" data-src="/pictures/default_picture.jpg" uk-img>';
+	            			echo '<img data-src="/pictures/no-picture.png" uk-img>';
 	            		} 
 			        	?>
 			        </div>				    
 			        <?php 
-			        $rtbId = getRtbIdFromUrl($db, $userId, $rtbUrl);
 		            $selectDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ? ORDER BY datum DESC");
 		            $selectDates->execute(array($rtbId));
 		            $dates = $selectDates->fetchAll(\PDO::FETCH_ASSOC);
@@ -231,7 +237,6 @@
 							            $selectEintraege->execute(array($rtbId, $datum['datum']));
 							            $eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
 
-							            setlocale(LC_TIME, "de_DE");
 							            $formatiertesDatum = strftime("%e. %B %Y", strtotime($datum['datum']));
 								    	?>
 								        <tr class="eintragBox" onclick="document.location='eintraege.php?rtb=<?=$rtbUrl;?>&datum=<?=$datum['datum'];?>'">
@@ -271,7 +276,74 @@
 						</div>
 				    	<?php
 				    }
+				} else {
 			    	?>
+			    	<div>
+						<div><a href="" class="uk-icon-link uk-float-right" uk-icon="icon: social; ratio: 1.5"></a></div>
+						<div><a href="" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right"></a></div>
+						<div class="uk-text-center uk-text-lead" id="rtbTitel"><?=$reisetagebuchDaten[0]['titel'];?> <span class="uk-text-small">von <?=$reisetagebuchDaten[0]['username'];?></span></div>
+					</div>
+
+					<div id="titelbild" class="uk-margin uk-text-center">
+			        	<?php 
+			        	if(!empty($reisetagebuchDaten[0]['bild_id'])){
+	            			echo '<img data-src="../users/'.$reisetagebuchDaten[0]['username'].'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img>'; 
+	            		} else {
+	            			echo '<img data-src="/pictures/no-picture.png" uk-img>';
+	            		} 
+			        	?>
+			        </div>				    
+			        <?php 
+		            $selectDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ? ORDER BY datum DESC");
+		            $selectDates->execute(array($rtbId));
+		            $dates = $selectDates->fetchAll(\PDO::FETCH_ASSOC);
+		            if(!empty($dates)){
+		            ?>
+					    <table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
+						    <thead>
+						        <tr>
+							        <th class="uk-text-center">Einträge</th>
+						        </tr>
+						    </thead>
+						    <tbody>
+						    	<?php
+							    	foreach($dates as $datum){
+							    		$selectEintraege = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ?");
+							            $selectEintraege->execute(array($rtbId, $datum['datum']));
+							            $eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
+
+							            $formatiertesDatum = strftime("%e. %B %Y", strtotime($datum['datum']));
+								    	?>
+								        <tr class="eintragBox" onclick="document.location='eintraege.php?rtb=<?=$rtbUrl;?>&datum=<?=$datum['datum'];?>'">
+								            <td>
+									            <span class="uk-text-bold"><?=$formatiertesDatum;?> </span>
+									            <i>
+									            <?php
+									            foreach($eintraege as $eintrag){
+									            	echo $eintrag['titel'].", ";
+									            }
+									            ?>
+									            ...
+									            </i>	
+								            </td>
+								        </tr>
+							        <?php
+							    	}
+							    	?>
+						    </tbody>
+						</table>
+					<?php
+					} else {
+				    	?>
+				    	<div class="uk-margin-top uk-text-center">
+							<span>Es wurde zu diesem Reisetagebuch noch nichts eingetragen.</span><br/>
+						</div>
+				    	<?php
+				    }
+			    	?>
+			    <?php
+				}
+				?>
 				</div>
 			</div>
 			<?php 

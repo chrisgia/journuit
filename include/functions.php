@@ -1,4 +1,11 @@
 <?php
+	// Leitet den Benutzer weiter, wenn er versucht eine Seite für angemeldete Benutzer aufzurufen
+	function checkAuthorization($userId){
+		if(empty($userId)){
+			header('location: /pages/unpermitted.php');
+		}
+	}
+
 	// Erstellt eine zufällige ID die noch nicht in der Tabelle vorhanden ist
 	function uniqueDbId($db, $table, $field){
 		$randomId = $db->prepare("
@@ -93,37 +100,25 @@
 	}
 
 	// Funktion um sicherzustellen dass der Benutzer auf sein eigenes Reisetagebuch zugreifft
-	function isOwner($db, $userId, $rtbId = null, $rtbUrl = null){
-		if(is_null($rtbUrl)){
-			$selectRtbFromId = $db->prepare("SELECT id FROM reisetagebuecher WHERE id = ? AND users_id = ?");
-	        $selectRtbFromId->execute(array($rtbId, $userId));
-	        $rtbFromId = $selectRtbFromId->fetchAll(\PDO::FETCH_ASSOC);
-	        if(!empty($rtbFromId)){
-	        	return $rtbFromId[0]['id'] == $rtbId;
-	        }
-	        return false;  
-	    } 
+	function isOwner($db, $userId, $rtbId){
+		$selectRtbFromId = $db->prepare("SELECT id FROM reisetagebuecher WHERE id = ? AND users_id = ?");
+        $selectRtbFromId->execute(array($rtbId, $userId));
+        $rtbFromId = $selectRtbFromId->fetchAll(\PDO::FETCH_ASSOC);
+        if(!empty($rtbFromId)){
+        	return $rtbFromId[0]['id'] == $rtbId;
+        }
 
-	    if(is_null($rtbId)){
-	    	$selectRtbFromURL = $db->prepare("SELECT url FROM reisetagebuecher WHERE users_id = ? AND url = ?");
-	        $selectRtbFromURL->execute(array($userId, $rtbUrl));
-	        $rtbFromURL = $selectRtbFromURL->fetchAll(\PDO::FETCH_ASSOC);
-	        if(!empty($rtbFromURL)){
-	        	return $rtbFromURL[0]['url'] == $rtbUrl;
-	    	}
-	    	return false;
-	    }
-
-	    return false;
+        return false;  
 	}
 
-	function getRtbIdFromUrl($db, $userId, $rtbUrl){
-		$selectRtbIdFromURL = $db->prepare("SELECT id FROM reisetagebuecher WHERE users_id = ? AND url = ?");
-        $selectRtbIdFromURL->execute(array($userId, $rtbUrl));
+	function getRtbIdFromUrl($db, $rtbUrl){
+		$selectRtbIdFromURL = $db->prepare("SELECT id FROM reisetagebuecher WHERE url = ?");
+        $selectRtbIdFromURL->execute(array($rtbUrl));
         $rtbId = $selectRtbIdFromURL->fetchAll(\PDO::FETCH_ASSOC);
         if(!empty($rtbId)){
         	return $rtbId[0]['id'];
-    	}
+    	} 
+
     	return false;
 	}
 ?>
