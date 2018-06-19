@@ -7,7 +7,7 @@
 	} elseif(isset($_POST["view"])) {
 		$view = htmlspecialchars($_POST["view"]);
 	} else {
-		$view = "meine-reisetagebuecher";
+		$view = "meine";
 	}
 
 	if(isset($_POST['rtbId'])){
@@ -23,6 +23,9 @@
     	$view = "reisetagebuch";
         $rtbUrl = htmlspecialchars($_GET['rtb']);
     }
+
+    $onlyLogged = array('meine', 'neu', 'reisetagebuch');
+    checkAuthorization($userId, $view, $onlyLogged);
 
 ?>
 <!DOCTYPE html>
@@ -44,10 +47,15 @@
 	            $selectReisetagebuchDaten = $db->prepare("SELECT reisetagebuecher.id, users.username, titel, beschreibung, public, erstellt_am, bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) JOIN users ON (users_id = users.id) WHERE reisetagebuecher.id = ?");
 	            $selectReisetagebuchDaten->execute(array($rtbId));
 	            $reisetagebuchDaten = $selectReisetagebuchDaten->fetchAll(\PDO::FETCH_ASSOC);
+
+	            if(empty($reisetagebuchDaten)){
+                    // Ist das Reisetagebuch nicht vorhanden, wird man zum default case weitergeleitet (Nicht vorhandene Seite)
+                    $view = 'not_available';
+                }
 			}
 
 			switch ($view) {
-				case 'meine-reisetagebuecher':	
+				case 'meine':	
 				// Fügt die Reisetagebücher des Benutzers in ein Array
                 $selectReisetagebuecher = $db->prepare("SELECT titel, beschreibung, url, public, erstellt_am, bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) WHERE users_id = ?");
                 $selectReisetagebuecher->execute(array($userId));
@@ -92,14 +100,14 @@
 					?>
 					<div class="uk-margin-top uk-text-center">
 						<span>Sie haben noch kein Reisetagebuch angelegt.</span><br/>
-						<button class="uk-button uk-button-text uk-text-uppercase"><a class="uk-heading uk-link-reset newRtbLink" href="reisetagebuecher.php?view=neues-reisetagebuch">Neues Reisetagebuch anlegen</a></button>
+						<button class="uk-button uk-button-text uk-text-uppercase"><a class="uk-heading uk-link-reset newRtbLink" href="reisetagebuecher.php?view=neu">Neues Reisetagebuch anlegen</a></button>
 					</div>
 				<?php
 				}
 
 			break;
 
-			case 'neues-reisetagebuch':
+			case 'neu':
 			?>
 			<div class="uk-margin-top uk-margin-bottom">
 				<h1 class="uk-text-center">Neues Reisetagebuch</h1>
@@ -109,7 +117,7 @@
 		        	<!-- Hier erscheint das Titelbild sobald eins hochgeladen wird -->
 		        </div>
 
-				<form id="neues-reisetagebuch" method="POST">
+				<form id="neu" method="POST">
 				    <fieldset class="uk-fieldset">
 
 				        <div class="uk-margin">
@@ -177,7 +185,7 @@
 					$uniqueUrl = uniqueDbId($db, 'reisetagebuecher', 'url');
 					$insertReisetagebuch = $db->prepare("INSERT INTO reisetagebuecher(users_id, titel, beschreibung, url, public, bild_id) VALUES(?, ?, ?, ?, ?, ?)");
 					$insertReisetagebuch->execute(array(htmlspecialchars($userId), htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['beschreibung']), $uniqueUrl, $public, htmlspecialchars($_POST['pictureId'])));
-					echo "<script>window.location.href = 'reisetagebuecher.php?view=meine-reisetagebuecher&success=true';</script>";
+					echo "<script>window.location.href = 'reisetagebuecher.php?view=meine&success=true';</script>";
 				} else {
 					echo "<ul>";
 					foreach($errors as $error){
@@ -223,9 +231,9 @@
 						        <tr>
 							        <th class="uk-text-center">Einträge</th>
 						            <th class="uk-text-right">
-						            	<form method="POST" action="eintraege.php?view=neuer-eintrag">
+						            	<form method="POST" action="eintraege.php?view=neu">
 						            		<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
-						            		<button class="uk-button uk-button-text" name="neuer-eintrag"><i uk-icon="plus"></i> Neuer Eintrag</button>
+						            		<button class="uk-button uk-button-text" name="neu"><i uk-icon="plus"></i> Neuer Eintrag</button>
 						            	</form>
 						            </th>
 						        </tr>
@@ -269,9 +277,9 @@
 				    	?>
 				    	<div class="uk-margin-top uk-text-center">
 							<span>Sie haben zu diesem Reisetagebuch noch keinen Eintrag geschrieben.</span><br/>
-							<form method="POST" action="eintraege.php?view=neuer-eintrag">
+							<form method="POST" action="eintraege.php?view=neu">
 			            		<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
-			            		<button class="uk-button uk-button-text" name="neuer-eintrag">Neuer Eintrag</button>
+			            		<button class="uk-button uk-button-text" name="neu">Neuer Eintrag</button>
 			            	</form>
 						</div>
 				    	<?php
@@ -347,6 +355,10 @@
 				</div>
 			</div>
 			<?php 
+			break;
+
+			default:
+				require 'unavailable.php';
 			break;
 			}
 		?>

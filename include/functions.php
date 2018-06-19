@@ -100,7 +100,7 @@
 	}
 
 	// Funktion um sicherzustellen dass der Benutzer auf sein eigenes Reisetagebuch zugreifft
-	function isOwner($db, $userId, $rtbId){
+	function isOwner($db, $userId, $rtbId = null){
 		$selectRtbFromId = $db->prepare("SELECT id FROM reisetagebuecher WHERE id = ? AND users_id = ?");
         $selectRtbFromId->execute(array($rtbId, $userId));
         $rtbFromId = $selectRtbFromId->fetchAll(\PDO::FETCH_ASSOC);
@@ -117,6 +117,18 @@
         $rtbId = $selectRtbIdFromURL->fetchAll(\PDO::FETCH_ASSOC);
         if(!empty($rtbId)){
         	return $rtbId[0]['id'];
+    	} 
+
+    	return false;
+	}
+
+	function checkEntryTime($db, $rtbId, $datum, $uhrzeit){
+		$selectUhrzeiten = $db->prepare("SELECT id FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND uhrzeit = ?");
+        $selectUhrzeiten->execute(array($rtbId, $datum, $uhrzeit));
+        $uhrzeiten = $selectUhrzeiten->fetchAll(\PDO::FETCH_ASSOC);
+
+        if(empty($uhrzeiten)){
+        	return true;
     	} 
 
     	return false;

@@ -2,15 +2,19 @@
     require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php'; 
     require $_SERVER['DOCUMENT_ROOT'].'/include/functions.php';
 
+    if(isset($_GET['datum'])){
+        if(!isset($view)){
+            $view = "eintrag";
+        }
+        $eintragsdatum = htmlspecialchars($_GET['datum']);
+    }
+
     if(isset($_GET["view"])) {
         $view = htmlspecialchars($_GET["view"]);
     } elseif(isset($_POST["view"])) {
         $view = htmlspecialchars($_POST["view"]);
-    }
-
-    if(isset($_GET['datum'])){
-        $view = "eintrag";
-        $eintragsdatum = htmlspecialchars($_GET['datum']);
+    } elseif(!isset($view)) {
+        $view = 'not_available';
     }
 
     if(isset($_POST['rtbId'])){
@@ -25,7 +29,7 @@
         $rtbUrl = htmlspecialchars($_GET['rtb']);
     }
 
-    $onlyLogged = array('neuer-eintrag', 'bearbeiten');
+    $onlyLogged = array('neu', 'bearbeiten');
     checkAuthorization($userId, $view, $onlyLogged);
 ?>
 <!DOCTYPE html>
@@ -42,20 +46,247 @@
         <div class="uk-container uk-container-large">
             <?php 
             
+            // Setzen von Variabeln und check ob der Eintrag existiert
             if(isset($rtbUrl) && !empty($rtbUrl)){
                 $rtbId = getRtbIdFromUrl($db, $rtbUrl);
+                
                 $selectRtbData = $db->prepare("SELECT titel, users.username FROM reisetagebuecher JOIN users ON (users_id = users.id) WHERE reisetagebuecher.id = ?");
                 $selectRtbData->execute(array($rtbId));
                 $rtbData = $selectRtbData->fetchAll(\PDO::FETCH_ASSOC);
-                $rtbTitel = $rtbData[0]['titel'];
-                $rtbCreator = $rtbData[0]['username'];
+                $data = $rtbData;
+
+                if(isset($eintragsdatum)){
+                    // Die Daten des Eintrags mit dem gegebenen Datum und rtbId ausgeben
+                    $selectEintraege = $db->prepare("SELECT id, titel, text, uhrzeit, standort_id, zusammenfassung, public FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND entwurf = 0 ORDER BY uhrzeit ASC");
+                    $selectEintraege->execute(array($rtbId, $eintragsdatum));
+                    $eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
+                    $data = $eintraege;
+                }
+
+                if(empty($data)){
+                    // Ist der Eintrag nicht vorhanden, wird man zum default case weitergeleitet (Nicht vorhandene Seite)
+                    $view = 'not_available';
+                } else {
+                    $rtbTitel = $rtbData[0]['titel'];
+                    $rtbCreator = $rtbData[0]['username'];
+                }
             }
 
             switch ($view) {
-                case 'neuer-eintrag':
+                case 'neu':
+                    // Gespeicherte Standorte des Benutzers 
+                    $selectStandorte = $db->prepare("SELECT id, name FROM standorte WHERE users_id = ? ORDER BY name");
+                    $selectStandorte->execute(array($userId));
+                    $standorte = $selectStandorte->fetchAll(\PDO::FETCH_ASSOC);
+                    if(isset($rtbId) && isOwner($db, $userId, $rtbId)){
+                        ?>
+                        <div class="uk-margin-top uk-margin-bottom">
+                            <h1 class="uk-text-center">Neuer Eintrag</h1>
+                            <h2 class="uk-text-center uk-margin-remove-top"><?=$rtbTitel;?></h2>
+                            <hr class="uk-width-1-1">
+
+                            <!-- Modal um neue Standorte zu erstellen, geht auf wenn man "Neuer Standort" in der Selectbox auswählt -->
+                            <div id="standorteModal" class="uk-flex-top" uk-modal>
+                                <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
+                                    <button class="uk-modal-close-default" type="button" uk-close></button>
+                                    <h2 class="uk-text-center">Neuer Standort</h2>
+                                    <hr class="uk-width-1-1">
+
+                                    <form id="neuer-standort" method="POST">
+                                        <fieldset class="uk-fieldset">
+
+                                            <div class="uk-margin uk-text-center">
+                                                <!-- Standorteingabe -->
+                                                <label class="uk-form-label">Standorteingabe</label>
+                                                <div class="uk-form-controls">
+                                                    <div class="uk-inline">
+                                                        <span class="uk-form-icon uk-form-icon-flip" uk-icon="icon: location"></span>
+                                                        <input type="text" class="uk-input uk-form-width-large" id="locationInput" placeholder="Standort"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <span class="uk-text-small uk-text-lead">Latitude</span>
+                                                <span class="uk-text-small uk-text-lead uk-float-right">Longitude</span>
+                                            </div>
+
+                                            <div class="uk-margin-bottom">
+                                                <input type="text" class="uk-input uk-form-width-small" id="lat" name="lat" placeholder="Latitude"/>
+                                                <input type="text" class="uk-input uk-form-width-small uk-float-right" id="lon" name="lon" placeholder="Longitude"/>
+                                            </div>
+
+                                            <!-- Standort von einem Bild erkennen -->
+                                            <div class="uk-margin">
+                                                <div id="standortVonBild" class="uk-placeholder uk-text-center">
+                                                    <span uk-icon="icon: location"></span>
+                                                    <span class="uk-text-middle">Standort per Bild (via Drag & Drop oder </span>
+                                                    <div uk-form-custom>
+                                                        <input type="file" name="files">
+                                                        <!-- Dateigröße auf 5MB limitieren -->
+                                                        <input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
+                                                        <span class="uk-link">direkter Auswahl</span>)
+                                                    </div>
+                                                </div>
+                                                <progress id="js-progressbar" class="uk-progress" value="0" max="100" hidden></progress>
+                                            </div>
+
+                                            <div id="pickerMap"></div>
+
+                                            <div class="uk-margin uk-text-center">
+                                                <div class="uk-inline">
+                                                    <span class="uk-form-icon uk-form-icon-flip" uk-icon="icon: quote-right"></span>
+                                                    <input type="text" class="uk-input uk-form-width-large" id="standortname" name="standortname" placeholder="Standortname..." required/>
+                                                </div>
+                                            </div>
+
+                                            <div class="uk-margin">
+                                                <textarea name="beschreibung" id="standortBeschreibung" class="uk-textarea" rows="5" type="text" placeholder="Beschreibung..."></textarea>
+                                            </div>
+
+                                            <!-- Bild für den Standort anlegen -->
+                                            <div class="uk-margin">
+                                                <div id="standortBildUpload" class="uk-placeholder uk-text-center">
+                                                    <span uk-icon="icon: cloud-upload"></span>
+                                                    <span class="uk-text-middle">Standortbild (via Drag & Drop oder </span>
+                                                    <div uk-form-custom>
+                                                        <input type="file" name="files">
+                                                        <!-- Dateigröße auf 5MB limitieren -->
+                                                        <input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
+                                                        <span class="uk-link">direkter Auswahl</span>)
+                                                    </div>
+                                                </div>
+                                                <progress id="js-progressbar2" class="uk-progress" value="0" max="100" hidden></progress>
+                                            </div>
+
+                                            <input id="pictureId" name="pictureId" type="hidden" value="">
+                                            <input id="file_ext" name="file_ext" type="hidden" value="">
+
+                                            <div id="standortBild" class="uk-margin uk-text-center">
+                                                <!-- Hier erscheint das Standortbild sobald eins hochgeladen wird -->
+                                            </div>
+
+                                            <div id="errors">
+                                                <!-- Hier erscheinen die Fehler beim Erstellen eines Standortes -->
+                                            </div>
+
+                                        </fieldset>
+                                        <div class="uk-flex uk-flex-center uk-flex-middle">
+                                            <button type="button" class="uk-button uk-button-default" id="standortErstellen">Erstellen</button>
+                                        </div>
+                                    </form>
+                                    <hr class="uk-width-1-1">
+                                </div>
+                            </div>
+
+                            <form id="neu" method="POST">
+                                <fieldset class="uk-fieldset">
+
+                                    <div class="uk-margin">
+                                        <label>Zusammenfassung <input id="zusammenfassung" name="zusammenfassung" class="uk-checkbox" type="checkbox" value="1"></label>
+                                    </div>
+
+                                    <div class="uk-margin">
+                                        <!-- Selectbox mit den gespeicherten Standorten des Benutzers -->
+                                        <select id="standorte" class="uk-select uk-form-width-medium" name="standort">
+                                            <option value="default" selected>Standort auswählen</option>
+                                            <option value="neuer-standort" class="uk-text-bold">Neuer Standort</option>
+                                            <?php 
+                                            foreach($standorte as $standort){
+                                                echo "<option value=\"".$standort['id']."\">".$standort['name']."</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="uk-margin">
+                                        <div class="uk-inline" id="dateInput">
+                                            <span class="uk-form-icon uk-form-icon-flip" uk-icon="icon: calendar"></span>
+                                            <?php 
+                                            // Setzen des DateInputs auf die aktuelle Zeit (oder auf das gegebene Datum, falls eins gesetzt ist) und rundet die Minuten zu 5 ab
+                                            $rounded_seconds = round(time() / (5 * 60)) * (5 * 60);
+                                            $currentTime = date("H:i", $rounded_seconds);
+                                            $dateTime = date('Y-m-d', time()).' '.$currentTime;
+
+                                            if(isset($eintragsdatum)){
+                                                $dateTime = $eintragsdatum.' '.$currentTime;
+                                            }
+
+                                            ?>
+                                            <input type="text" name="dateTime" id="dateTime" value="<?=$dateTime;?>" class="uk-input uk-form-width-medium flatpickr" placeholder="Datum & Uhrzeit" required>
+                                            <div id="uhrzeitError">
+                                                <!-- Hier wird ein Fehler angezeigt, wenn es Bereits einen Eintrag mit der ausgewählten Uhrzeit gibt -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="uk-margin">
+                                        <input name="titel" class="uk-input" type="text" placeholder="Titel..." required>
+                                    </div>
+
+                                    <div class="uk-margin">
+                                        <textarea name="eintrag" class="uk-textarea" rows="5" placeholder="Eintrag..." required></textarea>
+                                    </div>
+
+                                    <div class="uk-margin">
+                                        <div id="eintragsBildUpload" class="js-upload uk-placeholder uk-text-center">
+                                            <span uk-icon="icon: cloud-upload"></span>
+                                            <span class="uk-text-middle">Bilder hochladen (max. 3, per Drag & Drop oder </span>
+                                            <div uk-form-custom>
+                                                <input type="file" name="files">
+                                                <!-- Dateigröße auf 5MB limitieren -->
+                                                <input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
+                                                <span class="uk-link">direkter Auswahl</span>)
+                                            </div>
+                                        </div>
+                                        <progress id="js-progressbar3" class="uk-progress" value="0" max="100" hidden></progress>
+                                    </div>
+
+                                    <div class="uk-margin">
+                                        <label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="1"></label>
+                                    </div>
+                                    
+                                    <div id="bilder" class="uk-margin uk-text-center">
+                                    <!-- Hier erscheinen die hochgeladene Bilder-->
+                                    </div>
+
+                                    <input id="picture1Id" name="picture1Id" type="hidden" value="">
+                                    <input id="file1_ext" name="file1_ext" type="hidden" value="">
+                                    <input id="picture2Id" name="picture2Id" type="hidden" value="">
+                                    <input id="file2_ext" name="file2_ext" type="hidden" value="">
+                                    <input id="picture3Id" name="picture3Id" type="hidden" value="">
+                                    <input id="file3_ext" name="file3_ext" type="hidden" value="">
+
+                                    <input id="rtbUrl" name="rtb" type="hidden" value="<?=$rtbUrl;?>">
+
+                                </fieldset>
+                                <div class="uk-flex uk-flex-center uk-flex-middle">
+                                    <button class="uk-button uk-button-default uk-margin-right" name="entwurf">Als Entwurf speichern</button>
+                                    <button class="uk-button uk-button-default" name="create">Erstellen</button>
+                                </div>
+                            </form>
+                            <hr class="uk-width-1-1">
+                        </div>
+                    <?php
+                    } else {
+                        ?>
+                        <div class="uk-margin-top uk-alert-danger" uk-alert>
+                            <p>Dieses Reisetagebuch ist nicht vorhanden.</p>
+                        </div>
+                    <?php
+                    }
+
                     // Formularverarbeitung 
-                    if(isset($_POST['create'], $_POST['standort'], $_POST['dateTime'], $_POST['titel'], $_POST['eintrag'])){
+                    if(isset($_POST['standort'], $_POST['dateTime'], $_POST['titel'], $_POST['eintrag'])){
                         $errors = array();
+
+                        $datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
+                        $uhrzeit = str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5));
+
+                        if(!checkEntryTime($db, $rtbId, $datum, $uhrzeit)){
+                            array_push($errors, 'Es ist bereits ein Eintrag mit dieser Uhrzeit vorhanden.');
+                        }
+
                         if (ctype_space(htmlspecialchars($_POST['titel'])) || empty($_POST['titel'])) {
                             array_push($errors, 'Der Titel darf nicht leer sein.');
                         }
@@ -100,238 +331,59 @@
                             }
                         }
 
-                        $datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
-                        $uhrzeit = str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5));
-
                         if(empty($errors)){
                             $insertEintrag = $db->prepare("INSERT INTO eintraege(reisetagebuch_id, titel, text, datum, uhrzeit, standort_id, entwurf, zusammenfassung, public) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
                             $insertEintrag->execute(array($rtbId, htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['eintrag']), $datum, $uhrzeit, htmlspecialchars($_POST['standort']), $entwurf, $zusammenfassung, $public));
                             echo "<script>window.location.href = 'reisetagebuecher.php?rtb=".$rtbUrl."&eintragErfolgreich=true';</script>";
                         } else {
-                            echo "<ul>";
-                            foreach($errors as $error){
-                                echo "<li>".$error."</li>";
-                            }
-                            echo "</ul>";
-                        }
-                    } else {
-                        // Gespeicherte Standorte des Benutzers 
-                        $selectStandorte = $db->prepare("SELECT id, name FROM standorte WHERE users_id = ? ORDER BY name");
-                        $selectStandorte->execute(array($userId));
-                        $standorte = $selectStandorte->fetchAll(\PDO::FETCH_ASSOC);
-                        if(isOwner($db, $userId, $rtbId)){
-                            ?>
-                            <div class="uk-margin-top uk-margin-bottom">
-                                <h1 class="uk-text-center">Neuer Eintrag</h1>
-                                <h2 class="uk-text-center uk-margin-remove-top"><?=$rtbTitel;?></h2>
-                                <hr class="uk-width-1-1">
-
-                                <!-- Modal um neue Standorte zu erstellen, geht auf wenn man "Neuer Standort" in der Selectbox auswählt -->
-                                <div id="standorteModal" class="uk-flex-top" uk-modal>
-                                    <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
-                                        <button class="uk-modal-close-default" type="button" uk-close></button>
-                                        <h2 class="uk-text-center">Neuer Standort</h2>
-                                        <hr class="uk-width-1-1">
-
-                                        <form id="neuer-standort" method="POST">
-                                            <fieldset class="uk-fieldset">
-
-                                                <div class="uk-margin uk-text-center">
-                                                    <!-- Standorteingabe -->
-                                                    <label class="uk-form-label">Standorteingabe</label>
-                                                    <div class="uk-form-controls">
-                                                        <div class="uk-inline">
-                                                            <span class="uk-form-icon uk-form-icon-flip" uk-icon="icon: location"></span>
-                                                            <input type="text" class="uk-input uk-form-width-large" id="locationInput" placeholder="Standort"/>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <span class="uk-text-small uk-text-lead">Latitude</span>
-                                                    <span class="uk-text-small uk-text-lead uk-float-right">Longitude</span>
-                                                </div>
-
-                                                <div class="uk-margin-bottom">
-                                                    <input type="text" class="uk-input uk-form-width-small" id="lat" name="lat" placeholder="Latitude"/>
-                                                    <input type="text" class="uk-input uk-form-width-small uk-float-right" id="lon" name="lon" placeholder="Longitude"/>
-                                                </div>
-
-                                                <!-- Standort von einem Bild erkennen -->
-                                                <div class="uk-margin">
-                                                    <div id="standortVonBild" class="uk-placeholder uk-text-center">
-                                                        <span uk-icon="icon: location"></span>
-                                                        <span class="uk-text-middle">Standort per Bild (via Drag & Drop oder </span>
-                                                        <div uk-form-custom>
-                                                            <input type="file" name="files">
-                                                            <!-- Dateigröße auf 5MB limitieren -->
-                                                            <input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
-                                                            <span class="uk-link">direkter Auswahl</span>)
-                                                        </div>
-                                                    </div>
-                                                    <progress id="js-progressbar" class="uk-progress" value="0" max="100" hidden></progress>
-                                                </div>
-
-                                                <div id="pickerMap"></div>
-
-                                                <div class="uk-margin uk-text-center">
-                                                    <div class="uk-inline">
-                                                        <span class="uk-form-icon uk-form-icon-flip" uk-icon="icon: quote-right"></span>
-                                                        <input type="text" class="uk-input uk-form-width-large" id="standortname" name="standortname" placeholder="Standortname..." required/>
-                                                    </div>
-                                                </div>
-
-                                                <div class="uk-margin">
-                                                    <textarea name="beschreibung" id="standortBeschreibung" class="uk-textarea" rows="5" type="text" placeholder="Beschreibung..."></textarea>
-                                                </div>
-
-                                                <!-- Bild für den Standort anlegen -->
-                                                <div class="uk-margin">
-                                                    <div id="standortBildUpload" class="uk-placeholder uk-text-center">
-                                                        <span uk-icon="icon: cloud-upload"></span>
-                                                        <span class="uk-text-middle">Standortbild (via Drag & Drop oder </span>
-                                                        <div uk-form-custom>
-                                                            <input type="file" name="files">
-                                                            <!-- Dateigröße auf 5MB limitieren -->
-                                                            <input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
-                                                            <span class="uk-link">direkter Auswahl</span>)
-                                                        </div>
-                                                    </div>
-                                                    <progress id="js-progressbar2" class="uk-progress" value="0" max="100" hidden></progress>
-                                                </div>
-
-                                                <input id="pictureId" name="pictureId" type="hidden" value="">
-                                                <input id="file_ext" name="file_ext" type="hidden" value="">
-
-                                                <div id="standortBild" class="uk-margin uk-text-center">
-                                                    <!-- Hier erscheint das Standortbild sobald eins hochgeladen wird -->
-                                                </div>
-
-                                                <div id="errors">
-                                                    <!-- Hier erscheinen die Fehler beim Erstellen eines Standortes -->
-                                                </div>
-
-                                            </fieldset>
-                                            <div class="uk-flex uk-flex-center uk-flex-middle">
-                                                <button type="button" class="uk-button uk-button-default" id="standortErstellen">Erstellen</button>
-                                            </div>
-                                        </form>
-                                        <hr class="uk-width-1-1">
-                                    </div>
-                                </div>
-
-                                <form id="neuer-eintrag" method="POST">
-                                    <fieldset class="uk-fieldset">
-
-                                        <div class="uk-margin">
-                                            <label>Zusammenfassung <input id="zusammenfassung" name="zusammenfassung" class="uk-checkbox" type="checkbox" value="1"></label>
-                                        </div>
-
-                                        <div class="uk-margin">
-                                            <!-- Selectbox mit den gespeicherten Standorten des Benutzers -->
-                                            <select id="standorte" class="uk-select uk-form-width-medium" name="standort">
-                                                <option value="default" selected>Standort auswählen</option>
-                                                <option value="neuer-standort" class="uk-text-bold">Neuer Standort</option>
-                                                <?php 
-                                                foreach($standorte as $standort){
-                                                    echo "<option value=\"".$standort['id']."\">".$standort['name']."</option>";
-                                                }
-                                                ?>
-                                            </select>
-                                        </div>
-
-                                        <div class="uk-margin">
-                                            <div class="uk-inline" id="dateInput">
-                                                <span class="uk-form-icon uk-form-icon-flip" uk-icon="icon: calendar"></span>
-                                                <input type="text" name="dateTime" class="uk-input uk-form-width-medium flatpickr" placeholder="Datum & Uhrzeit" required>
-                                            </div>
-                                        </div>
-
-                                        <div class="uk-margin">
-                                            <input name="titel" class="uk-input" type="text" placeholder="Titel..." required>
-                                        </div>
-
-                                        <div class="uk-margin">
-                                            <textarea name="eintrag" class="uk-textarea" rows="5" placeholder="Eintrag..." required></textarea>
-                                        </div>
-
-                                        <div class="uk-margin">
-                                            <div id="eintragsBildUpload" class="js-upload uk-placeholder uk-text-center">
-                                                <span uk-icon="icon: cloud-upload"></span>
-                                                <span class="uk-text-middle">Bilder hochladen (max. 3, per Drag & Drop oder </span>
-                                                <div uk-form-custom>
-                                                    <input type="file" name="files">
-                                                    <!-- Dateigröße auf 5MB limitieren -->
-                                                    <input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
-                                                    <span class="uk-link">direkter Auswahl</span>)
-                                                </div>
-                                            </div>
-                                            <progress id="js-progressbar3" class="uk-progress" value="0" max="100" hidden></progress>
-                                        </div>
-
-                                        <div class="uk-margin">
-                                            <label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="1"></label>
-                                        </div>
-                                        
-                                        <div id="bilder" class="uk-margin uk-text-center">
-                                        <!-- Hier erscheinen die hochgeladene Bilder-->
-                                        </div>
-
-                                        <input id="picture1Id" name="picture1Id" type="hidden" value="">
-                                        <input id="file1_ext" name="file1_ext" type="hidden" value="">
-                                        <input id="picture2Id" name="picture2Id" type="hidden" value="">
-                                        <input id="file2_ext" name="file2_ext" type="hidden" value="">
-                                        <input id="picture3Id" name="picture3Id" type="hidden" value="">
-                                        <input id="file3_ext" name="file3_ext" type="hidden" value="">
-
-                                        <input id="rtbUrl" name="rtb" type="hidden" value="<?=$rtbUrl;?>">
-
-                                    </fieldset>
-                                    <div class="uk-flex uk-flex-center uk-flex-middle">
-                                        <button class="uk-button uk-button-default uk-margin-right" name="entwurf">Als Entwurf speichern</button>
-                                        <button class="uk-button uk-button-default" name="create">Erstellen</button>
-                                    </div>
-                                </form>
-                                <hr class="uk-width-1-1">
-                            </div>
-                        <?php
-                        } else {
-                            ?>
-                            <div class="uk-margin-top uk-alert-danger" uk-alert>
-                                <p>Dieses Reisetagebuch ist nicht vorhanden.</p>
-                            </div>
-                        <?php
+                            echo "<div class=\"uk-text-center\">";
+                                echo "<ul>";
+                                foreach($errors as $error){
+                                    echo "<li>".$error."</li>";
+                                }
+                                echo "</ul>";
+                            echo "</div>";
                         }
                     }
+                    
                     break;
 
                 case 'eintrag':
-                    // Die Daten des Eintrags mit dem gegebenen Datum und rtbId ausgeben
-                    $selectEintraege = $db->prepare("SELECT id, titel, text, uhrzeit, standort_id, zusammenfassung, public FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND entwurf = 0 ORDER BY uhrzeit ASC");
-                    $selectEintraege->execute(array($rtbId, $eintragsdatum));
-                    $eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
                     $formatiertesDatum = strftime("%e. %B %Y", strtotime($eintragsdatum));
                     ?>
                     <div class="uk-margin-top uk-width-auto">
                         <?php
                         if(isOwner($db, $userId, $rtbId)){
                             ?>
-                            <div>
-                                <div class="uk-text-center uk-text-lead" id="rtbTitel"><?=$rtbTitel;?> <span class="uk-text-small">von <?=$username;?></span></div>
+                            <div class="uk-text-center uk-text-lead" id="rtbTitel">
+                                <a class="uk-link-reset" href="reisetagebuecher.php?rtb=<?=$rtbUrl;?>"><?=$rtbTitel;?></a> <span class="uk-text-small">von <?=$username;?></span>
                             </div>
 
                             <div class="uk-margin uk-text-center">
                                 <span class="uk-h2"><?=$formatiertesDatum;?></span>
                             </div>
+
+                            <div class="uk-margin uk-text-center">
+                                <form method="POST" action="eintraege.php?view=neu&datum=<?=$eintragsdatum;?>">
+                                    <input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
+                                    <button class="uk-button uk-button-text"><i uk-icon="plus"></i></button>
+                                </form>
+                            </div>
                             <hr class="uk-width-1-1">  
                             <?php 
                             foreach($eintraege as $eintrag) {
                                 // Gespeicherte Standorte des Benutzers 
-                                $selectStandort = $db->prepare("SELECT name FROM standorte WHERE id = ?");
-                                $standortId = htmlspecialchars($eintrag['standort_id']);
-                                $selectStandort->execute(array($standortId));
-                                $standort = $selectStandort->fetchAll(\PDO::FETCH_ASSOC);
-                                $standortName = $standort[0]['name'];
+                                $standortName = '?';
+
+                                if(isset($eintrag['standort_id'])){
+                                    $selectStandort = $db->prepare("SELECT name FROM standorte WHERE id = ?");
+                                    $standortId = htmlspecialchars($eintrag['standort_id']);
+                                    $selectStandort->execute(array($standortId));
+                                    $standort = $selectStandort->fetchAll(\PDO::FETCH_ASSOC);
+                                    if(!empty($standort)){
+                                        $standortName = $standort[0]['name'];
+                                    } 
+                                }
 
                                 $uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
                                 ?>
@@ -403,11 +455,16 @@
                     
                 <?php
             break;
+
+            default:
+                require 'unavailable.php';
+            break;
         }
         ?>
         </div>
         <script>
             var username = "<?php echo $username; ?>";
+            var rtb = "<?php echo $rtbUrl; ?>";
             // Wenn der Eintrag eine Zusammenfassung ist, kann man weder Standort noch Datum eingeben
             $('#zusammenfassung').change(function(){
                 if($(this).is(':checked')){
@@ -428,7 +485,37 @@
                 dateFormat: "Y-m-d H:i",
                 /*minTime: "16:00",
                 maxTime: "22:00",*/
-                time_24hr: true
+                time_24hr: true,
+                minuteIncrement: 5,
+                onValueUpdate: function(dateStr, instance){
+                    var date = instance.substring(0, 10);
+                    var hours = instance.substring(11, 13);
+                    var minutes = instance.substring(14);
+                    var roundedMinutes = minutes - (minutes % 5);
+                    this.setDate(date+' '+hours+':'+roundedMinutes);
+                }, 
+                onClose: function(dateStr, instance){
+                    var date = instance.substring(0, 10);
+                    var hours = instance.substring(11, 13);
+                    var minutes = instance.substring(14);
+                    $.ajax({
+                        url : 'checkEntryTime.php',
+                        type : 'POST',
+                        data : {
+                            rtb : rtb,
+                            datum : date,
+                            uhrzeit : hours+''+minutes
+                        },
+                        success : function(response) {
+                            console.log(response);
+                            if(response != 'OK'){
+                                $('#uhrzeitError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>'+response+'</p></div>');
+                            } else {
+                                $('#uhrzeitError').empty();
+                            }
+                        }
+                    });
+                }              
             });
 
             $('#standorte').change(function () {

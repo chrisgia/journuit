@@ -2,7 +2,7 @@
 	require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php'; 
 	require $_SERVER['DOCUMENT_ROOT'].'/include/functions.php';
 
-	// Formularverarbeitung 
+	// Füllen der Standort-Selectbox
 	if(isset($_POST['standortname'], $_POST['lat'], $_POST['lon'])){
 		$errors = array();
 		if (ctype_space(htmlspecialchars($_POST['standortname'])) || empty($_POST['standortname'])) {

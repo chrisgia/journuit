@@ -31,12 +31,12 @@
             </div>
             <div class="uk-navbar-item">
                 <ul class="uk-navbar-nav">
-                    <li><a class="nav_icon" href="/pages/reisetagebuecher.php?view=meine-reisetagebuecher" uk-icon="icon: thumbnails; ratio: 1.5"></a></li>
+                    <li><a class="nav_icon" href="/pages/reisetagebuecher.php?view=meine" uk-icon="icon: thumbnails; ratio: 1.5"></a></li>
                 </ul>
             </div>
             <div class="uk-navbar-item">
                 <ul class="uk-navbar-nav">
-                    <li><a class="nav_icon" href="/pages/reisetagebuecher.php?view=neues-reisetagebuch" uk-icon="icon: plus; ratio: 1.5"></a></li>
+                    <li><a class="nav_icon" href="/pages/reisetagebuecher.php?view=neu" uk-icon="icon: plus; ratio: 1.5"></a></li>
                 </ul>
             </div>
             <?php } else {

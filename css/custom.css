@@ -112,3 +112,8 @@ textarea {
 .eintragText{
 	font-size: 1.2em;
 }
+
+/* Zentriert das Bullet von Listen */
+ul{
+	list-style-position: inside;
+}
