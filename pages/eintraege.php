@@ -24,6 +24,9 @@
     } elseif(isset($_GET['rtb'])){
         $rtbUrl = htmlspecialchars($_GET['rtb']);
     }
+
+    $onlyLogged = array('neuer-eintrag', 'bearbeiten');
+    checkAuthorization($userId, $view, $onlyLogged);
 ?>
 <!DOCTYPE html>
 <html>
@@ -50,7 +53,6 @@
 
             switch ($view) {
                 case 'neuer-eintrag':
-                    checkAuthorization($userId);
                     // Formularverarbeitung 
                     if(isset($_POST['create'], $_POST['standort'], $_POST['dateTime'], $_POST['titel'], $_POST['eintrag'])){
                         $errors = array();

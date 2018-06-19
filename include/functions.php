@@ -1,7 +1,7 @@
 <?php
 	// Leitet den Benutzer weiter, wenn er versucht eine Seite für angemeldete Benutzer aufzurufen
-	function checkAuthorization($userId){
-		if(empty($userId)){
+	function checkAuthorization($userId, $view, $pages){
+		if(empty($userId) && in_array($view, $pages)){
 			header('location: /pages/unpermitted.php');
 		}
 	}

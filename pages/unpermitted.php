@@ -18,10 +18,11 @@
 					</span>
 				</div>
 
-				<div class="uk-margin-medium-top">
+				<div class="uk-margin-medium-top uk-text-center">
 					<div class="uk-alert-danger" uk-alert>
-						<p>Sie müssen sich anmelden, um diese Seite aufrufen zu können.</p>
+						<p>Sie müssen <a href="login.php">sich anmelden</a>, um diese Seite aufrufen zu können.</p>
 					</div>	
+					<a href="/" class="uk-link">Zurück zur Startseite</a>
 				</div>
 			</div>
 		</div>
