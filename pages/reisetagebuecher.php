@@ -24,7 +24,7 @@
         $rtbUrl = htmlspecialchars($_GET['rtb']);
     }
 
-    $onlyLogged = array('meine', 'neu', 'reisetagebuch');
+    $onlyLogged = array('meine', 'neu');
     checkAuthorization($userId, $view, $onlyLogged);
 
 ?>
@@ -48,8 +48,8 @@
 	            $selectReisetagebuchDaten->execute(array($rtbId));
 	            $reisetagebuchDaten = $selectReisetagebuchDaten->fetchAll(\PDO::FETCH_ASSOC);
 
-	            if(empty($reisetagebuchDaten)){
-                    // Ist das Reisetagebuch nicht vorhanden, wird man zum default case weitergeleitet (Nicht vorhandene Seite)
+	            // Ist das Reisetagebuch nicht vorhanden oder nicht öffentlich und von einem anderen Benutzer, wird man zum default case weitergeleitet (nicht vorhandene Seite)
+	            if(empty($reisetagebuchDaten) || ($reisetagebuchDaten[0]['public'] != 1 && !isOwner($db, $userId, $rtbId))){
                     $view = 'not_available';
                 }
 			}
@@ -176,7 +176,7 @@
 				}
 
 				if($_POST['pictureId'] != "" && empty($errors)){
-					if(!insertBild($db, $username, $_POST['pictureId'], $_POST['file_ext'])) {
+					if(!insertBild($db, $username, $_POST['pictureId'], $_POST['file_ext'], null)) {
 						array_push($errors, 'Das Bild konnte nicht eingefügt werden.');
 					}
 				}
@@ -202,6 +202,9 @@
 			<div class="uk-flex uk-flex-center uk-flex-column uk-flex-middle">
 				<div class="uk-margin-top">
 				<?php 
+				$selectDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ? AND entwurf = 0 ORDER BY datum DESC");
+	            $selectDates->execute(array($rtbId));
+	            $dates = $selectDates->fetchAll(\PDO::FETCH_ASSOC);
 				if(isOwner($db, $userId, $rtbId)){
 				?>
 					<div>
@@ -221,9 +224,7 @@
 			        	?>
 			        </div>				    
 			        <?php 
-		            $selectDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ? ORDER BY datum DESC");
-		            $selectDates->execute(array($rtbId));
-		            $dates = $selectDates->fetchAll(\PDO::FETCH_ASSOC);
+
 		            if(!empty($dates)){
 		            ?>
 					    <table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
@@ -240,36 +241,36 @@
 						    </thead>
 						    <tbody>
 						    	<?php
-							    	foreach($dates as $datum){
-							    		$selectEintraege = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ?");
-							            $selectEintraege->execute(array($rtbId, $datum['datum']));
-							            $eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
+						    	foreach($dates as $datum){
+						    		$selectEintraege = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND entwurf = 0");
+						            $selectEintraege->execute(array($rtbId, $datum['datum']));
+						            $eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
 
-							            $formatiertesDatum = strftime("%e. %B %Y", strtotime($datum['datum']));
-								    	?>
-								        <tr class="eintragBox" onclick="document.location='eintraege.php?rtb=<?=$rtbUrl;?>&datum=<?=$datum['datum'];?>'">
-								            <td>
-								            <span class="uk-text-bold"><?=$formatiertesDatum;?> </span>
-								            <i>
-								            <?php
-								            foreach($eintraege as $eintrag){
-								            	echo $eintrag['titel'].", ";
-								            }
-								            ?>
-								            ...
-								            </i>	
-								            </td>
-								            <td class="uk-text-right">
-								            	<form method="POST" action="eintraege.php?view=eintrag-bearbeiten">
-								            		<input type="text" name="rtbId" value="<?=$rtbId;?>" hidden>
-								            		<input type="text" name="datum" value="<?=$datum['datum'];?>" hidden>
-								            		<button class="uk-button uk-button-text" name="eintrag-bearbeiten"><i uk-icon="file-edit"></i></button>
-								            	</form>
-								            </td>
-								        </tr>
-							        <?php
-							    	}
+						            $formatiertesDatum = strftime("%e. %B %Y", strtotime($datum['datum']));
 							    	?>
+							        <tr class="eintragBox" onclick="document.location='eintraege.php?rtb=<?=$rtbUrl;?>&datum=<?=$datum['datum'];?>'">
+							            <td>
+							            <span class="uk-text-bold"><?=$formatiertesDatum;?> </span>
+							            <i>
+							            <?php
+							            foreach($eintraege as $eintrag){
+							            	echo $eintrag['titel'].", ";
+							            }
+							            ?>
+							            ...
+							            </i>	
+							            </td>
+							            <td class="uk-text-right">
+							            	<form method="POST" action="eintraege.php?view=eintrag-bearbeiten">
+							            		<input type="text" name="rtbId" value="<?=$rtbId;?>" hidden>
+							            		<input type="text" name="datum" value="<?=$datum['datum'];?>" hidden>
+							            		<button class="uk-button uk-button-text" name="eintrag-bearbeiten"><i uk-icon="file-edit"></i></button>
+							            	</form>
+							            </td>
+							        </tr>
+						        <?php
+						    	}
+						    	?>
 						    </tbody>
 						</table>
 					<?php
@@ -282,7 +283,7 @@
 			            		<button class="uk-button uk-button-text" name="neu">Neuer Eintrag</button>
 			            	</form>
 						</div>
-				    	<?php
+				    <?php
 				    }
 				} else {
 			    	?>
@@ -302,9 +303,6 @@
 			        	?>
 			        </div>				    
 			        <?php 
-		            $selectDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ? ORDER BY datum DESC");
-		            $selectDates->execute(array($rtbId));
-		            $dates = $selectDates->fetchAll(\PDO::FETCH_ASSOC);
 		            if(!empty($dates)){
 		            ?>
 					    <table class="uk-table uk-table-hover uk-table-justify uk-table-divider">

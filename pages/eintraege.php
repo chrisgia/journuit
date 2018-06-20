@@ -50,7 +50,7 @@
             if(isset($rtbUrl) && !empty($rtbUrl)){
                 $rtbId = getRtbIdFromUrl($db, $rtbUrl);
                 
-                $selectRtbData = $db->prepare("SELECT titel, users.username FROM reisetagebuecher JOIN users ON (users_id = users.id) WHERE reisetagebuecher.id = ?");
+                $selectRtbData = $db->prepare("SELECT titel, users.username, public FROM reisetagebuecher JOIN users ON (users_id = users.id) WHERE reisetagebuecher.id = ?");
                 $selectRtbData->execute(array($rtbId));
                 $rtbData = $selectRtbData->fetchAll(\PDO::FETCH_ASSOC);
                 $data = $rtbData;
@@ -63,8 +63,8 @@
                     $data = $eintraege;
                 }
 
-                if(empty($data)){
-                    // Ist der Eintrag nicht vorhanden, wird man zum default case weitergeleitet (Nicht vorhandene Seite)
+                // Ist der Eintrag nicht vorhanden oder das Reisetagebuch nicht öffentlich und von einem anderen Benutzer, wird man zum default case weitergeleitet (nicht vorhandene Seite)
+                if(empty($data) || ($rtbData[0]['public'] != 1 && !isOwner($db, $userId, $rtbId))){
                     $view = 'not_available';
                 } else {
                     $rtbTitel = $rtbData[0]['titel'];
@@ -166,7 +166,7 @@
                                                 <!-- Hier erscheint das Standortbild sobald eins hochgeladen wird -->
                                             </div>
 
-                                            <div id="errors">
+                                            <div id="standortErrors">
                                                 <!-- Hier erscheinen die Fehler beim Erstellen eines Standortes -->
                                             </div>
 
@@ -242,26 +242,34 @@
                                         <progress id="js-progressbar3" class="uk-progress" value="0" max="100" hidden></progress>
                                     </div>
 
+                                    <div id="picturesError">
+                                        <!-- Hier erscheinen die Fehler beim hochladen von Bildern -->
+                                    </div>
+
+                                    
+                                    <div id="pictures" class="uk-margin uk-text-center uk-child-width-1-3" uk-grid>
+                                    <!-- Hier erscheinen die hochgeladene Bilder-->
+                                    </div>
+
                                     <div class="uk-margin">
                                         <label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="1"></label>
-                                    </div>
-                                    
-                                    <div id="bilder" class="uk-margin uk-text-center">
-                                    <!-- Hier erscheinen die hochgeladene Bilder-->
                                     </div>
 
                                     <input id="picture1Id" name="picture1Id" type="hidden" value="">
                                     <input id="file1_ext" name="file1_ext" type="hidden" value="">
+                                    <input id="bild1unterschrift" name="bild1unterschrift" type="hidden" value="">
                                     <input id="picture2Id" name="picture2Id" type="hidden" value="">
                                     <input id="file2_ext" name="file2_ext" type="hidden" value="">
+                                    <input id="bild2unterschrift" name="bild2unterschrift" type="hidden" value="">
                                     <input id="picture3Id" name="picture3Id" type="hidden" value="">
                                     <input id="file3_ext" name="file3_ext" type="hidden" value="">
+                                    <input id="bild3unterschrift" name="bild3unterschrift" type="hidden" value="">
 
                                     <input id="rtbUrl" name="rtb" type="hidden" value="<?=$rtbUrl;?>">
 
                                 </fieldset>
                                 <div class="uk-flex uk-flex-center uk-flex-middle">
-                                    <button class="uk-button uk-button-default uk-margin-right" name="entwurf">Als Entwurf speichern</button>
+                                    <button class="uk-button uk-button-default uk-margin-right" name="entwurf" value="1">Als Entwurf speichern</button>
                                     <button class="uk-button uk-button-default" name="create">Erstellen</button>
                                 </div>
                             </form>
@@ -313,27 +321,39 @@
                             $entwurf = 0;
                         }
 
+                        $insertedPicsCount = 0;
+
                         if($_POST['picture1Id'] != "" && empty($errors)){
-                            if(!insertBild($db, $username, $_POST['picture1Id'], $_POST['file1_ext'])) {
-                                array_push($errors, 'Das Bild konnte nicht eingefügt werden.');
+                            if(!insertBild($db, $username, $_POST['picture1Id'], $_POST['file1_ext'], 1)) {
+                                array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
+                            } else {
+                                $insertedPicsCount++;
                             }
                         }
 
                         if($_POST['picture2Id'] != "" && empty($errors)){
-                            if(!insertBild($db, $username, $_POST['picture2Id'], $_POST['file2_ext'])) {
-                                array_push($errors, 'Das Bild konnte nicht eingefügt werden.');
+                            if(!insertBild($db, $username, $_POST['picture2Id'], $_POST['file2_ext'], 2)) {
+                                array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
+                            } else {
+                                $insertedPicsCount++;
                             }
                         }
 
                         if($_POST['picture3Id'] != "" && empty($errors)){
-                            if(!insertBild($db, $username, $_POST['picture3Id'], $_POST['file3_ext'])) {
-                                array_push($errors, 'Das Bild konnte nicht eingefügt werden.');
+                            if(!insertBild($db, $username, $_POST['picture3Id'], $_POST['file3_ext'], 3)) {
+                                array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
+                            } else {
+                                $insertedPicsCount++;
                             }
                         }
 
                         if(empty($errors)){
                             $insertEintrag = $db->prepare("INSERT INTO eintraege(reisetagebuch_id, titel, text, datum, uhrzeit, standort_id, entwurf, zusammenfassung, public) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
                             $insertEintrag->execute(array($rtbId, htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['eintrag']), $datum, $uhrzeit, htmlspecialchars($_POST['standort']), $entwurf, $zusammenfassung, $public));
+                            $eintragId = $db->lastInsertId();
+                            for($i = 1; $i <= $insertedPicsCount; $i++){
+                                insertEintragBild($db, $username, $eintragId, $_POST['picture'.$i.'Id'], $_POST['bild'.$i.'unterschrift']);
+                            }
                             echo "<script>window.location.href = 'reisetagebuecher.php?rtb=".$rtbUrl."&eintragErfolgreich=true';</script>";
                         } else {
                             echo "<div class=\"uk-text-center\">";
@@ -406,6 +426,17 @@
                                 <div class="uk-margin-top eintragText">
                                     <p><?=$eintrag['text'];?></p>
                                 </div>
+                                <?php
+                                $selectBilder = $db->prepare("SELECT bilder.id, bilder.file_ext FROM bilder JOIN eintraege_bilder ON (bilder.id = eintraege_bilder.bild_id) WHERE eintraege_bilder.eintrag_id = ?");
+                                $eintragId = htmlspecialchars($eintrag['id']);
+                                $selectBilder->execute(array($eintragId));
+                                $bilder = $selectBilder->fetchAll(\PDO::FETCH_ASSOC);
+                                if(!empty($bilder)){
+                                    foreach($bilder as $bild){
+                                        echo '<img class="eintragBild uk-margin-medium-bottom" src="/users/'.$username.'/'.$bild['id'].'.'.$bild['file_ext'].'"><br/>';
+                                    }
+                                }
+                                ?>
                                 <hr class="uk-width-1-1">
                                 <?php
                             }
@@ -422,6 +453,7 @@
                             <hr class="uk-width-1-1">  
 
                             <?php 
+                            $count = 0;
                             foreach($eintraege as $eintrag) {
                                 if($eintrag['public'] == 1){
                                     // Gespeicherte Standorte des Benutzers 
@@ -447,7 +479,16 @@
                                     </div>
                                     <hr class="uk-width-1-1">
                                 <?php
+                                    $count++;
                                 }
+                            }
+
+                            if($count === 0){
+                                ?>
+                                <div class="uk-margin-top uk-text-center">
+                                    <span>Es gibt zu diesem Datum noch keine öffentliche Einträge.</span><br/>
+                                </div>
+                                <?php
                             }
                         } 
                         ?>
@@ -669,7 +710,7 @@
             });
 
             $('#standortErstellen').on('click', function(){
-                $('#errors').empty();
+                $('#standortErrors').empty();
                 $.ajax({
                     url : 'standorte_ajax.php',
                     type : 'POST',
@@ -690,7 +731,7 @@
                             UIkit.notification({message: 'Ihr Standort wurde erfolgreich erstellt.', status: 'success'});
                             UIkit.modal('#standorteModal').hide();
                         } else if(response.status == 'ERROR') {
-                            $('#errors').empty().append(response.data);
+                            $('#standortErrors').empty().append(response.data);
                         }
                     }
                 });
@@ -702,12 +743,10 @@
             UIkit.upload('#eintragsBildUpload', {
 
                 url: '/include/upload.php',
-                multiple: false,
                 mime: 'image/*',
                 method: 'POST',
                 params: {
-                    width: 300,
-                    height: 300
+                    multiple: true
                 },
 
                 beforeSend: function () {
@@ -717,7 +756,6 @@
                 load: function () {
                 },
                 error: function () {
-                    console.log('test');
                 },
                 complete: function () {
                 },
@@ -744,12 +782,16 @@
                     }, 1000);
 
                     var infos = JSON.parse(data.response);
-                    var fullPath = '../users/'+username+'/tmp_'+infos.pictureId+'.'+infos.file_ext;
+                    if(infos.status == 'OK'){
+                        var fullPath = '../users/'+username+'/tmp'+infos.fieldToFill+'_'+infos.pictureId+'.'+infos.file_ext;
 
-                    $('#picture1Id').val(infos.pictureId);
-                    $('#file1_ext').val(infos.file_ext);
-                    $('#standortBild').empty().append('<div class="uk-animation-fade"><img data-src="'+fullPath+'" uk-img></div>');
-                    UIkit.notification({message: 'Ihr Standortbild wurde erfolgreich hochgeladen.', status: 'success'});
+                        $('#picture'+infos.fieldToFill+'Id').val(infos.pictureId);
+                        $('#file'+infos.fieldToFill+'_ext').val(infos.file_ext);
+                        $('#pictures').append('<div class="uk-animation-fade" id="picture'+infos.fieldToFill+'"><img data-src="'+fullPath+'" uk-img></div>');
+                        UIkit.notification({message: 'Ihr Eintragsbild wurde erfolgreich hochgeladen.', status: 'success'});
+                    } else {
+                        $('#picturesError').append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>Die maximale Anzahl (3) an Bildern wurde schon erreicht. Sie können andere Bilder ersetzen indem Sie diese davor löschen.</p></div>');
+                    }
                 }
             });
         </script>

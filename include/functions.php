@@ -71,9 +71,12 @@
 		return $result;
 	}
 
-	function insertBild($db, $username, $id, $file_ext) {
+	function insertBild($db, $username, $id, $file_ext, $picNumber = null) {
 		$exifSupportedFileExts = array('jpg', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi');
-		$tempPath = "../users/$username/tmp_".$id.".".$file_ext;
+		if(is_null($picNumber)){
+			$picNumber = '';
+		}
+		$tempPath = "../users/$username/tmp".$picNumber."_".$id.".".$file_ext;
 		// Falls der Benutzer im Formular eine eigene pictureId übergibt
 		if(file_exists($tempPath)){
 			$fullPath = "../users/$username/".$id.".".$file_ext;
@@ -91,6 +94,12 @@
 		} else {
 			return false;
 		}
+	}
+
+	function insertEintragBild($db, $username, $eintrag_id, $bild_id, $bildunterschrift = null) {
+		$insertEintragBild = $db->prepare("INSERT INTO eintraege_bilder(eintrag_id, bild_id, bildunterschrift) VALUES(?, ?, ?)");
+		$result = $insertEintragBild->execute(array(htmlspecialchars($eintrag_id), htmlspecialchars($bild_id), htmlspecialchars($bildunterschrift)));
+		return $result;
 	}
 
 	// Datum aus Formulareingabe für MySQL Insert aufbereiten

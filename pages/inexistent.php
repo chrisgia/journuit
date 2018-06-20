@@ -4,7 +4,7 @@
 		<?php 
 			require $_SERVER['DOCUMENT_ROOT']."/include/header.php"; 
 		?>
-		<title>journuit - Nicht vorhanden</title>
+		<title>journuit - Zugriff verweigert</title>
 	</head>
 
 	<body class="uk-height-viewport">
@@ -19,7 +19,7 @@
 
 				<div class="uk-margin-medium-top uk-text-center">
 					<div class="uk-alert-danger" uk-alert>
-						<p>Die Seite, die Sie versuchen aufzurufen ist nicht vorhanden.</p>
+						<p>Sie müssen <a href="login.php">sich anmelden</a>, um diese Seite aufrufen zu können.</p>
 					</div>	
 					<a href="/" class="uk-link">Zurück zur Startseite</a>
 				</div>

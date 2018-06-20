@@ -16,15 +16,12 @@
                             <span class="nav_username">
                                 <?php echo $username." (".$fullname.".)";?>
                             </span>
-                            <span uk-icon="icon: triangle-down; ratio: 1.5"></span>
                         </a>
                     </li>
+                    <li>
+                        <a href="/pages/logout.php" uk-icon="icon: sign-out"></a>
+                    </li>
                 </ul>
-                <div uk-dropdown="animation: uk-animation-slide-top-small; duration: 500">
-                    <ul class="uk-nav uk-dropdown-nav">
-                        <li><a href="/pages/logout.php" uk-icon="icon: sign-out">ABMELDEN  </a></li>
-                    </ul>
-                </div>
             </div>
             <div class="uk-navbar-item">
                 <img src="http://landausflugsplaner.de/pictures/dot.png" alt="dot" uk-img">
