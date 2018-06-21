@@ -406,11 +406,16 @@
                                     } 
                                 }
 
-                                $uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
                                 ?>
                                 <div class="uk-margin-top eintragHeader">
                                     <span class="uk-float-left">
-                                        <?=$uhrzeit;?>, <span class="uk-text-lead"><?=$eintrag['titel'];?></span> 
+                                        <?php
+                                        if($eintrag['zusammenfassung'] != 1){
+                                            $uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
+                                            echo $uhrzeit.", ";
+                                        }
+                                        ?> 
+                                        <span class="uk-text-lead"><?=$eintrag['titel'];?></span> 
                                         <?php if($eintrag['public'] == 1){
                                             echo "<i class=\"far fa-eye black\"></i>";
                                         } else {
@@ -419,7 +424,14 @@
                                         ?>
                                     </span>
                                     <span class="uk-float-right">
-                                        <i uk-icon="icon: location"></i> <i><?=$standortName;?></i>
+                                        <i uk-icon="icon: location"></i> 
+                                        <i>
+                                            <?php 
+                                            if($eintrag['zusammenfassung'] != 1){
+                                                echo $standortName;
+                                            }
+                                            ?>
+                                        </i>
                                         <a href="eintraege.php?id=<?=$eintrag['id'];?>" class="uk-icon-link uk-margin-left" uk-icon="icon: file-edit; ratio: 1.2"></a>
                                     </span>
                                 </div>
@@ -464,14 +476,26 @@
                                     $standort = $selectStandort->fetchAll(\PDO::FETCH_ASSOC);
                                     $standortName = $standort[0]['name'];
 
-                                    $uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
                                     ?>
                                     <div class="uk-margin-top eintragHeader">
                                         <span class="uk-float-left">
-                                            <?=$uhrzeit;?>, <span class="uk-text-lead"><?=$eintrag['titel'];?></span> 
+                                            <?php
+                                            if($eintrag['zusammenfassung'] != 1){
+                                                $uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
+                                                echo $uhrzeit.", ";
+                                            }
+                                            ?> 
+                                            <span class="uk-text-lead"><?=$eintrag['titel'];?></span> 
                                         </span>
                                         <span class="uk-float-right">
-                                            <i uk-icon="icon: location"></i> <i><?=$standortName;?></i>
+                                            <i uk-icon="icon: location"></i>
+                                            <i>
+                                            <?php 
+                                            if($eintrag['zusammenfassung'] != 1){
+                                                echo $standortName;
+                                            }
+                                            ?>
+                                            </i>
                                         </span>
                                     </div>
                                     <br/>
