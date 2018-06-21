@@ -38,9 +38,5 @@ if(isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] == true) {
 				</div>
 			</div>
 		</div>
-		<!-- Success Notification wenn der Benutzer gerade ein Konto erstellt, oder sich eingeloggt hat -->
-		<?php
-			if(isset($_GET['register'])){echo "<script>UIkit.notification({message: 'Ihr Konto wurde erfolgreich erstellt !', status: 'success'});</script>";}
-		?>
 	</body>
 </html>

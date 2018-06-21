@@ -15,7 +15,7 @@
 		<?php require $_SERVER['DOCUMENT_ROOT']."/include/navbar.php";?>
 		<div class="uk-container uk-container-large">
 			<div class="uk-flex uk-flex-column uk-flex-center uk-flex-middle">
-				<div>
+				<div class="uk-margin-top">
 					<span id="journuit_big">
 						<span class="white">jour</span><span class="black">nuit</span> <img data-src="/pictures/journuit-logo_big.png" alt="journuit Logo" uk-img>
 					</span>
@@ -68,11 +68,15 @@
     						echo 	"<p>".$error."</p>";
 							echo "</div>";
 						} else {
-							echo "<script>window.location.replace('/pages/reisetagebuecher.php?login=success');</script>";
+							echo "<script>window.location.replace('reisetagebuecher.php?login=success');</script>";
 						}
 					}
 				?>
 			</div>
 		</div>
+		<!-- Success Notification wenn der Benutzer gerade ein Konto erstellt, oder sich eingeloggt hat -->
+		<?php
+			if(isset($_GET['register'])){echo "<script>UIkit.notification({message: 'Ihr Konto wurde erfolgreich erstellt !', status: 'success'});</script>";}
+		?>
 	</body>
 </html>

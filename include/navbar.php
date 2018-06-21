@@ -11,9 +11,9 @@
             ?>
             <div class="uk-navbar-item">
                 <ul class="uk-navbar-nav">
-                    <li>
+                    <li class="nav_username">
                         <a class="uk-link-heading" href="/pages/profile.php">
-                            <span class="nav_username">
+                            <span>
                                 <?php echo $username." (".$fullname.".)";?>
                             </span>
                         </a>
@@ -43,7 +43,7 @@
                     <li><a class="uk-link-heading" href="/pages/register.php"><span class="nav_link">REGISTRIEREN</span></a></li>
                 </ul>
             </div>
-            <div class="uk-navbar-item">
+            <div class="uk-navbar-item" id="dot">
             	<img src="http://landausflugsplaner.de/pictures/dot.png" alt="dot" uk-img">
         	</div>
         	<div class="uk-navbar-item">
@@ -51,10 +51,10 @@
             	   <li><a class="uk-link-heading" href="/pages/login.php"><span class="nav_link">ANMELDEN</span></a></li>
                 </ul>
         	</div>
-             <?php } ?>
+            <?php } ?>
         </div>
         <div class="uk-navbar-right">
-            <a class="uk-navbar-item uk-logo" href="/"><span class="white">jour</span><span class="black">nuit</span> <img data-src="/pictures/journuit-logo_mini.png" alt="journuit Logo" uk-img></a>
+            <a class="uk-navbar-item uk-logo" href="/"><span class="journuit"><span class="white">jour</span><span class="black">nuit</span></span> <img data-src="/pictures/journuit-logo_mini.png" alt="journuit Logo" uk-img></a>
         </div>
     </nav>
 </div>

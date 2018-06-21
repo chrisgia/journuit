@@ -113,6 +113,71 @@ textarea {
 	font-size: 1.2em;
 }
 
+@media only screen and (min-width: 800px) {
+	.eintrag {
+		width: 50%;
+		margin: auto;
+	}
+}
+
+@media only screen and (max-width: 600px) {
+	.eintrag {
+		width: 100%;
+	}
+
+	.uk-navbar-item {
+		padding: 7px;
+	}
+
+	.nav_username {
+		display:none;
+	}
+
+	.journuit {
+		display:none;
+	}
+
+	.uk-navbar-right .uk-navbar-item {
+		padding: 2px;
+	}
+
+	.uk-navbar-right img {
+		width: 80%;
+	}
+
+	.nav_link {
+		font-size: 1em;
+	}
+
+	#dot {
+		display:none;
+	}
+
+	#journuit_big {
+		font-size: 2.5em;
+	}
+
+	#journuit_big img {
+		height: auto;
+	}
+
+	.rtbCard{
+		height: 40vh;
+	}
+
+	.eintragHeader {
+		font-size: 1em;
+	}
+
+	.eintragHeader .uk-text-lead {
+		font-size: 1em;
+	}
+
+	.eintragText {
+		font-size: 1.2em;
+	}
+} 
+
 /* Zentriert das Bullet von Listen */
 ul{
 	list-style-position: inside;

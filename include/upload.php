@@ -44,6 +44,8 @@ if(isset($_FILES['files'])){
 
 		$mask = "../users/$username/tmp".$fieldToFill."_*.*";
 		$filename = "tmp".$fieldToFill."_".$pictureId.".".$file_ext;
+	} else {
+		$fieldToFill = '';
 	}
 
 	if(!$error){

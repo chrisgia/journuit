@@ -14,7 +14,7 @@
 		<?php require $_SERVER['DOCUMENT_ROOT']."/include/navbar.php";?>
 		<div class="uk-container uk-container-large">
 			<div class="uk-flex uk-flex-column uk-flex-center uk-flex-middle">
-				<div>
+				<div class="uk-margin-top">
 					<span id="journuit_big">
 						<span class="white">jour</span><span class="black">nuit</span> <img data-src="http://landausflugsplaner.de/pictures/journuit-logo_big.png" alt="journuit Logo" uk-img>
 					</span>
@@ -131,7 +131,7 @@
 							$insertUserData->execute(array(htmlspecialchars($vorname), htmlspecialchars($nachname)));
 							$root = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT');
 							mkdir($root."/users/$username/", 0755, true);
-							echo "<script>window.location.replace('http://landausflugsplaner.de/index.php?register=success');</script>";
+							echo "<script>window.location.replace('login.php?register=success');</script>";
 						}
 					}
 				?>

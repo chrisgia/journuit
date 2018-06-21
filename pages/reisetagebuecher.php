@@ -17,7 +17,6 @@
     }
 
     if(isset($_POST['rtb'])){
-    	$view = "reisetagebuch";
         $rtbUrl = htmlspecialchars($_POST['rtb']);
     } elseif(isset($_GET['rtb'])){
     	$view = "reisetagebuch";
@@ -156,7 +155,6 @@
 				    </div>
 				</form>
 				<hr class="uk-width-1-1">
-			</div>
 			<?php 
 			// Formularverarbeitung 
 			if(isset($_POST['create'])){
@@ -194,13 +192,16 @@
 					echo "</ul>";
 				}
 			}
+			?>
+			</div>
+			<?php
 			break;
 
 			case 'reisetagebuch':
 			
 			?>
 			<div class="uk-flex uk-flex-center uk-flex-column uk-flex-middle">
-				<div class="uk-margin-top">
+				<div class="uk-margin-top uk-margin-bottom">
 				<?php 
 				$selectDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ? AND entwurf = 0 ORDER BY datum DESC");
 	            $selectDates->execute(array($rtbId));
@@ -208,7 +209,12 @@
 				if(isOwner($db, $userId, $rtbId)){
 				?>
 					<div>
-						<div><a href="" class="uk-icon-link uk-float-left" uk-icon="icon: file-edit; ratio: 1.5"></a></div>
+						<div>
+							<form method="POST" action="reisetagebuecher.php?view=bearbeiten">
+			            		<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
+			            		<button class="uk-button uk-button-text uk-float-left" name="eintrag-bearbeiten"><i uk-icon="icon: file-edit; ratio: 1.5"></i></button>
+			            	</form>
+						</div>
 						<div><a href="" class="uk-icon-link uk-float-right" uk-icon="icon: social; ratio: 1.5"></a></div>
 						<div><a href="" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right"></a></div>
 						<div class="uk-text-center uk-text-lead" id="rtbTitel"><?=$reisetagebuchDaten[0]['titel'];?> <span class="uk-text-small">von <?=$username;?></span></div>
@@ -217,9 +223,9 @@
 					<div id="titelbild" class="uk-margin uk-text-center">
 			        	<?php 
 			        	if(!empty($reisetagebuchDaten[0]['bild_id'])){
-	            			echo '<img data-src="../users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img>'; 
+	            			echo '<img data-src="../users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img class="uk-border-rounded">'; 
 	            		} else {
-	            			echo '<img data-src="/pictures/no-picture.png" uk-img>';
+	            			echo '<img class="uk-border-rounded" data-src="/pictures/no-picture.png" uk-img>';
 	            		} 
 			        	?>
 			        </div>				    
@@ -296,9 +302,9 @@
 					<div id="titelbild" class="uk-margin uk-text-center">
 			        	<?php 
 			        	if(!empty($reisetagebuchDaten[0]['bild_id'])){
-	            			echo '<img data-src="../users/'.$reisetagebuchDaten[0]['username'].'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img>'; 
+	            			echo '<img class="uk-border-rounded" data-src="../users/'.$reisetagebuchDaten[0]['username'].'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img>'; 
 	            		} else {
-	            			echo '<img data-src="/pictures/no-picture.png" uk-img>';
+	            			echo '<img class="uk-border-rounded" data-src="/pictures/no-picture.png" uk-img>';
 	            		} 
 			        	?>
 			        </div>				    
@@ -355,6 +361,88 @@
 			<?php 
 			break;
 
+			case 'bearbeiten':
+				?>
+				<div class="uk-flex uk-flex-center uk-flex-column uk-flex-middle">
+					<div class="uk-margin-top uk-margin-bottom">
+						<h1 class="uk-text-center">Reisetagebuch bearbeiten</h1>
+						<hr class="uk-width-1-1">
+
+						<div id="titelbild" class="uk-margin uk-text-center">
+	        			<?php 
+		            		if(!empty($reisetagebuchDaten[0]['bild_id'])){
+		            			echo '<img class="titelbild" src="/users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'">';
+		            		} else {
+		            			echo '<img class="titelbild" src="/pictures/no-picture.png">';
+		            		} 
+		            	?>
+				        </div>
+
+						<form id="bearbeiten" method="POST">
+						    <fieldset class="uk-fieldset">
+
+						        <div class="uk-margin">
+						        	<i><span id="char_count"><?= 26 - strlen($reisetagebuchDaten[0]['titel']);?></span> verbleibend</i>
+							        <input name="titel" id="titel" class="uk-input" type="text" placeholder="Titel (maximal 25 Zeichen)" onFocus="countChars('titel','char_count',25)" onKeyDown="countChars('titel','char_count',25)" onKeyUp="countChars('titel','char_count',25)" maxlength="25" value="<?=$reisetagebuchDaten[0]['titel'];?>" required>
+						        </div>
+
+						        <div class="uk-margin">
+							        <textarea name="beschreibung" class="uk-textarea" rows="5" type="text" placeholder="Beschreibung..." required><?=$reisetagebuchDaten[0]['beschreibung'];?></textarea>
+						        </div>
+
+						        <div class="uk-margin">
+							    	<label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="<?=$reisetagebuchDaten[0]['public'];?>"></label>
+						        </div>
+
+						    </fieldset>
+						    <div class="uk-flex uk-flex-center uk-flex-middle">
+						    	<button class="uk-button uk-button-default" name="create">Speichern</button>
+						    </div>
+						</form>
+						<hr class="uk-width-1-1">
+					<?php 
+					// Formularverarbeitung 
+					if(isset($_POST['create'])){
+						$errors = array();
+						if (ctype_space(htmlspecialchars($_POST['titel'])) || empty($_POST['titel'])) {
+							array_push($errors, 'Der Titel darf nicht leer sein.');
+						}
+
+						if (ctype_space(htmlspecialchars($_POST['beschreibung'])) || empty($_POST['beschreibung'])) {
+							array_push($errors, 'Die Beschreibung darf nicht leer sein.');
+						}
+
+						if (isset($_POST['public']) && ($_POST['public'] == "1")) {
+							$public = 1;
+						} else {
+							$public = 0;
+						}
+
+						if($_POST['pictureId'] != "" && empty($errors)){
+							if(!insertBild($db, $username, $_POST['pictureId'], $_POST['file_ext'], null)) {
+								array_push($errors, 'Das Bild konnte nicht eingefügt werden.');
+							}
+						}
+
+						if(empty($errors)){
+							$uniqueUrl = uniqueDbId($db, 'reisetagebuecher', 'url');
+							$insertReisetagebuch = $db->prepare("INSERT INTO reisetagebuecher(users_id, titel, beschreibung, url, public, bild_id) VALUES(?, ?, ?, ?, ?, ?)");
+							$insertReisetagebuch->execute(array(htmlspecialchars($userId), htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['beschreibung']), $uniqueUrl, $public, htmlspecialchars($_POST['pictureId'])));
+							echo "<script>window.location.href = 'reisetagebuecher.php?view=meine&success=true';</script>";
+						} else {
+							echo "<ul>";
+							foreach($errors as $error){
+								echo "<li>".$error."</li>";
+							}
+							echo "</ul>";
+						}
+					}
+					?>
+					</div>
+				</div>
+				<?php
+			break;
+
 			default:
 				require 'unavailable.php';
 			break;
@@ -363,9 +451,9 @@
 		</div>
 		<?php 
 			// Success Benachrichtigungen 
-			if(isset($_GET['login'])){echo "<script>UIkit.notification({message: 'Sie sind angemeldet.', status: 'success'});</script>";}
-			if(isset($_GET['success'])){echo "<script>UIkit.notification({message: 'Ihr Reisetagebuch wurde erfolgreich erstellt.', status: 'success'});</script>";}
-			if(isset($_GET['eintragErfolgreich'])){echo "<script>UIkit.notification({message: 'Ihr Eintrag wurde erfolgreich erstellt.', status: 'success'});</script>";}
+			if(isset($_GET['login'])){echo "<script>UIkit.notification({message: 'Sie sind angemeldet.', status: 'success', pos: 'top-right'});</script>";}
+			if(isset($_GET['success'])){echo "<script>UIkit.notification({message: 'Ihr Reisetagebuch wurde erfolgreich erstellt.', status: 'success', pos: 'top-right'});</script>";}
+			if(isset($_GET['eintragErfolgreich'])){echo "<script>UIkit.notification({message: 'Ihr Eintrag wurde erfolgreich erstellt.', status: 'success', pos: 'top-right'});</script>";}
 		?>
 		<script>
 			var bar = document.getElementById('js-progressbar');
@@ -417,7 +505,7 @@
 
 		            $('#pictureId').val(infos.pictureId);
 		            $('#file_ext').val(infos.file_ext);
-		            $('#titelbild').empty().append('<div class="uk-animation-fade"><img data-src="'+fullPath+'" uk-img></div>');
+		            $('#titelbild').empty().append('<div class="uk-animation-fade"><img class="uk-border-rounded" data-src="'+fullPath+'" uk-img></div>');
 		            UIkit.notification({message: 'Ihr Titelbild wurde erfolgreich hochgeladen.', status: 'success'});
 		        }
 		    });
