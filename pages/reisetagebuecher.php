@@ -391,19 +391,31 @@
 						        </div>
 
 						        <div class="uk-margin">
-							    	<label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="<?=$reisetagebuchDaten[0]['public'];?>"></label>
+						        	<?php
+						        	$checked = '';
+						        	if($reisetagebuchDaten[0]['public'] == 1){
+						        		$checked = 'checked';
+						        	}
+						        	?>
+							    	<label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="<?=$reisetagebuchDaten[0]['public'];?>" <?=$checked;?>></label>
 						        </div>
+
+						        <input id="pictureId" name="pictureId" type="hidden" value="">
+				        		<input id="file_ext" name="file_ext" type="hidden" value="">
+				        		<input name="rtb" type="hidden" value="<?=$rtbUrl;?>">
 
 						    </fieldset>
 						    <div class="uk-flex uk-flex-center uk-flex-middle">
-						    	<button class="uk-button uk-button-default" name="create">Speichern</button>
+						    	<button class="uk-button uk-button-default" name="save">Speichern</button>
 						    </div>
 						</form>
 						<hr class="uk-width-1-1">
 					<?php 
 					// Formularverarbeitung 
-					if(isset($_POST['create'])){
+					if(isset($_POST['save'])){
+						$updateQuery = '';
 						$errors = array();
+
 						if (ctype_space(htmlspecialchars($_POST['titel'])) || empty($_POST['titel'])) {
 							array_push($errors, 'Der Titel darf nicht leer sein.');
 						}
@@ -412,22 +424,31 @@
 							array_push($errors, 'Die Beschreibung darf nicht leer sein.');
 						}
 
-						if (isset($_POST['public']) && ($_POST['public'] == "1")) {
+						if (isset($_POST['public'])) {
 							$public = 1;
 						} else {
 							$public = 0;
 						}
 
+						$updateArray = array(
+							htmlspecialchars($_POST['titel']), 
+							htmlspecialchars($_POST['beschreibung']), 
+							$public
+						);
+
 						if($_POST['pictureId'] != "" && empty($errors)){
 							if(!insertBild($db, $username, $_POST['pictureId'], $_POST['file_ext'], null)) {
 								array_push($errors, 'Das Bild konnte nicht eingefügt werden.');
 							}
+							$updateQuery .= ', bild_id = ?';
+							array_push($updateArray, htmlspecialchars($_POST['pictureId']));
 						}
 
+						array_push($updateArray, $rtbId);
+
 						if(empty($errors)){
-							$uniqueUrl = uniqueDbId($db, 'reisetagebuecher', 'url');
-							$insertReisetagebuch = $db->prepare("INSERT INTO reisetagebuecher(users_id, titel, beschreibung, url, public, bild_id) VALUES(?, ?, ?, ?, ?, ?)");
-							$insertReisetagebuch->execute(array(htmlspecialchars($userId), htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['beschreibung']), $uniqueUrl, $public, htmlspecialchars($_POST['pictureId'])));
+							$updateReisetagebuch = $db->prepare("UPDATE reisetagebuecher SET titel = ?, beschreibung = ?, public = ?".$updateQuery." WHERE id = ?");
+							$updateReisetagebuch->execute($updateArray);
 							echo "<script>window.location.href = 'reisetagebuecher.php?view=meine&success=true';</script>";
 						} else {
 							echo "<ul>";
@@ -452,7 +473,7 @@
 		<?php 
 			// Success Benachrichtigungen 
 			if(isset($_GET['login'])){echo "<script>UIkit.notification({message: 'Sie sind angemeldet.', status: 'success', pos: 'top-right'});</script>";}
-			if(isset($_GET['success'])){echo "<script>UIkit.notification({message: 'Ihr Reisetagebuch wurde erfolgreich erstellt.', status: 'success', pos: 'top-right'});</script>";}
+			if(isset($_GET['success'])){echo "<script>UIkit.notification({message: 'Ihr Reisetagebuch wurde erfolgreich gespeichert.', status: 'success', pos: 'top-right'});</script>";}
 			if(isset($_GET['eintragErfolgreich'])){echo "<script>UIkit.notification({message: 'Ihr Eintrag wurde erfolgreich erstellt.', status: 'success', pos: 'top-right'});</script>";}
 		?>
 		<script>
