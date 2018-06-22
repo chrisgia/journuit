@@ -212,7 +212,7 @@
 						<div>
 							<form method="POST" action="reisetagebuecher.php?view=bearbeiten">
 			            		<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
-			            		<button class="uk-button uk-button-text uk-float-left" name="eintrag-bearbeiten"><i uk-icon="icon: file-edit; ratio: 1.5"></i></button>
+			            		<button class="uk-button uk-button-text uk-float-left" name="reisetagebuch-bearbeiten"><i uk-icon="icon: file-edit; ratio: 1.5"></i></button>
 			            	</form>
 						</div>
 						<div><a href="" class="uk-icon-link uk-float-right" uk-icon="icon: social; ratio: 1.5"></a></div>
@@ -371,9 +371,9 @@
 						<div id="titelbild" class="uk-margin uk-text-center">
 	        			<?php 
 		            		if(!empty($reisetagebuchDaten[0]['bild_id'])){
-		            			echo '<img class="titelbild" src="/users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'">';
+		            			echo '<img class="titelbild uk-border-rounded" src="/users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'">';
 		            		} else {
-		            			echo '<img class="titelbild" src="/pictures/no-picture.png">';
+		            			echo '<img class="titelbild uk-border-rounded" src="/pictures/no-picture.png">';
 		            		} 
 		            	?>
 				        </div>
@@ -474,7 +474,7 @@
 			// Success Benachrichtigungen 
 			if(isset($_GET['login'])){echo "<script>UIkit.notification({message: 'Sie sind angemeldet.', status: 'success', pos: 'top-right'});</script>";}
 			if(isset($_GET['success'])){echo "<script>UIkit.notification({message: 'Ihr Reisetagebuch wurde erfolgreich gespeichert.', status: 'success', pos: 'top-right'});</script>";}
-			if(isset($_GET['eintragErfolgreich'])){echo "<script>UIkit.notification({message: 'Ihr Eintrag wurde erfolgreich erstellt.', status: 'success', pos: 'top-right'});</script>";}
+			if(isset($_GET['eintragErfolgreich'])){echo "<script>UIkit.notification({message: 'Ihr Eintrag wurde erfolgreich gespeichert.', status: 'success', pos: 'top-right'});</script>";}
 		?>
 		<script>
 			var bar = document.getElementById('js-progressbar');

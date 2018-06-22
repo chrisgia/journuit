@@ -29,6 +29,10 @@
         $rtbUrl = htmlspecialchars($_GET['rtb']);
     }
 
+    if(isset($_GET['id'])){
+        $eintragId = htmlspecialchars($_GET['id']);
+    }
+
     $onlyLogged = array('neu', 'bearbeiten');
     checkAuthorization($userId, $view, $onlyLogged);
 ?>
@@ -395,6 +399,7 @@
                             foreach($eintraege as $eintrag) {
                                 // Gespeicherte Standorte des Benutzers 
                                 $standortName = '?';
+                                $eintragId = htmlspecialchars($eintrag['id']);
 
                                 if(isset($eintrag['standort_id'])){
                                     $selectStandort = $db->prepare("SELECT name FROM standorte WHERE id = ?");
@@ -432,7 +437,7 @@
                                             }
                                             ?>
                                         </i>
-                                        <a href="eintraege.php?id=<?=$eintrag['id'];?>" class="uk-icon-link uk-margin-left" uk-icon="icon: file-edit; ratio: 1.2"></a>
+                                        <a href="eintraege.php?view=bearbeiten&rtb=<?=$rtbUrl;?>&id=<?=$eintragId;?>" class="uk-icon-link uk-margin-left" uk-icon="icon: file-edit; ratio: 1.2"></a>
                                     </span>
                                 </div>
                                 <br/>
@@ -441,7 +446,6 @@
                                 </div>
                                 <?php
                                 $selectBilder = $db->prepare("SELECT bilder.id, bilder.file_ext FROM bilder JOIN eintraege_bilder ON (bilder.id = eintraege_bilder.bild_id) WHERE eintraege_bilder.eintrag_id = ?");
-                                $eintragId = htmlspecialchars($eintrag['id']);
                                 $selectBilder->execute(array($eintragId));
                                 $bilder = $selectBilder->fetchAll(\PDO::FETCH_ASSOC);
                                 if(!empty($bilder)){
@@ -468,14 +472,16 @@
                             <?php 
                             $count = 0;
                             foreach($eintraege as $eintrag) {
+                                $standortName = '?';
                                 if($eintrag['public'] == 1){
                                     // Gespeicherte Standorte des Benutzers 
                                     $selectStandort = $db->prepare("SELECT name FROM standorte WHERE id = ?");
                                     $standortId = htmlspecialchars($eintrag['standort_id']);
                                     $selectStandort->execute(array($standortId));
                                     $standort = $selectStandort->fetchAll(\PDO::FETCH_ASSOC);
-                                    $standortName = $standort[0]['name'];
-
+                                    if(!empty($standort)){
+                                        $standortName = $standort[0]['name'];
+                                    }
                                     ?>
                                     <div class="uk-margin-top eintragHeader">
                                         <span class="uk-float-left">
@@ -514,7 +520,7 @@
                                     }
                                     ?>
                                     <hr class="uk-width-1-1">
-                                <?php
+                                    <?php
                                     $count++;
                                 }
                             }
@@ -532,16 +538,20 @@
                 <?php
                 break;
 
-                /*case 'bearbeiten':
+                case 'bearbeiten':
+                    $selectEintrag = $db->prepare("SELECT id, titel, text, datum, uhrzeit, standort_id, zusammenfassung, public FROM eintraege WHERE id = ?");
+                    $selectEintrag->execute(array($eintragId));
+                    $eintrag = $selectEintrag->fetchAll(\PDO::FETCH_ASSOC);
+
+                    $formatiertesDatum = strftime("%e. %B %Y", strtotime($eintrag[0]['datum']));
                     // Gespeicherte Standorte des Benutzers 
                     $selectStandorte = $db->prepare("SELECT id, name FROM standorte WHERE users_id = ? ORDER BY name");
                     $selectStandorte->execute(array($userId));
                     $standorte = $selectStandorte->fetchAll(\PDO::FETCH_ASSOC);
-                    if(isset($rtbId) && isOwner($db, $userId, $rtbId)){
+                    if(isset($rtbId) && isOwner($db, $userId, $rtbId) && !empty($eintrag)){
                         ?>
                         <div class="uk-margin-top uk-margin-bottom">
-                            <h1 class="uk-text-center">Neuer Eintrag</h1>
-                            <h2 class="uk-text-center uk-margin-remove-top"><?=$rtbTitel;?></h2>
+                            <h1 class="uk-text-center">Eintrag bearbeiten</h1>
                             <hr class="uk-width-1-1">
 
                             <!-- Modal um neue Standorte zu erstellen, geht auf wenn man "Neuer Standort" in der Selectbox auswählt -->
@@ -638,7 +648,7 @@
                                 </div>
                             </div>
 
-                            <form id="neu" method="POST">
+                            <form id="bearbeiten" method="POST">
                                 <fieldset class="uk-fieldset">
 
                                     <div class="uk-margin">
@@ -650,9 +660,13 @@
                                         <select id="standorte" class="uk-select uk-form-width-medium" name="standort">
                                             <option value="default" selected>Standort auswählen</option>
                                             <option value="neuer-standort" class="uk-text-bold">Neuer Standort</option>
-                                            <?php 
+                                            <?php
+                                            $selected = ''; 
                                             foreach($standorte as $standort){
-                                                echo "<option value=\"".$standort['id']."\">".$standort['name']."</option>";
+                                                if($standort['id'] == $eintrag[0]['standort_id']){
+                                                    $selected = 'selected';
+                                                }
+                                                echo "<option value=\"".$standort['id']."\"".$selected.">".$standort['name']."</option>";
                                             }
                                             ?>
                                         </select>
@@ -661,16 +675,9 @@
                                     <div class="uk-margin">
                                         <div class="uk-inline" id="dateInput">
                                             <span class="uk-form-icon uk-form-icon-flip" uk-icon="icon: calendar"></span>
-                                            <?php 
-                                            // Setzen des DateInputs auf die aktuelle Zeit (oder auf das gegebene Datum, falls eins gesetzt ist) und rundet die Minuten zu 5 ab
-                                            $rounded_seconds = round(time() / (5 * 60)) * (5 * 60);
-                                            $currentTime = date("H:i", $rounded_seconds);
-                                            $dateTime = date('Y-m-d', time()).' '.$currentTime;
-
-                                            if(isset($eintragsdatum)){
-                                                $dateTime = $eintragsdatum.' '.$currentTime;
-                                            }
-
+                                            <?php
+                                            $uhrzeit = substr_replace($eintrag[0]['uhrzeit'], ':', 2, 0);
+                                            $dateTime = $eintrag[0]['datum']." ".$uhrzeit;
                                             ?>
                                             <input type="text" name="dateTime" id="dateTime" value="<?=$dateTime;?>" class="uk-input uk-form-width-medium flatpickr" placeholder="Datum & Uhrzeit" required>
                                             <div id="uhrzeitError">
@@ -680,11 +687,11 @@
                                     </div>
 
                                     <div class="uk-margin">
-                                        <input name="titel" class="uk-input" type="text" placeholder="Titel..." required>
+                                        <input name="titel" class="uk-input" type="text" placeholder="Titel..." value="<?=$eintrag[0]['titel'];?>" required>
                                     </div>
 
                                     <div class="uk-margin">
-                                        <textarea name="eintrag" class="uk-textarea" rows="5" placeholder="Eintrag..." required></textarea>
+                                        <textarea name="eintrag" class="uk-textarea" rows="5" placeholder="Eintrag..." required><?=$eintrag[0]['text'];?></textarea>
                                     </div>
 
                                     <div class="uk-margin">
@@ -705,13 +712,27 @@
                                         <!-- Hier erscheinen die Fehler beim hochladen von Bildern -->
                                     </div>
 
-                                    
                                     <div id="pictures" class="uk-margin uk-text-center uk-child-width-1-3" uk-grid>
-                                    <!-- Hier erscheinen die hochgeladene Bilder-->
+                                        <?php
+                                        $selectBilder = $db->prepare("SELECT bilder.id, bilder.file_ext FROM bilder JOIN eintraege_bilder ON (bilder.id = eintraege_bilder.bild_id) WHERE eintraege_bilder.eintrag_id = ?");
+                                        $selectBilder->execute(array($eintragId));
+                                        $bilder = $selectBilder->fetchAll(\PDO::FETCH_ASSOC);
+                                        if(!empty($bilder)){
+                                            foreach($bilder as $bild){
+                                                echo '<div><img class="eintragBild uk-margin-small-bottom uk-border-rounded" src="/users/'.$rtbCreator.'/'.$bild['id'].'.'.$bild['file_ext'].'"></div>';
+                                            }
+                                        }
+                                        ?>
                                     </div>
 
                                     <div class="uk-margin">
-                                        <label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="1"></label>
+                                        <?php
+                                        $checked = '';
+                                        if($eintrag[0]['public'] == 1){
+                                            $checked = 'checked';
+                                        }
+                                        ?>
+                                        <label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="<?=$eintrag[0]['public'];?>" <?=$checked;?>></label>
                                     </div>
 
                                     <input id="picture1Id" name="picture1Id" type="hidden" value="">
@@ -728,8 +749,7 @@
 
                                 </fieldset>
                                 <div class="uk-flex uk-flex-center uk-flex-middle">
-                                    <button class="uk-button uk-button-default uk-margin-right" name="entwurf" value="1">Als Entwurf speichern</button>
-                                    <button class="uk-button uk-button-default" name="create">Erstellen</button>
+                                    <button class="uk-button uk-button-default" name="save">Speichern</button>
                                 </div>
                             </form>
                             <hr class="uk-width-1-1">
@@ -738,20 +758,23 @@
                     } else {
                         ?>
                         <div class="uk-margin-top uk-alert-danger" uk-alert>
-                            <p>Dieses Reisetagebuch ist nicht vorhanden.</p>
+                            <p>Dieser Eintrag ist nicht vorhanden.</p>
                         </div>
                     <?php
                     }
 
                     // Formularverarbeitung 
-                    if(isset($_POST['standort'], $_POST['dateTime'], $_POST['titel'], $_POST['eintrag'])){
+                    if(isset($_POST['save'], $_POST['standort'], $_POST['dateTime'], $_POST['titel'], $_POST['eintrag'])){
+                        $updateQuery = '';
                         $errors = array();
 
                         $datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
                         $uhrzeit = str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5));
 
-                        if(!checkEntryTime($db, $rtbId, $datum, $uhrzeit)){
-                            array_push($errors, 'Es ist bereits ein Eintrag mit dieser Uhrzeit vorhanden.');
+                        if($uhrzeit != $eintrag[0]['uhrzeit']){
+                            if(!checkEntryTime($db, $rtbId, $datum, $uhrzeit)){
+                                array_push($errors, 'Es ist bereits ein Eintrag mit dieser Uhrzeit vorhanden.');
+                            }
                         }
 
                         if (ctype_space(htmlspecialchars($_POST['titel'])) || empty($_POST['titel'])) {
@@ -768,17 +791,24 @@
                             $zusammenfassung = 0;
                         }
 
-                        if (isset($_POST['public']) && ($_POST['public'] == "1")) {
+                        if (isset($_POST['public'])) {
                             $public = 1;
                         } else {
                             $public = 0;
                         }
 
-                        if (isset($_POST['entwurf']) && ($_POST['entwurf'] == "1")) {
-                            $entwurf = 1;
-                        } else {
-                            $entwurf = 0;
-                        }
+                        $updateArray = array(
+                            $rtbId,
+                            htmlspecialchars($_POST['titel']), 
+                            htmlspecialchars($_POST['eintrag']),
+                            $datum,
+                            $uhrzeit,
+                            htmlspecialchars($_POST['standort']), 
+                            $zusammenfassung, 
+                            $public,
+                            $eintragId,
+                            $rtbId
+                        );
 
                         $insertedPicsCount = 0;
 
@@ -807,8 +837,8 @@
                         }
 
                         if(empty($errors)){
-                            $insertEintrag = $db->prepare("INSERT INTO eintraege(reisetagebuch_id, titel, text, datum, uhrzeit, standort_id, entwurf, zusammenfassung, public) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                            $insertEintrag->execute(array($rtbId, htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['eintrag']), $datum, $uhrzeit, htmlspecialchars($_POST['standort']), $entwurf, $zusammenfassung, $public));
+                            $insertEintrag = $db->prepare("UPDATE eintraege SET reisetagebuch_id = ?, titel = ?, text = ?, datum = ?, uhrzeit = ?, standort_id = ?, zusammenfassung = ?, public = ? WHERE id = ? AND reisetagebuch_id = ?");
+                            $insertEintrag->execute($updateArray);
                             $eintragId = $db->lastInsertId();
                             for($i = 1; $i <= $insertedPicsCount; $i++){
                                 insertEintragBild($db, $username, $eintragId, $_POST['picture'.$i.'Id'], $_POST['bild'.$i.'unterschrift']);
@@ -825,7 +855,7 @@
                         }
                     }
                 break;
-*/
+
                 default:
                     require 'unavailable.php';
                 break;

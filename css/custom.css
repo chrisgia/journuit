@@ -176,6 +176,20 @@ textarea {
 	.eintragText {
 		font-size: 1.2em;
 	}
+
+	#pickerMap{
+		margin: 0;
+		width: 80vw;
+		height: 40vh;
+	}
+
+	.uk-input {
+		width: 65vw;
+	}
+
+	#lat, #lon {
+		width: 30vw;
+	}
 } 
 
 /* Zentriert das Bullet von Listen */
