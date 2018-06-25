@@ -25,8 +25,13 @@ if(isset($_FILES['files'])){
 	if(isset($_POST['multiple']) && $_POST['multiple'] == true){
 		$fieldToFill = 1;
 		$tmpFiles = array();
+		$anzahlBilder = 0;
 
-		for($i = 1; $i <= 3; $i++){
+		if(isset($_POST['anzahlBilder'])){
+			$anzahlBilder = (int)htmlspecialchars($_POST['anzahlBilder']);
+		}
+
+		for($i = $anzahlBilder + 1; $i <= 3; $i++){
 			$mask = "../users/$username/tmp".$i."_*.*";
 			if(!empty(glob($mask))){
 				$foundFile = glob($mask)[0];
@@ -36,10 +41,13 @@ if(isset($_FILES['files'])){
 
 		if(!empty($tmpFiles)){
 			$fieldToFillPos = strlen("../users/$username/tmp");
-			$fieldToFill = substr($tmpFiles[sizeOf($tmpFiles) - 1], $fieldToFillPos, 1) + 1;
-			if($fieldToFill == 4){
-				$error = true;
-			}
+			$fieldToFill = (int)substr($tmpFiles[sizeof($tmpFiles) - 1], $fieldToFillPos, 1) + 1;
+		} else {
+			$fieldToFill = $anzahlBilder + 1;
+		}
+
+		if($fieldToFill > 3){
+			$error = true;
 		}
 
 		$mask = "../users/$username/tmp".$fieldToFill."_*.*";

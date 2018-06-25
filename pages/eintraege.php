@@ -717,7 +717,9 @@
                                         $selectBilder = $db->prepare("SELECT bilder.id, bilder.file_ext FROM bilder JOIN eintraege_bilder ON (bilder.id = eintraege_bilder.bild_id) WHERE eintraege_bilder.eintrag_id = ?");
                                         $selectBilder->execute(array($eintragId));
                                         $bilder = $selectBilder->fetchAll(\PDO::FETCH_ASSOC);
+                                        $anzahlBilder = 0;
                                         if(!empty($bilder)){
+                                            $anzahlBilder = sizeof($bilder);
                                             foreach($bilder as $bild){
                                                 echo '<div><img class="eintragBild uk-margin-small-bottom uk-border-rounded" src="/users/'.$rtbCreator.'/'.$bild['id'].'.'.$bild['file_ext'].'"></div>';
                                             }
@@ -735,15 +737,13 @@
                                         <label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="<?=$eintrag[0]['public'];?>" <?=$checked;?>></label>
                                     </div>
 
-                                    <input id="picture1Id" name="picture1Id" type="hidden" value="">
-                                    <input id="file1_ext" name="file1_ext" type="hidden" value="">
-                                    <input id="bild1unterschrift" name="bild1unterschrift" type="hidden" value="">
-                                    <input id="picture2Id" name="picture2Id" type="hidden" value="">
-                                    <input id="file2_ext" name="file2_ext" type="hidden" value="">
-                                    <input id="bild2unterschrift" name="bild2unterschrift" type="hidden" value="">
-                                    <input id="picture3Id" name="picture3Id" type="hidden" value="">
-                                    <input id="file3_ext" name="file3_ext" type="hidden" value="">
-                                    <input id="bild3unterschrift" name="bild3unterschrift" type="hidden" value="">
+                                    <?php
+                                    for($i = $anzahlBilder + 1; $i <= 3; $i++){
+                                        echo "<input id=\"picture".$i."Id\" name=\"picture".$i."Id\" type=\"hidden\" value=\"\">";
+                                        echo "<input id=\"file".$i."_ext\" name=\"file".$i."_ext\" type=\"hidden\" value=\"\">";
+                                        echo "<input id=\"bild".$i."unterschrift\" name=\"bild".$i."unterschrift\" type=\"hidden\" value=\"\">";
+                                    }
+                                    ?>
 
                                     <input id="rtbUrl" name="rtb" type="hidden" value="<?=$rtbUrl;?>">
 
@@ -839,7 +839,6 @@
                         if(empty($errors)){
                             $insertEintrag = $db->prepare("UPDATE eintraege SET reisetagebuch_id = ?, titel = ?, text = ?, datum = ?, uhrzeit = ?, standort_id = ?, zusammenfassung = ?, public = ? WHERE id = ? AND reisetagebuch_id = ?");
                             $insertEintrag->execute($updateArray);
-                            $eintragId = $db->lastInsertId();
                             for($i = 1; $i <= $insertedPicsCount; $i++){
                                 insertEintragBild($db, $username, $eintragId, $_POST['picture'.$i.'Id'], $_POST['bild'.$i.'unterschrift']);
                             }
@@ -1097,7 +1096,7 @@
             });
 
             var bar3 = document.getElementById('js-progressbar3');
-
+            var anzahlBilder = "<?php if(isset($anzahlBilder)){echo $anzahlBilder;}else{echo 0;}?>";
             // Skript zum uploaden vom Standortbild
             UIkit.upload('#eintragsBildUpload', {
 
@@ -1105,7 +1104,8 @@
                 mime: 'image/*',
                 method: 'POST',
                 params: {
-                    multiple: true
+                    multiple: true,
+                    anzahlBilder: anzahlBilder
                 },
 
                 beforeSend: function () {
@@ -1149,7 +1149,7 @@
                         $('#pictures').append('<div class="uk-animation-fade" id="picture'+infos.fieldToFill+'"><img class="uk-border-rounded" data-src="'+fullPath+'" uk-img></div>');
                         UIkit.notification({message: 'Ihr Eintragsbild wurde erfolgreich hochgeladen.', status: 'success'});
                     } else {
-                        $('#picturesError').append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>Die maximale Anzahl (3) an Bildern wurde schon erreicht. Sie können andere Bilder ersetzen indem Sie diese davor löschen.</p></div>');
+                        $('#picturesError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>Die maximale Anzahl (3) an Bildern wurde schon erreicht. Sie können andere Bilder ersetzen indem Sie diese davor löschen.</p></div>');
                     }
                 }
             });
