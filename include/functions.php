@@ -25,7 +25,7 @@
 	}
 
 
-	// Funktion um später die Lat und Lon Werte aus den EXIF Daten zu bekommen
+	// Funktion um die Lat und Lon Werte aus den EXIF Daten zu bekommen
 	function gps($coordinate, $hemisphere) {
 	  if (is_string($coordinate)) {
 	    $coordinate = array_map("trim", explode(",", $coordinate));
@@ -109,10 +109,10 @@
 	}
 
 	// Funktion um sicherzustellen dass der Benutzer auf sein eigenes Reisetagebuch zugreifft
-	function isOwner($db, $userId, $rtbId = null){
+	function isOwner($db, $userId, $rtbId){
 		$selectRtbFromId = $db->prepare("SELECT id FROM reisetagebuecher WHERE id = ? AND users_id = ?");
-        $selectRtbFromId->execute(array($rtbId, $userId));
-        $rtbFromId = $selectRtbFromId->fetchAll(\PDO::FETCH_ASSOC);
+	    $selectRtbFromId->execute(array($rtbId, $userId));
+	    $rtbFromId = $selectRtbFromId->fetchAll(\PDO::FETCH_ASSOC);
         if(!empty($rtbFromId)){
         	return $rtbFromId[0]['id'] == $rtbId;
         }
@@ -141,5 +141,10 @@
     	} 
 
     	return false;
+	}
+
+	function cleanFolder($username){
+		$mask = "../users/$username/tmp*.*";
+		array_map('unlink', glob($mask));
 	}
 ?>

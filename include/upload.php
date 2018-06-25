@@ -50,17 +50,15 @@ if(isset($_FILES['files'])){
 			$error = true;
 		}
 
-		$mask = "../users/$username/tmp".$fieldToFill."_*.*";
 		$filename = "tmp".$fieldToFill."_".$pictureId.".".$file_ext;
 	} else {
 		$fieldToFill = '';
+		// Temporäre Bilder löschen
+		array_map('unlink', glob($mask));
 	}
 
 	if(!$error){
 		$fullPath = "../users/$username/".$filename;
-
-		// Alle Temporären Bilder löschen
-		array_map('unlink', glob($mask));
 
 	    // Das Bild wird mittels TinyPNG API kompressiert
 	    $source = \Tinify\fromFile($file_tmp);

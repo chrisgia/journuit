@@ -368,6 +368,8 @@
                                 echo "</ul>";
                             echo "</div>";
                         }
+                    } else {
+                        cleanFolder($username);
                     }
                     
                 break;
@@ -720,8 +722,10 @@
                                         $anzahlBilder = 0;
                                         if(!empty($bilder)){
                                             $anzahlBilder = sizeof($bilder);
+                                            $i = 1;
                                             foreach($bilder as $bild){
-                                                echo '<div><img class="eintragBild uk-margin-small-bottom uk-border-rounded" src="/users/'.$rtbCreator.'/'.$bild['id'].'.'.$bild['file_ext'].'"></div>';
+                                                echo '<div class="uk-inline uk-dark" id="picture'.$i.'Div"><button class="uk-position-top-right uk-icon-button deletePicture" type="button" uk-icon="icon: close"></button><img class="eintragBild uk-margin-small-bottom uk-border-rounded" src="/users/'.$rtbCreator.'/'.$bild['id'].'.'.$bild['file_ext'].'"></div>';
+                                                $i++;
                                             }
                                         }
                                         ?>
@@ -810,36 +814,28 @@
                             $rtbId
                         );
 
-                        $insertedPicsCount = 0;
-
-                        if($_POST['picture1Id'] != "" && empty($errors)){
+                        if(isset($_POST['picture1Id']) && $_POST['picture1Id'] != "" && empty($errors)){
                             if(!insertBild($db, $username, $_POST['picture1Id'], $_POST['file1_ext'], 1)) {
                                 array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
-                            } else {
-                                $insertedPicsCount++;
                             }
                         }
 
-                        if($_POST['picture2Id'] != "" && empty($errors)){
+                        if(isset($_POST['picture2Id']) && $_POST['picture2Id'] != "" && empty($errors)){
                             if(!insertBild($db, $username, $_POST['picture2Id'], $_POST['file2_ext'], 2)) {
                                 array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
-                            } else {
-                                $insertedPicsCount++;
                             }
                         }
 
-                        if($_POST['picture3Id'] != "" && empty($errors)){
+                        if(isset($_POST['picture3Id']) && $_POST['picture3Id'] != "" && empty($errors)){
                             if(!insertBild($db, $username, $_POST['picture3Id'], $_POST['file3_ext'], 3)) {
                                 array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
-                            } else {
-                                $insertedPicsCount++;
                             }
                         }
 
                         if(empty($errors)){
                             $insertEintrag = $db->prepare("UPDATE eintraege SET reisetagebuch_id = ?, titel = ?, text = ?, datum = ?, uhrzeit = ?, standort_id = ?, zusammenfassung = ?, public = ? WHERE id = ? AND reisetagebuch_id = ?");
                             $insertEintrag->execute($updateArray);
-                            for($i = 1; $i <= $insertedPicsCount; $i++){
+                            for($i = $anzahlBilder + 1; $i <= 3; $i++){
                                 insertEintragBild($db, $username, $eintragId, $_POST['picture'.$i.'Id'], $_POST['bild'.$i.'unterschrift']);
                             }
                             echo "<script>window.location.href = 'reisetagebuecher.php?rtb=".$rtbUrl."&eintragErfolgreich=true';</script>";
@@ -852,6 +848,9 @@
                                 echo "</ul>";
                             echo "</div>";
                         }
+                    } else {
+                        // Falls der Benutzer davor Bilder hochgeladen, aber nicht abgespeichert hat, werden diese gelöscht.
+                        cleanFolder($username);
                     }
                 break;
 
@@ -1146,12 +1145,36 @@
 
                         $('#picture'+infos.fieldToFill+'Id').val(infos.pictureId);
                         $('#file'+infos.fieldToFill+'_ext').val(infos.file_ext);
-                        $('#pictures').append('<div class="uk-animation-fade" id="picture'+infos.fieldToFill+'"><img class="uk-border-rounded" data-src="'+fullPath+'" uk-img></div>');
+                        $('#pictures').append('<div class="uk-animation-fade" id="picture'+infos.fieldToFill+'"><button class="uk-position-top-right uk-overlay uk-overlay-default"><i uk-icon="icon: close"></i></button><img class="uk-border-rounded" data-src="'+fullPath+'" uk-img></div>');
                         UIkit.notification({message: 'Ihr Eintragsbild wurde erfolgreich hochgeladen.', status: 'success'});
                     } else {
                         $('#picturesError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>Die maximale Anzahl (3) an Bildern wurde schon erreicht. Sie können andere Bilder ersetzen indem Sie diese davor löschen.</p></div>');
                     }
                 }
+            });
+
+            $('.deletePicture').on('click', function(){
+                var pictureDiv = $(this).parent();
+                UIkit.modal.confirm('Dieses Bild wirklich entfernen ?').then(function() {
+                    var picture = pictureDiv.find('.eintragBild').attr('src');
+                    $.ajax({
+                        url : 'removePicture.php',
+                        type : 'POST',
+                        data : {
+                            picture: picture
+                        },
+                        success : function(response) {
+                            var response = JSON.parse(response);
+                            if(response.status == 'OK'){
+                                pictureDiv.remove();
+                            } else if(response.status == 'ERROR'){
+                                $('#picturesError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>Das Bild konnte nicht entfernt werden.</p></div>');
+                            }
+                        }
+                    });
+                }, function() {
+                    // Wenn der Benutzer auf "Cancel" drückt...
+                });
             });
         </script>
     </body>
