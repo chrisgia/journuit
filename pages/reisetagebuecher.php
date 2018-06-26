@@ -146,6 +146,11 @@
 							<progress id="js-progressbar" class="uk-progress" value="0" max="100" hidden></progress>
 						</div>
 
+						<div id="loading" class="uk-text-center" hidden>
+							<div uk-spinner></div>
+							<span>Das Bild wird verarbeitet...</span>
+						</div>
+
 						<input id="pictureId" name="pictureId" type="hidden" value="">
 						<input id="file_ext" name="file_ext" type="hidden" value="">
 
@@ -412,6 +417,11 @@
 									<progress id="js-progressbar" class="uk-progress" value="0" max="100" hidden></progress>
 								</div>
 
+								<div id="loading" class="uk-text-center" hidden>
+									<div uk-spinner></div>
+									<span>Das Bild wird verarbeitet...</span>
+								</div>
+
 								<div class="uk-margin">
 									<i><span id="char_count"><?= 26 - strlen($reisetagebuchDaten[0]['titel']);?></span> verbleibend</i>
 									<input name="titel" id="titel" class="uk-input" type="text" placeholder="Titel (maximal 25 Zeichen)" onFocus="countChars('titel','char_count',25)" onKeyDown="countChars('titel','char_count',25)" onKeyUp="countChars('titel','char_count',25)" maxlength="25" value="<?=$reisetagebuchDaten[0]['titel'];?>" required>
@@ -541,6 +551,7 @@
 				},
 
 				loadStart: function (e) {
+					$('#loading').removeAttr('hidden');
 					bar.removeAttribute('hidden');
 					bar.max = e.total;
 					bar.value = e.loaded;
@@ -557,9 +568,7 @@
 				},
 
 				completeAll: function (data) {
-					setTimeout(function () {
-						bar.setAttribute('hidden', 'hidden');
-					}, 1000);
+					bar.setAttribute('hidden', 'hidden');
 
 					var infos = JSON.parse(data.response);
 					var fullPath = '../users/'+username+'/tmp_'+infos.pictureId+'.'+infos.file_ext;
@@ -568,6 +577,7 @@
 					$('#file_ext').val(infos.file_ext);
 					$('#titelbild').empty().append('<div class="uk-animation-fade"><img class="uk-border-rounded" data-src="'+fullPath+'" uk-img></div>');
 					UIkit.notification({message: 'Ihr Titelbild wurde erfolgreich hochgeladen.', status: 'success'});
+					$('#loading').attr('hidden', 'hidden');
 				}
 			});
 		</script>

@@ -163,6 +163,11 @@
 												<progress id="js-progressbar2" class="uk-progress" value="0" max="100" hidden></progress>
 											</div>
 
+											<div id="loading1" class="uk-text-center" hidden>
+												<div uk-spinner></div>
+												<span>Das Bild wird verarbeitet...</span>
+											</div>
+
 											<input id="pictureId" name="pictureId" type="hidden" value="">
 											<input id="file_ext" name="file_ext" type="hidden" value="">
 
@@ -244,6 +249,11 @@
 											</div>
 										</div>
 										<progress id="js-progressbar3" class="uk-progress" value="0" max="100" hidden></progress>
+									</div>
+
+									<div id="loading2" class="uk-text-center" hidden>
+										<div uk-spinner></div>
+										<span>Das Bild wird verarbeitet...</span>
 									</div>
 
 									<div id="picturesError">
@@ -630,6 +640,11 @@
 												<progress id="js-progressbar2" class="uk-progress" value="0" max="100" hidden></progress>
 											</div>
 
+											<div id="loading1" class="uk-text-center" hidden>
+												<div uk-spinner></div>
+												<span>Das Bild wird verarbeitet...</span>
+											</div>
+
 											<input id="pictureId" name="pictureId" type="hidden" value="">
 											<input id="file_ext" name="file_ext" type="hidden" value="">
 
@@ -708,6 +723,10 @@
 											</div>
 										</div>
 										<progress id="js-progressbar3" class="uk-progress" value="0" max="100" hidden></progress>
+										<div id="loading2" class="uk-text-center" hidden>
+											<div uk-spinner></div>
+											<span>Das Bild wird verarbeitet...</span>
+										</div>
 									</div>
 
 									<div id="picturesError">
@@ -987,9 +1006,7 @@
 				},
 
 				completeAll: function (data) {
-					setTimeout(function () {
-						bar1.setAttribute('hidden', 'hidden');
-					}, 1000);
+					bar1.setAttribute('hidden', 'hidden');
 
 					var exifData = JSON.parse(data.response);
 					if('error' in exifData){
@@ -1036,6 +1053,7 @@
 				},
 
 				loadStart: function (e) {
+					$('#loading1').removeAttr('hidden');
 					bar2.removeAttribute('hidden');
 					bar2.max = e.total;
 					bar2.value = e.loaded;
@@ -1052,9 +1070,7 @@
 				},
 
 				completeAll: function (data) {
-					setTimeout(function () {
-						bar2.setAttribute('hidden', 'hidden');
-					}, 1000);
+					bar2.setAttribute('hidden', 'hidden');
 
 					var infos = JSON.parse(data.response);
 					var fullPath = '../users/'+username+'/tmp_'+infos.pictureId+'.'+infos.file_ext;
@@ -1063,6 +1079,7 @@
 					$('#file_ext').val(infos.file_ext);
 					$('#standortBild').empty().append('<div class="uk-animation-fade"><img class="uk-border-rounded" data-src="'+fullPath+'" uk-img></div>');
 					UIkit.notification({message: 'Ihr Standortbild wurde erfolgreich hochgeladen.', status: 'success'});
+					$('#loading1').attr('hidden', 'hidden');
 				}
 			});
 
@@ -1110,6 +1127,9 @@
 				beforeSend: function () {
 				},
 				beforeAll: function () {
+					if($('#picture3Id').val() != ''){
+						$('#picturesError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>Die maximale Anzahl (3) an Bildern wurde schon erreicht. Sie können andere Bilder ersetzen indem Sie diese davor löschen.</p></div>');
+					}
 				},
 				load: function () {
 				},
@@ -1119,6 +1139,7 @@
 				},
 
 				loadStart: function (e) {
+					$('#loading2').removeAttr('hidden');
 					bar3.removeAttribute('hidden');
 					bar3.max = e.total;
 					bar3.value = e.loaded;
@@ -1135,9 +1156,7 @@
 				},
 
 				completeAll: function (data) {
-					setTimeout(function () {
-						bar3.setAttribute('hidden', 'hidden');
-					}, 1000);
+					bar3.setAttribute('hidden', 'hidden');
 
 					var infos = JSON.parse(data.response);
 					if(infos.status == 'OK'){
@@ -1150,6 +1169,7 @@
 					} else {
 						$('#picturesError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>Die maximale Anzahl (3) an Bildern wurde schon erreicht. Sie können andere Bilder ersetzen indem Sie diese davor löschen.</p></div>');
 					}
+					$('#loading2').attr('hidden', 'hidden');
 				}
 			});
 
