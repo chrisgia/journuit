@@ -170,4 +170,49 @@
 		$mask = "../users/$username/tmp*.*";
 		array_map('unlink', glob($mask));
 	}
+
+	function sendMail($to, $name, $subject, $message, $copy = false, $attachments = NULL) {
+      	$mail = new PHPMailer(true);
+      	$body = $message;
+      	$mail->IsSMTP();
+      	$mail->Host = 'sslout.df.eu;smtprelaypool.ispgateway.de';
+		$mail->SMTPAuth = true;                              
+		$mail->Username = 'kontakt@euresa-reisen.de';                 
+		$mail->Password = 'q4P94DjkY7/t';                           
+		$mail->SMTPSecure = 'ssl';                            
+		$mail->Port = 465; 
+		$mail->CharSet = 'utf-8';
+		$mail->setLanguage('de', '/phpmailer/language/');
+		$mail->isHTML(true);
+       	$mail->SetFrom('info@euresa-reisen.de', 'EURESAreisen');
+       	$mail->AddReplyTo("info@euresa-reisen.de","EURESAreisen");
+      	$mail->Subject    = $subject;
+      	$mail->AltBody    = trim(strip_tags($body));
+      	$mail->Body = $body;
+      	$address = $to;
+      	$mail->AddAddress($address, $name);
+
+        //Copy (CC) hinzufügen
+        if($copy == true){
+            $mail->AddBCC('info@euresa-reisen.de');
+        }
+
+      	// Anhang / Anhänge hinzufügen
+      	if($attachments !== NULL){
+      		if(is_array($attachments)){           
+            foreach($attachments as $attachment) {
+              $mail->AddAttachment($attachment[0], $attachment[1]);
+            }
+      		} elseif (is_string($attachments)) {
+      			$mail->AddAttachment($attachments);
+      		}
+      	}
+
+      	// eigentlicher Mailversand
+      	if(!$mail->Send()) {
+        	return $mail->ErrorInfo;
+      	} else {
+            return 1;
+     	}
+	}
 ?>

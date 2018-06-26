@@ -38,6 +38,10 @@
 								</div>
 							</div>
 
+							<div class="uk-margin">
+								<a class="uk-link-text" href="resetPassword.php">Passwort vergessen ?</a>
+							</div>
+
 						</fieldset>
 						<div class="uk-flex uk-flex-center uk-flex-middle">
 							<button class="uk-button uk-button-default" name="login">Anmelden</button>
