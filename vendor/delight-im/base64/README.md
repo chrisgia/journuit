@@ -10,15 +10,15 @@ Simple and convenient Base64 encoding and decoding for PHP
 
  1. Include the library via Composer [[?]](https://github.com/delight-im/Knowledge/blob/master/Composer%20(PHP).md):
 
-    ```
-    $ composer require delight-im/base64
-    ```
+	```
+	$ composer require delight-im/base64
+	```
 
  1. Include the Composer autoloader:
 
-    ```php
-    require __DIR__ . '/vendor/autoload.php';
-    ```
+	```php
+	require __DIR__ . '/vendor/autoload.php';
+	```
 
 ## Usage
 

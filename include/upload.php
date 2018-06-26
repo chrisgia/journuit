@@ -12,12 +12,12 @@ if(isset($_FILES['files'])){
 	$username = $username[0]['username'];
 
 	// Dateiinformationen
-    $file_name = $_FILES['files']['name'][0];
-    $file_size = $_FILES['files']['size'][0];
-    $file_tmp = $_FILES['files']['tmp_name'][0];
-    $file_ext = substr($file_name, strpos($file_name, ".") + 1);
-    $pictureId = uniqueDbId($db, 'bilder', 'id');
-    $filename = "tmp_".$pictureId.".".$file_ext;
+	$file_name = $_FILES['files']['name'][0];
+	$file_size = $_FILES['files']['size'][0];
+	$file_tmp = $_FILES['files']['tmp_name'][0];
+	$file_ext = substr($file_name, strpos($file_name, ".") + 1);
+	$pictureId = uniqueDbId($db, 'bilder', 'id');
+	$filename = "tmp_".$pictureId.".".$file_ext;
 
 	$mask = "../users/$username/tmp_*.*";
 
@@ -60,9 +60,9 @@ if(isset($_FILES['files'])){
 	if(!$error){
 		$fullPath = "../users/$username/".$filename;
 
-	    // Das Bild wird mittels TinyPNG API kompressiert
-	    $source = \Tinify\fromFile($file_tmp);
-	    // Man behält das Erstellungsdatum und die GPS-Daten
+		// Das Bild wird mittels TinyPNG API kompressiert
+		$source = \Tinify\fromFile($file_tmp);
+		// Man behält das Erstellungsdatum und die GPS-Daten
 		$sourcePreservedEXIF = $source->preserve("creation", "location");
 		
 		// Wenn keine Maßangaben übergeben wurden, normales Titelbild Format
@@ -76,9 +76,9 @@ if(isset($_FILES['files'])){
 
 		// Bildgröße anpassen
 		$resizedPicture = $sourcePreservedEXIF->resize(array(
-		    "method" => "fit",
-		    "width" => $width,
-		    "height" => $height
+			"method" => "fit",
+			"width" => $width,
+			"height" => $height
 		));
 
 		// Die Datei wird in das Benutzerverzeichnis verschoben

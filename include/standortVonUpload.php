@@ -11,16 +11,16 @@ if(isset($_FILES['files'])){
 	$username = $username[0]['username'];
 
 	// Dateiinformationen
-    $file_name = $_FILES['files']['name'][0];
-    $file_size = $_FILES['files']['size'][0];
-    $file_tmp = $_FILES['files']['tmp_name'][0];
-    $file_ext = substr($file_name, strpos($file_name, ".") + 1);
+	$file_name = $_FILES['files']['name'][0];
+	$file_size = $_FILES['files']['size'][0];
+	$file_tmp = $_FILES['files']['tmp_name'][0];
+	$file_ext = substr($file_name, strpos($file_name, ".") + 1);
 
-    $exifSupportedFileExts = array('jpg', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi');
+	$exifSupportedFileExts = array('jpg', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi');
 	
 	if(in_array(strtolower($file_ext), $exifSupportedFileExts)){
-	    $exifData = getExifData($file_tmp);
-	    $latLon = array(
+		$exifData = getExifData($file_tmp);
+		$latLon = array(
 			'lat' => $exifData['lat'], 
 			'lon' => $exifData['lon']
 		);

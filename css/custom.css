@@ -75,13 +75,13 @@ body{
 }
 
 .titelbild {
-    width:100%;
+	width:100%;
 	height:100%;
 }
 
 /* Resizable-Kanten von Textareas entfernen */
 textarea {
-    resize: none;
+	resize: none;
 }
 
 /* Fix damit Locationpicker-Autocomplete im Modal angezeigt wird. */

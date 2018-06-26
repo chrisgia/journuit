@@ -10,15 +10,15 @@ Modern cookie management for PHP
 
  1. Include the library via Composer [[?]](https://github.com/delight-im/Knowledge/blob/master/Composer%20(PHP).md):
 
-    ```
-    $ composer require delight-im/cookie
-    ```
+	```
+	$ composer require delight-im/cookie
+	```
 
  1. Include the Composer autoloader:
 
-    ```php
-    require __DIR__ . '/vendor/autoload.php';
-    ```
+	```php
+	require __DIR__ . '/vendor/autoload.php';
+	```
 
 ## Upgrading
 
@@ -153,7 +153,7 @@ session_id();
 
    ```php
    if (\Delight\Cookie\Session::has($key)) {
-       // ...
+	   // ...
    }
    ```
 

@@ -21,11 +21,11 @@
 
 		$preparedStandortName = htmlspecialchars(strtolower($_POST['standortname']));
 		// Checken, ob der Benutzer nicht bereits ein Standort mit demselben Namen erstellt hat
-        $selectIdentischerStandort = $db->prepare("SELECT id FROM standorte WHERE users_id = ? AND LOWER(name) = ?");
-        $selectIdentischerStandort->execute(array($userId, $preparedStandortName));
-        $identischerStandort = $selectIdentischerStandort->fetchAll(\PDO::FETCH_ASSOC);
+		$selectIdentischerStandort = $db->prepare("SELECT id FROM standorte WHERE users_id = ? AND LOWER(name) = ?");
+		$selectIdentischerStandort->execute(array($userId, $preparedStandortName));
+		$identischerStandort = $selectIdentischerStandort->fetchAll(\PDO::FETCH_ASSOC);
 
-        if (!empty($identischerStandort)) {
+		if (!empty($identischerStandort)) {
 			array_push($errors, 'Sie haben bereits einen Standort mit diesem Namen erstellt.');
 		}
 
@@ -36,20 +36,20 @@
 			$insertedStandortId = $db->lastInsertId();
 
 			$selectStandorte = $db->prepare("SELECT id, name FROM standorte WHERE users_id = ? ORDER BY name");
-            $selectStandorte->execute(array($userId));
-            $standorte = $selectStandorte->fetchAll(\PDO::FETCH_ASSOC);
+			$selectStandorte->execute(array($userId));
+			$standorte = $selectStandorte->fetchAll(\PDO::FETCH_ASSOC);
 
-            $standorteSelectBox = "<option value=\"default\">Standort auswählen</option>";
-            $standorteSelectBox .= "<option value=\"neuer-standort\" class=\"uk-text-bold\">Neuer Standort</option>";
+			$standorteSelectBox = "<option value=\"default\">Standort auswählen</option>";
+			$standorteSelectBox .= "<option value=\"neuer-standort\" class=\"uk-text-bold\">Neuer Standort</option>";
 
-            $selected = "";
+			$selected = "";
 
-            foreach($standorte as $standort){
-            	if($standort['id'] == $insertedStandortId){
-            		$selected = "selected";
-            	}
-                $standorteSelectBox .= "<option value=\"".$standort['id']."\" ".$selected.">".$standort['name']."</option>";
-            }
+			foreach($standorte as $standort){
+				if($standort['id'] == $insertedStandortId){
+					$selected = "selected";
+				}
+				$standorteSelectBox .= "<option value=\"".$standort['id']."\" ".$selected.">".$standort['name']."</option>";
+			}
 
 			$result = array(
 				'status' => 'OK',

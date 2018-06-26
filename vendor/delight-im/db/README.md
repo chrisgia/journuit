@@ -60,11 +60,11 @@ Safe and convenient SQL database access in a driver-agnostic way
 
    ```php
    $db = \Delight\Db\PdoDatabase::fromDsn(
-       new \Delight\Db\PdoDsn(
-           'mysql:dbname=my-database;host=localhost',
-           'my-username',
-           'my-password'
-       )
+	   new \Delight\Db\PdoDsn(
+		   'mysql:dbname=my-database;host=localhost',
+		   'my-username',
+		   'my-password'
+	   )
    );
    ```
 
@@ -100,35 +100,35 @@ $rows = $db->select('SELECT id, name FROM books');
 // or
 
 $rows = $db->select(
-    'SELECT name, year FROM books WHERE author = ? ORDER BY copies DESC LIMIT 0, 10',
-    [ 'Charles Dickens' ]
+	'SELECT name, year FROM books WHERE author = ? ORDER BY copies DESC LIMIT 0, 10',
+	[ 'Charles Dickens' ]
 );
 
 // or
 
 $row = $db->selectRow(
-    'SELECT author, year FROM books WHERE author <> ? ORDER BY year ASC LIMIT 0, 1',
-    [ 'Miguel de Cervantes' ]
+	'SELECT author, year FROM books WHERE author <> ? ORDER BY year ASC LIMIT 0, 1',
+	[ 'Miguel de Cervantes' ]
 );
 
 // or
 
 $value = $db->selectValue(
-    'SELECT year FROM books WHERE name <> ? AND name <> ? ORDER BY year DESC LIMIT 0, 1',
-    [
-        'Tale of Two Cities',
-        'Alice in Wonderland'
-    ]
+	'SELECT year FROM books WHERE name <> ? AND name <> ? ORDER BY year DESC LIMIT 0, 1',
+	[
+		'Tale of Two Cities',
+		'Alice in Wonderland'
+	]
 );
 
 // or
 
 $column = $db->selectColumn(
-    'SELECT author FROM books ORDER BY copies DESC LIMIT ?, ?',
-    [
-        0,
-        3
-    ]
+	'SELECT author FROM books ORDER BY copies DESC LIMIT ?, ?',
+	[
+		0,
+		3
+	]
 );
 ```
 
@@ -138,13 +138,13 @@ For simple insertions, you can use a convenient shorthand:
 
 ```php
 $db->insert(
-    'books',
-    [
-        // set
-        'name' => 'Don Quixote',
-        'author' => 'Miguel de Cervantes',
-        'year' => 1612
-    ]
+	'books',
+	[
+		// set
+		'name' => 'Don Quixote',
+		'author' => 'Miguel de Cervantes',
+		'year' => 1612
+	]
 );
 ```
 
@@ -164,16 +164,16 @@ For simple updates, you can use a convenient shorthand as well:
 
 ```php
 $db->update(
-    'books',
-    [
-        // set
-        'author' => 'J. K. Rowling',
-        'copies' => 2
-    ],
-    [
-        // where
-        'name' => "Harry Potter and the Philosopher's Stone"
-    ]
+	'books',
+	[
+		// set
+		'author' => 'J. K. Rowling',
+		'copies' => 2
+	],
+	[
+		// where
+		'name' => "Harry Potter and the Philosopher's Stone"
+	]
 );
 ```
 
@@ -187,12 +187,12 @@ Again, for simple deletions, you can use a convenient shorthand:
 
 ```php
 $db->delete(
-    'books',
-    [
-        // where
-        'author' => 'C. S. Lewis',
-        'year' => 1949
-    ]
+	'books',
+	[
+		// where
+		'author' => 'C. S. Lewis',
+		'year' => 1949
+	]
 );
 ```
 
@@ -206,22 +206,22 @@ You can execute any arbitrary SQL statements as shown in the following examples:
 
 ```php
 $db->exec(
-    'INSERT INTO books (name, author, year) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE copies = copies + 1',
-    [
-        "Harry Potter and the Philosopher's Stone",
-        'J. K. Rowling',
-        1997
-    ]
+	'INSERT INTO books (name, author, year) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE copies = copies + 1',
+	[
+		"Harry Potter and the Philosopher's Stone",
+		'J. K. Rowling',
+		1997
+	]
 );
 
 // or
 
 $db->exec(
-    "UPDATE books SET name = CONCAT(LEFT(name, 5), ' in ', RIGHT(name, 10)) WHERE year >= ? AND year < ?",
-    [
-        1860,
-        1890
-    ]
+	"UPDATE books SET name = CONCAT(LEFT(name, 5), ' in ', RIGHT(name, 10)) WHERE year >= ? AND year < ?",
+	[
+		1860,
+		1890
+	]
 );
 ```
 
