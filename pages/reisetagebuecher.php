@@ -236,7 +236,7 @@
 						<table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
 							<thead>
 								<tr>
-									<th class="uk-text-center">Einträge</th>
+									<th class="uk-text-center">Einträge (<?=sizeof($dates);?>)</th>
 									<th class="uk-text-right">
 										<form method="POST" action="eintraege.php?view=neu">
 											<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
@@ -259,19 +259,32 @@
 										<span class="uk-text-bold"><?=$formatiertesDatum;?> </span>
 										<i>
 										<?php
-										foreach($eintraege as $eintrag){
-											echo $eintrag['titel'].", ";
+										$anzahlEintraege = sizeof($eintraege);
+										for($i = 0; $i <= $anzahlEintraege - 1; $i++){
+											echo $eintraege[$i]['titel'];
+
+											if($i < $anzahlEintraege - 1){
+												echo ", ";
+											}
+
+											if($i >= 2){
+												echo "...";
+												break;
+											}
 										}
+
 										?>
-										...
 										</i>	
 										</td>
 										<td class="uk-text-right">
-											<form method="POST" action="eintraege.php?view=eintrag-bearbeiten">
-												<input type="text" name="rtbId" value="<?=$rtbId;?>" hidden>
-												<input type="text" name="datum" value="<?=$datum['datum'];?>" hidden>
-												<button class="uk-button uk-button-text" name="eintrag-bearbeiten"><i uk-icon="file-edit"></i></button>
-											</form>
+											<?php 
+											echo $anzahlEintraege;
+											if($anzahlEintraege === 1){
+												echo " EINTRAG";
+											} else {
+												echo " EINTRÄGE"; 
+											}
+											?>
 										</td>
 									</tr>
 								<?php
@@ -370,8 +383,12 @@
 
 						<div id="titelbild" class="uk-margin uk-text-center">
 						<?php 
+							$pictureId = '';
+							$file_ext = '';
 							if(!empty($reisetagebuchDaten[0]['bild_id'])){
-								echo '<img class="titelbild uk-border-rounded" src="/users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'">';
+								$pictureId = $reisetagebuchDaten[0]['bild_id'];
+								$file_ext = $reisetagebuchDaten[0]['file_ext'];
+								echo '<img class="titelbild uk-border-rounded" src="/users/'.$username.'/'.$pictureId.'.'.$file_ext.'">';
 							} else {
 								echo '<img class="titelbild uk-border-rounded" src="/pictures/no-picture.png">';
 							} 
@@ -380,6 +397,20 @@
 
 						<form id="bearbeiten" method="POST">
 							<fieldset class="uk-fieldset">
+
+								<div class="uk-margin">
+									<div class="js-upload uk-placeholder uk-text-center">
+										<span uk-icon="icon: cloud-upload"></span>
+										<span class="uk-text-middle">Titelbild ersetzen (per Drag & Drop oder </span>
+										<div uk-form-custom>
+											<input type="file" name="files">
+											<!-- Dateigröße auf 5MB limitieren -->
+											<input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
+											<span class="uk-link">direkter Auswahl</span>)
+										</div>
+									</div>
+									<progress id="js-progressbar" class="uk-progress" value="0" max="100" hidden></progress>
+								</div>
 
 								<div class="uk-margin">
 									<i><span id="char_count"><?= 26 - strlen($reisetagebuchDaten[0]['titel']);?></span> verbleibend</i>
@@ -413,8 +444,8 @@
 					<?php 
 					// Formularverarbeitung 
 					if(isset($_POST['save'])){
-						$updateQuery = '';
 						$errors = array();
+						$updateQuery = '';
 
 						if (ctype_space(htmlspecialchars($_POST['titel'])) || empty($_POST['titel'])) {
 							array_push($errors, 'Der Titel darf nicht leer sein.');
@@ -436,12 +467,21 @@
 							$public
 						);
 
-						if($_POST['pictureId'] != "" && empty($errors)){
-							if(!insertBild($db, $username, $_POST['pictureId'], $_POST['file_ext'], null)) {
-								array_push($errors, 'Das Bild konnte nicht eingefügt werden.');
+						if(isset($_POST['pictureId']) && $_POST['file_ext'] && !empty($_POST['pictureId']) && !empty($_POST['file_ext']) && empty($errors)){
+							if(!empty($pictureId) && !empty($file_ext)){
+								// Ersetzen des vorherigen Bildes
+								$pictureError = updateBild($db, $username, $pictureId, htmlspecialchars($_POST['pictureId']), $file_ext, htmlspecialchars($_POST['file_ext']));
+							} else {
+								// War noch kein Bild vorhanden, wird es eingefügt
+								$pictureError = insertBild($db, $username, htmlspecialchars($_POST['pictureId']), htmlspecialchars($_POST['file_ext']));
 							}
-							$updateQuery .= ', bild_id = ?';
-							array_push($updateArray, htmlspecialchars($_POST['pictureId']));
+
+							if(!$pictureError){
+								array_push($errors, 'Das Bild konnte nicht ersetzt werden.');
+							} else {
+								$updateQuery .= ', bild_id = ?';
+								array_push($updateArray, htmlspecialchars($_POST['pictureId']));
+							}
 						}
 
 						array_push($updateArray, $rtbId);

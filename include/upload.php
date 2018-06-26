@@ -5,11 +5,6 @@ require $_SERVER['DOCUMENT_ROOT'].'/include/functions.php';
 if(isset($_FILES['files'])){
 	$error = false;
 	// TODO : Filesize und Type checken
-	// Man nimmt den Benutzernamen des eingeloggten Benutzers um später den Ordner zu erstellen
-	$selectUsername = $db->prepare("SELECT username FROM users WHERE id = ?");
-	$selectUsername->execute(array($userId));
-	$username = $selectUsername->fetchAll(\PDO::FETCH_ASSOC);
-	$username = $username[0]['username'];
 
 	// Dateiinformationen
 	$file_name = $_FILES['files']['name'][0];

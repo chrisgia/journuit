@@ -96,6 +96,29 @@
 		}
 	}
 
+	function updateBild($db, $username, $previousId, $id, $previous_file_ext, $file_ext){
+		$exifSupportedFileExts = array('jpg', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi');
+		$tempPath = "../users/$username/tmp_".$id.".".$file_ext;
+		$fullPath = "../users/$username/".$previousId.".".$previous_file_ext;
+		unlink($fullPath);
+
+		if(file_exists($tempPath)){
+			$fullPath = "../users/$username/".$id.".".$file_ext;
+			rename($tempPath, $fullPath);
+			if(in_array(strtolower($file_ext), $exifSupportedFileExts)){
+				$exifData = getExifData($fullPath);
+				$updatePictureData = $db->prepare("UPDATE bilder SET id = ?, datum = ?, lat = ?, lon = ?, file_ext = ? WHERE id = ?");
+				$result = $updatePictureData->execute(array($id, htmlspecialchars($exifData['dateTime']), htmlspecialchars($exifData['lat']), htmlspecialchars($exifData['lon']), $file_ext, $previousId));
+			} else {
+				$updatePictureData = $db->prepare("UPDATE bilder SET id = ?, file_ext = ? WHERE id = ?");
+				$result = $updatePictureData->execute(array($id, $file_ext, $previousId));
+			}
+			return $result;
+		} else {
+			return false;
+		}
+	}
+
 	function insertEintragBild($db, $username, $eintrag_id, $bild_id, $bildunterschrift = null) {
 		$insertEintragBild = $db->prepare("INSERT INTO eintraege_bilder(eintrag_id, bild_id, bildunterschrift) VALUES(?, ?, ?)");
 		$result = $insertEintragBild->execute(array(htmlspecialchars($eintrag_id), htmlspecialchars($bild_id), htmlspecialchars($bildunterschrift)));
