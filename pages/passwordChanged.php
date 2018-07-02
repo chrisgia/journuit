@@ -1,10 +1,11 @@
+<?php require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php'; ?>
 <!DOCTYPE html>
 <html>
 	<head>
 		<?php 
 			require $_SERVER['DOCUMENT_ROOT']."/include/header.php"; 
 		?>
-		<title>journuit - Zugriff verweigert</title>
+		<title>journuit - Passwort geändert</title>
 	</head>
 
 	<body class="uk-height-viewport">
@@ -17,13 +18,19 @@
 					</span>
 				</div>
 
-				<div class="uk-margin-medium-top uk-text-center">
-					<div class="uk-alert-danger" uk-alert>
-						<p>Sie müssen <a href="login.php">sich anmelden</a>, um diese Seite aufrufen zu können.</p>
+				<div class="uk-margin-medium-top">
+					<div class="uk-alert-primary" uk-alert>
+						<p>Sie werden in kürze umgeleitet...</p>
 					</div>	
-					<a href="/" class="uk-link">Zurück zur Startseite</a>
+
 				</div>
 			</div>
 		</div>
+
+		<script>
+			UIkit.notification({message: 'Ihr Passwort wurde erfolgreich geändert.', status: 'success'});
+			setInterval(function(){ window.location.replace('login.php'); }, 3000);
+		</script>
+
 	</body>
 </html>

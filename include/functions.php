@@ -171,6 +171,10 @@
 		array_map('unlink', glob($mask));
 	}
 
+	// PHPMailer importieren
+	use PHPMailer\PHPMailer\PHPMailer;
+	use PHPMailer\PHPMailer\Exception;
+
 	function sendMail($to, $name, $subject, $message, $copy = false, $attachments = NULL) {
       	$mail = new PHPMailer(true);
       	$body = $message;
@@ -178,14 +182,14 @@
       	$mail->Host = 'sslout.df.eu;smtprelaypool.ispgateway.de';
 		$mail->SMTPAuth = true;                              
 		$mail->Username = 'kontakt@euresa-reisen.de';                 
-		$mail->Password = 'q4P94DjkY7/t';                           
+		$mail->Password = 'q4P94DjkY7/t!908_';                           
 		$mail->SMTPSecure = 'ssl';                            
 		$mail->Port = 465; 
 		$mail->CharSet = 'utf-8';
 		$mail->setLanguage('de', '/phpmailer/language/');
 		$mail->isHTML(true);
-       	$mail->SetFrom('info@euresa-reisen.de', 'EURESAreisen');
-       	$mail->AddReplyTo("info@euresa-reisen.de","EURESAreisen");
+       	$mail->SetFrom('info@euresa-reisen.de', 'journuit');
+       	$mail->AddReplyTo("info@euresa-reisen.de","journuit");
       	$mail->Subject    = $subject;
       	$mail->AltBody    = trim(strip_tags($body));
       	$mail->Body = $body;

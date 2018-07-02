@@ -39,7 +39,7 @@
 							</div>
 
 							<div class="uk-margin">
-								<a class="uk-link-text" href="resetPassword.php">Passwort vergessen ?</a>
+								<a class="uk-link-text" href="resetPassword.php?view=enterEmail">Passwort vergessen ?</a>
 							</div>
 
 						</fieldset>

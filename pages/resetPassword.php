@@ -1,6 +1,43 @@
 <?php 
 	require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php';
 	require $_SERVER['DOCUMENT_ROOT'].'/include/functions.php';
+
+	if(isset($_GET["view"])) {
+		$view = htmlspecialchars($_GET["view"]);
+	}
+
+	if(isset($_POST['changePassword'], $_POST['passwort'], $_POST['selector'], $_POST['token'])){
+		try {
+			$error = "";
+			$selector = htmlspecialchars($_POST['selector']);
+			$token = htmlspecialchars($_POST['token']);
+			
+			if($_POST['passwort'] != $_POST['passwort_confirm']){
+				$error = "Die Passwörter stimmen nicht überein.";
+			}
+
+		    $auth->resetPassword($selector, $token, $_POST['passwort']);
+		}
+
+		catch (\Delight\Auth\InvalidSelectorTokenPairException $e) {
+		    $error = "Der Autorisierungstoken ist ungültig";
+		}
+		catch (\Delight\Auth\TokenExpiredException $e) {
+		    $error = "Der Autorisierungstoken ist abgelaufen.";
+		}
+		catch (\Delight\Auth\InvalidPasswordException $e) {
+		    $error = "Das Passwort ist ungültig.";
+		}
+		catch (\Delight\Auth\TooManyRequestsException $e) {
+		    $error = "Die maximale Anzahl an Anfragen wurde überschritten.";
+		}
+
+		if(!empty($error)){
+			echo "<script>$('#error').append('<div class=\"uk-alert-danger\" uk-alert><a class=\"uk-alert-close\" uk-close></a><p>".$error.".</p></div>')</script>;";
+		} else {
+			header('Location: passwordChanged.php?success=true');
+		}
+	}
 ?>
 <!DOCTYPE html>
 <html>
@@ -21,7 +58,11 @@
 					</span>
 				</div>
 
-				<p>Bitte geben Sie Ihre E-Mail Adresse ein. Es wird Ihnen dann ein Link gesendet, um Ihr Passwort zurückzusetzen.</p>
+			<?php
+			switch ($view) {
+				case 'enterEmail':
+				?>	
+				<p>Bitte geben Sie Ihre Email-Adresse ein. Es wird Ihnen dann ein Link gesendet, um Ihr Passwort zurückzusetzen.</p>
 				<div class="uk-margin-top uk-margin-bottom">
 					<form method="POST">
 						<fieldset class="uk-fieldset">
@@ -29,7 +70,7 @@
 							<div class="uk-margin">
 								<div class="uk-inline">
 									<span class="uk-form-icon" uk-icon="icon: mail"></span>
-									<input name="email" class="uk-input" type="text" placeholder="Email-Adresse..." value="<?php if(isset($_POST['email'])){echo $_POST['email'];}?>">
+									<input name="email" class="uk-input" type="text" placeholder="Email-Adresse...">
 								</div>
 							</div>
 
@@ -50,9 +91,10 @@
 						$subject = 'journuit - Passwort zurückzusetzen';
 
 						try {
-						    $auth->forgotPassword($_POST['email'], function ($selector, $token) {
-						        $url = 'http://www.landausflugsplaner.de/pages/reset_password.php?selector='.\urlencode($selector).'&token='.\urlencode($token);
-						        $message = 'Hallo '.$username.', <br/>bitte klicken Sie auf den folgenden Link um das Passwort für Ihr Konto bei journuit zurückzusetzen: <a href="'.$url.'">Passwort zurücksetzen</a><br/>Vielen dank.';
+						    $auth->forgotPassword($_POST['email'], function ($selector, $token) use ($username, $email, $fullname, $subject) {
+
+						        $url = 'http://www.landausflugsplaner.de/pages/resetPassword.php?view=changePassword&selector='.\urlencode($selector).'&token='.\urlencode($token);
+						        $message = 'Hallo '.$username.', <br/>bitte klicken Sie auf den folgenden Link um das Passwort für Ihr Konto bei journuit zurückzusetzen: <a href="'.$url.'">Passwort zurücksetzen</a>. <br/>Vielen Dank.';
 						        sendMail($email, $fullname, $subject, $message, $copy = false, $attachments = NULL);
 						    });
 						}
@@ -68,8 +110,69 @@
 							echo 	"<a class=\"uk-alert-close\" uk-close></a>";
 							echo 	"<p>".$error."</p>";
 							echo "</div>";
+						} else {
+							echo "<div class=\"uk-alert-success\" uk-alert>";
+							echo 	"<a class=\"uk-alert-close\" uk-close></a>";
+							echo 	"<p>Die Email wurde versendet.</p>";
+							echo "</div>";
 						}
 					}
+
+				break;
+
+				case 'changePassword':
+					if(isset($_GET['selector'], $_GET['token'])){
+						$selector = htmlspecialchars($_GET['selector']);
+						$token = htmlspecialchars($_GET['token']);
+
+						if(!isset($_POST['passwort'])){
+							if ($auth->canResetPassword($selector, $token)) {
+							    ?>
+							    <div class="uk-margin-top uk-margin-bottom">
+								    <form method="POST">
+										<fieldset class="uk-fieldset">
+
+											<div class="uk-margin">
+												<div class="uk-inline">
+													<span class="uk-form-icon" uk-icon="icon: lock"></span>
+													<input name="passwort" class="uk-input" type="password" placeholder="Neues Passwort...">
+												</div>
+											</div>
+
+											<div class="uk-margin">
+												<div class="uk-inline">
+													<span class="uk-form-icon" uk-icon="icon: lock"></span>
+													<input name="passwort_confirm" class="uk-input" type="password" placeholder="Passwort wiederholen...">
+												</div>
+											</div>
+
+											<input type="hidden" name="selector" value="<?=$selector;?>">
+											<input type="hidden" name="token" value="<?=$token;?>">
+										</fieldset>
+										<div class="uk-flex uk-flex-center uk-flex-middle">
+											<button class="uk-button uk-button-default" name="changePassword">Passwort ändern</button>
+										</div>
+									</form>
+								</div>
+							    <?php
+							} else {
+								echo "<div class=\"uk-alert-danger\" uk-alert>";
+								echo 	"<a class=\"uk-alert-close\" uk-close></a>";
+								echo 	"<p>Der Authorisierungstoken ist abgelaufen.</p>";
+								echo "</div>";
+							}
+						} else {
+							echo "<div id=\"error\">";
+							echo "</div>";
+						}
+					} 
+
+				break;
+
+				default :
+					require 'unavailable.php';
+				break;
+				}
 				?>
 			</div>
 		</div>
