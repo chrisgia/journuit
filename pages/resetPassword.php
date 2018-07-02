@@ -4,40 +4,7 @@
 
 	if(isset($_GET["view"])) {
 		$view = htmlspecialchars($_GET["view"]);
-	}
-
-	if(isset($_POST['changePassword'], $_POST['passwort'], $_POST['selector'], $_POST['token'])){
-		try {
-			$error = "";
-			$selector = htmlspecialchars($_POST['selector']);
-			$token = htmlspecialchars($_POST['token']);
-			
-			if($_POST['passwort'] != $_POST['passwort_confirm']){
-				$error = "Die Passwörter stimmen nicht überein.";
-			}
-
-		    $auth->resetPassword($selector, $token, $_POST['passwort']);
-		}
-
-		catch (\Delight\Auth\InvalidSelectorTokenPairException $e) {
-		    $error = "Der Autorisierungstoken ist ungültig";
-		}
-		catch (\Delight\Auth\TokenExpiredException $e) {
-		    $error = "Der Autorisierungstoken ist abgelaufen.";
-		}
-		catch (\Delight\Auth\InvalidPasswordException $e) {
-		    $error = "Das Passwort ist ungültig.";
-		}
-		catch (\Delight\Auth\TooManyRequestsException $e) {
-		    $error = "Die maximale Anzahl an Anfragen wurde überschritten.";
-		}
-
-		if(!empty($error)){
-			echo "<script>$('#error').append('<div class=\"uk-alert-danger\" uk-alert><a class=\"uk-alert-close\" uk-close></a><p>".$error.".</p></div>')</script>;";
-		} else {
-			header('Location: passwordChanged.php?success=true');
-		}
-	}
+	}	
 ?>
 <!DOCTYPE html>
 <html>
@@ -125,44 +92,41 @@
 						$selector = htmlspecialchars($_GET['selector']);
 						$token = htmlspecialchars($_GET['token']);
 
-						if(!isset($_POST['passwort'])){
-							if ($auth->canResetPassword($selector, $token)) {
-							    ?>
-							    <div class="uk-margin-top uk-margin-bottom">
-								    <form method="POST">
-										<fieldset class="uk-fieldset">
+						if ($auth->canResetPassword($selector, $token)) {
+						    ?>
+						    <div class="uk-margin-top uk-margin-bottom">
+							    <form id="passwordChange" method="POST">
+									<fieldset class="uk-fieldset">
 
-											<div class="uk-margin">
-												<div class="uk-inline">
-													<span class="uk-form-icon" uk-icon="icon: lock"></span>
-													<input name="passwort" class="uk-input" type="password" placeholder="Neues Passwort...">
-												</div>
+										<div class="uk-margin">
+											<div class="uk-inline">
+												<span class="uk-form-icon" uk-icon="icon: lock"></span>
+												<input name="passwort" class="uk-input" type="password" placeholder="Neues Passwort...">
 											</div>
-
-											<div class="uk-margin">
-												<div class="uk-inline">
-													<span class="uk-form-icon" uk-icon="icon: lock"></span>
-													<input name="passwort_confirm" class="uk-input" type="password" placeholder="Passwort wiederholen...">
-												</div>
-											</div>
-
-											<input type="hidden" name="selector" value="<?=$selector;?>">
-											<input type="hidden" name="token" value="<?=$token;?>">
-										</fieldset>
-										<div class="uk-flex uk-flex-center uk-flex-middle">
-											<button class="uk-button uk-button-default" name="changePassword">Passwort ändern</button>
 										</div>
-									</form>
-								</div>
-							    <?php
-							} else {
-								echo "<div class=\"uk-alert-danger\" uk-alert>";
-								echo 	"<a class=\"uk-alert-close\" uk-close></a>";
-								echo 	"<p>Der Authorisierungstoken ist abgelaufen.</p>";
-								echo "</div>";
-							}
+
+										<div class="uk-margin">
+											<div class="uk-inline">
+												<span class="uk-form-icon" uk-icon="icon: lock"></span>
+												<input name="passwort_confirm" class="uk-input" type="password" placeholder="Passwort wiederholen...">
+											</div>
+										</div>
+
+										<input type="hidden" name="selector" value="<?=$selector;?>">
+										<input type="hidden" name="token" value="<?=$token;?>">
+									</fieldset>
+									<div class="uk-flex uk-flex-center uk-flex-middle">
+										<button class="uk-button uk-button-default" name="changePassword">Passwort ändern</button>
+									</div>
+								</form>
+							</div>
+							<div class="uk-margin" id="error">
+							</div>
+						    <?php
 						} else {
-							echo "<div id=\"error\">";
+							echo "<div class=\"uk-alert-danger\" uk-alert>";
+							echo 	"<a class=\"uk-alert-close\" uk-close></a>";
+							echo 	"<p>Der Authorisierungstoken ist abgelaufen.</p>";
 							echo "</div>";
 						}
 					} 
@@ -176,5 +140,32 @@
 				?>
 			</div>
 		</div>
+		<script>
+			<?php
+			if(isset($_POST['changePassword'], $_POST['passwort'], $_POST['passwort_confirm'], $_POST['selector'], $_POST['token'])){
+				?>
+				$.ajax({
+					url : 'resetPassword_ajax.php',
+					type : 'POST',
+					data : {
+						passwort : '<?=$_POST['passwort'];?>',
+						passwort_confirm : '<?=$_POST['passwort_confirm'];?>',
+						selector : '<?=$selector;?>',
+						token : '<?=$token;?>'
+					},
+					success : function(response) {
+						if(response == 'OK'){
+							console.log(response);
+							window.location.href = 'passwordChanged.php';
+						} else {
+							console.log('fehler');
+							$('#error').empty().append('<div class=\"uk-alert-danger\" uk-alert><a class=\"uk-alert-close\" uk-close></a><p>'+response+'</p>');
+						}
+					}
+				});
+			<?php
+			}
+			?>
+		</script>
 	</body>
 </html>
