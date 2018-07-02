@@ -53,8 +53,10 @@
 				        $selectUserData = $db->prepare("SELECT vorname, nachname, users.username FROM users_data JOIN users ON (users_data.id = users.id) WHERE users.email = ?");
 						$selectUserData->execute(array($email));
 						$userData = $selectUserData->fetchAll(\PDO::FETCH_ASSOC);
-						$username = $userData[0]['username'];
-						$fullname = $userData[0]['vorname']." ".$userData[0]['nachname'];
+						if(!empty($userData)){
+							$username = $userData[0]['username'];
+							$fullname = $userData[0]['vorname']." ".$userData[0]['nachname'];
+						}
 						$subject = 'journuit - Passwort zurückzusetzen';
 
 						try {

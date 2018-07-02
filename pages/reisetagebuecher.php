@@ -23,7 +23,7 @@
 		$rtbUrl = htmlspecialchars($_GET['rtb']);
 	}
 
-	$onlyLogged = array('meine', 'neu');
+	$onlyLogged = array('meine', 'neu', 'bearbeiten');
 	checkAuthorization($userId, $view, $onlyLogged);
 
 ?>
@@ -217,7 +217,7 @@
 						<div>
 							<form method="POST" action="reisetagebuecher.php?view=bearbeiten">
 								<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
-								<button class="uk-button uk-button-text uk-float-left" name="reisetagebuch-bearbeiten"><i uk-icon="icon: file-edit; ratio: 1.5"></i></button>
+								<button class="uk-icon-link uk-float-left" name="reisetagebuch-bearbeiten" uk-icon="icon: file-edit; ratio: 1.5"></button>
 							</form>
 						</div>
 						<div><a href="" class="uk-icon-link uk-float-right" uk-icon="icon: social; ratio: 1.5"></a></div>

@@ -11,14 +11,14 @@
 			?>
 			<div class="uk-navbar-item">
 				<ul class="uk-navbar-nav">
-					<li class="nav_username">
+					<li class="nav_username" uk-tooltip="title: Mein Profil; pos: bottom">
 						<a class="uk-link-heading" href="/pages/profile.php">
 							<span>
 								<?php echo $username." (".$fullname.".)";?>
 							</span>
 						</a>
 					</li>
-					<li>
+					<li uk-tooltip="title: Abmelden; pos: bottom">
 						<a href="/pages/logout.php" uk-icon="icon: sign-out"></a>
 					</li>
 				</ul>
@@ -26,12 +26,17 @@
 			<div class="uk-navbar-item">
 				<img src="http://landausflugsplaner.de/pictures/dot.png" alt="dot" uk-img">
 			</div>
-			<div class="uk-navbar-item">
+			<div class="uk-navbar-item" uk-tooltip="title: Meine Reisetagebücher; pos: bottom">
 				<ul class="uk-navbar-nav">
 					<li><a class="nav_icon" href="/pages/reisetagebuecher.php?view=meine" uk-icon="icon: thumbnails; ratio: 1.5"></a></li>
 				</ul>
 			</div>
-			<div class="uk-navbar-item">
+			<div class="uk-navbar-item" uk-tooltip="title: Meine Orte; pos: bottom">
+				<ul class="uk-navbar-nav">
+					<li><a class="nav_icon" href="/pages/standorte.php?view=meine" uk-icon="icon: location; ratio: 1.5"></a></li>
+				</ul>
+			</div>
+			<div class="uk-navbar-item" uk-tooltip="title: Neues Reisetagebuch; pos: bottom">
 				<ul class="uk-navbar-nav">
 					<li><a class="nav_icon" href="/pages/reisetagebuecher.php?view=neu" uk-icon="icon: plus; ratio: 1.5"></a></li>
 				</ul>

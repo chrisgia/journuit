@@ -113,6 +113,11 @@ textarea {
 	font-size: 1.2em;
 }
 
+/* Zentriert das Bullet von Listen */
+ul{
+	list-style-position: inside;
+}
+
 @media only screen and (min-width: 800px) {
 	.eintrag {
 		width: 50%;
@@ -138,11 +143,15 @@ textarea {
 	}
 
 	.uk-navbar-right .uk-navbar-item {
-		padding: 2px;
+		padding: 10px;
 	}
 
 	.uk-navbar-right img {
 		width: 80%;
+	}
+
+	.nav_icon {
+		padding: 10px !important;
 	}
 
 	.nav_link {
@@ -191,8 +200,3 @@ textarea {
 		width: 30vw;
 	}
 } 
-
-/* Zentriert das Bullet von Listen */
-ul{
-	list-style-position: inside;
-}
