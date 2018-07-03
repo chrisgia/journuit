@@ -113,6 +113,10 @@ textarea {
 	font-size: 1.2em;
 }
 
+.delete{
+	color: red;
+}
+
 /* Zentriert das Bullet von Listen */
 ul{
 	list-style-position: inside;
@@ -186,9 +190,15 @@ ul{
 		font-size: 1.2em;
 	}
 
-	#pickerMap{
+	#standorteModal #pickerMap{
 		margin: 0;
 		width: 80vw;
+		height: 40vh;
+	}
+
+	#standort-bearbeiten #pickerMap{
+		margin: 0;
+		width: 95vw;
 		height: 40vh;
 	}
 
