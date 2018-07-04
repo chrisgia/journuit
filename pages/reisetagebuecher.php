@@ -519,7 +519,7 @@
 			break;
 
 			default:
-				require 'unavailable.php';
+				require '../include/unavailable.php';
 			break;
 			}
 		?>
@@ -589,13 +589,12 @@
 				var rtb = this.id.replace("deleteReisetagebuch", "");
 				UIkit.modal.confirm('Wollen Sie dieses Reisetagebuch wirklich löschen ?').then(function() {
 					$.ajax({
-						url : 'deleteReisetagebuch.php',
+						url : '/ajax/deleteReisetagebuch.php',
 						type : 'POST',
 						data : {
 							rtb: rtb
 						},
 						success : function(response) {
-							console.log(response);
 							var response = JSON.parse(response);
 							if(response.status == 'OK'){
 								window.location.href="reisetagebuecher.php?view=meine";

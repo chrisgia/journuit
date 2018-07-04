@@ -93,7 +93,7 @@
 							<div id="standorteModal" class="uk-flex-top" uk-modal>
 								<div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
 									<button class="uk-modal-close-default" type="button" uk-close></button>
-									<?php require 'neuerStandort.php'; ?>
+									<?php require '../include/neuerStandort.php'; ?>
 								</div>
 							</div>
 
@@ -480,7 +480,7 @@
 							<div id="standorteModal" class="uk-flex-top" uk-modal>
 								<div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
 									<button class="uk-modal-close-default" type="button" uk-close></button>
-									<?php require 'neuerStandort.php'; ?>
+									<?php require '../include/neuerStandort.php'; ?>
 								</div>
 							</div>
 
@@ -697,7 +697,7 @@
 				break;
 
 				default:
-					require 'unavailable.php';
+					require '../include/unavailable.php';
 				break;
 			}
 		?>
@@ -711,14 +711,13 @@
 				var eintragId = this.id.replace("deleteEintrag", "");
 				UIkit.modal.confirm('Wollen Sie diesen Eintrag wirklich löschen ?').then(function() {
 					$.ajax({
-						url : 'deleteEintrag.php',
+						url : '/ajax/deleteEintrag.php',
 						type : 'POST',
 						data : {
 							eintragId: eintragId,
 							rtb: rtb
 						},
 						success : function(response) {
-							console.log(response);
 							var response = JSON.parse(response);
 							if(response.status == 'OK'){
 								location.reload();
@@ -764,7 +763,7 @@
 			$('#standortErstellen').on('click', function(){
 				$('#standortErrors').empty();
 				$.ajax({
-					url : 'standorte_ajax.php',
+					url : '/ajax/standorte_ajax.php',
 					type : 'POST',
 					data : {
 						standortname : $('#standortname').val(),
@@ -826,7 +825,7 @@
 					var hours = instance.substring(11, 13);
 					var minutes = instance.substring(14);
 					$.ajax({
-						url : 'checkEntryTime.php',
+						url : '/ajax/checkEntryTime.php',
 						type : 'POST',
 						data : {
 							rtb : rtb,
@@ -912,7 +911,7 @@
 				UIkit.modal.confirm('Dieses Bild wirklich entfernen ?').then(function() {
 					var picture = pictureDiv.find('.eintragBild').attr('src');
 					$.ajax({
-						url : 'removePicture.php',
+						url : '/ajax/removePicture.php',
 						type : 'POST',
 						data : {
 							picture: picture

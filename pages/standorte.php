@@ -91,7 +91,7 @@
                     ?>
                     <div class="uk-flex uk-flex-column uk-flex-center uk-flex-middle uk-margin-top"> 
                     <?php
-                    require 'neuerStandort.php';
+                    require '../include/neuerStandort.php';
                     ?>
                     </div>
                     <?php
@@ -302,7 +302,7 @@
                 break;
 
                 default:
-                    require 'unavailable.php';
+                    require '../include/unavailable.php';
                 break;
             }
             ?>
@@ -342,7 +342,7 @@
 
             $('#standortErstellen').on('click', function(){
                 $.ajax({
-                    url : 'standorte_ajax.php',
+                    url : '/ajax/standorte_ajax.php',
                     type : 'POST',
                     data : {
                         standortname : $('#standortname').val(),

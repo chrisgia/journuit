@@ -136,7 +136,7 @@
 				break;
 
 				default :
-					require 'unavailable.php';
+					require '../include/unavailable.php';
 				break;
 				}
 				?>
@@ -147,7 +147,7 @@
 			if(isset($_POST['changePassword'], $_POST['passwort'], $_POST['passwort_confirm'], $_POST['selector'], $_POST['token'])){
 				?>
 				$.ajax({
-					url : 'resetPassword_ajax.php',
+					url : '/ajax/resetPassword_ajax.php',
 					type : 'POST',
 					data : {
 						passwort : '<?=$_POST['passwort'];?>',
