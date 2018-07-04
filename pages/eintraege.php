@@ -359,7 +359,7 @@
 											?>
 										</i>
 										<a href="eintraege.php?view=bearbeiten&rtb=<?=$rtbUrl;?>&id=<?=$eintragId;?>" class="uk-icon-link uk-margin-left" uk-icon="icon: file-edit; ratio: 1.2"></a>
-										<!-- <a id="deleteEintrag" href="" class="uk-icon-link uk-margin-left delete" uk-icon="icon: trash; ratio: 1.2"></a> -->
+										<button id="deleteEintrag<?=$eintragId;?>" class="uk-icon-link uk-margin-left delete" uk-icon="icon: trash; ratio: 1.2"></button>
 									</span>
 								</div>
 								<br/>
@@ -707,9 +707,9 @@
 			var username = "<?php echo $username; ?>";
 			var rtb = "<?php echo $rtbUrl; ?>";
 
-			/*$('#deleteEintrag').on('click', function(){
+			$(document.body).on('click', '.delete', function(){
+				var eintragId = this.id.replace("deleteEintrag", "");
 				UIkit.modal.confirm('Wollen Sie diesen Eintrag wirklich löschen ?').then(function() {
-					var eintragId = "<?php echo $eintragId; ?>";
 					$.ajax({
 						url : 'deleteEintrag.php',
 						type : 'POST',
@@ -718,6 +718,7 @@
 							rtb: rtb
 						},
 						success : function(response) {
+							console.log(response);
 							var response = JSON.parse(response);
 							if(response.status == 'OK'){
 								location.reload();
@@ -730,7 +731,7 @@
 					// Wenn der Benutzer auf "Cancel" drückt...
 				});
 			});
-*/
+
 			// Initialisiert die Map beim öffnen des Modals
 			$('#standorte').change(function () {
 				var selectedOption = $(this).find("option:selected");

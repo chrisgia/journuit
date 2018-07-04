@@ -15,6 +15,10 @@ body{
 	color: black;
 }
 
+.red {
+	color: red;
+}
+
 /* Hintergrundfarbe der Navbar */
 #navbar {
 	background-color: grey;
@@ -190,15 +194,15 @@ ul{
 		font-size: 1.2em;
 	}
 
-	#standorteModal #pickerMap{
+	#pickerMap{
 		margin: 0;
-		width: 80vw;
+		width: 95vw;
 		height: 40vh;
 	}
 
-	#standort-bearbeiten #pickerMap{
+	#standorteModal #pickerMap{
 		margin: 0;
-		width: 95vw;
+		width: 80vw;
 		height: 40vh;
 	}
 

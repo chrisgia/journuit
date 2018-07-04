@@ -441,13 +441,17 @@
 									<label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="<?=$reisetagebuchDaten[0]['public'];?>" <?=$checked;?>></label>
 								</div>
 
+								<div class="uk-margin">
+									<button type="button" id="deleteReisetagebuch<?=$rtbUrl;?>" class="uk-icon-link delete" uk-icon="icon: trash;"><span class="red uk-text-uppercase">Reisetagebuch löschen</span></button>
+								</div>
+
 								<input id="pictureId" name="pictureId" type="hidden" value="">
 								<input id="file_ext" name="file_ext" type="hidden" value="">
 								<input name="rtb" type="hidden" value="<?=$rtbUrl;?>">
 
 							</fieldset>
 							<div class="uk-flex uk-flex-center uk-flex-middle">
-								<button class="uk-button uk-button-default" name="save">Speichern</button>
+								<button type="submit" class="uk-button uk-button-default" name="save">Speichern</button>
 							</div>
 						</form>
 						<hr class="uk-width-1-1">
@@ -579,6 +583,30 @@
 					UIkit.notification({message: 'Ihr Titelbild wurde erfolgreich hochgeladen.', status: 'success'});
 					$('#loading').attr('hidden', 'hidden');
 				}
+			});
+
+			$(document.body).on('click', '.delete', function(){
+				var rtb = this.id.replace("deleteReisetagebuch", "");
+				UIkit.modal.confirm('Wollen Sie dieses Reisetagebuch wirklich löschen ?').then(function() {
+					$.ajax({
+						url : 'deleteReisetagebuch.php',
+						type : 'POST',
+						data : {
+							rtb: rtb
+						},
+						success : function(response) {
+							console.log(response);
+							var response = JSON.parse(response);
+							if(response.status == 'OK'){
+								window.location.href="reisetagebuecher.php?view=meine";
+							} else if(response.status == 'ERROR'){
+								UIkit.notification({message: 'Dieses Reisetagebuch konnte nicht entfernt werden.', status: 'danger'});
+							}
+						}
+					});
+				}, function() {
+					// Wenn der Benutzer auf "Cancel" drückt...
+				});
 			});
 		</script>
 	</body>

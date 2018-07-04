@@ -204,9 +204,9 @@
       	// Anhang / Anhänge hinzufügen
       	if($attachments !== NULL){
       		if(is_array($attachments)){           
-            foreach($attachments as $attachment) {
-              $mail->AddAttachment($attachment[0], $attachment[1]);
-            }
+	            foreach($attachments as $attachment) {
+	              $mail->AddAttachment($attachment[0], $attachment[1]);
+	            }
       		} elseif (is_string($attachments)) {
       			$mail->AddAttachment($attachments);
       		}
@@ -218,5 +218,68 @@
       	} else {
             return 1;
      	}
+	}
+
+	function removePicture($db, $picture, $username, $userId){
+		$file = htmlspecialchars($picture);
+		$filename = basename($file);
+		$fullPath = "../users/$username/$filename";
+
+		// Dateierweiterung von dem Dateinamen entfernen um nur die ID des Bildes zu bekommen
+		$dotPos = strrpos($filename, ".");
+		$pictureId = substr($filename, 0, $dotPos);
+
+		if (strpos($filename, 'tmp') !== false) {
+			// Sicherstellen, dass der Benutzer auf seine eigene Datei zugreifft
+			if(strpos($fullPath, '/'.$username.'/')){
+				$picNum = substr($filename, strpos($filename, 'tmp')+3, 1);
+				$result = array(
+					'status' => 'OK',
+					'picNum' => $picNum
+				);
+				
+				unlink($fullPath);
+			} else {
+				$result = array(
+					'status' => 'ERROR'
+				);
+			}
+		} else {
+			//Checken ob es sich um ein Titelbild handelt
+			$isRtb = false;
+			$selectRtbId = $db->prepare("SELECT id FROM reisetagebuecher WHERE bild_id = ? AND users_id = ?");
+			$selectRtbId->execute(array($pictureId, $userId));
+			$rtbId = $selectRtbId->fetchAll(\PDO::FETCH_ASSOC);
+			if(empty($rtbId)){
+				$selectRtbIdFromPictureId = $db->prepare("SELECT reisetagebuecher.id FROM reisetagebuecher JOIN eintraege ON (eintraege.reisetagebuch_id = reisetagebuecher.id) JOIN eintraege_bilder ON (eintraege.id = eintraege_bilder.eintrag_id) WHERE eintraege_bilder.bild_id = ? AND reisetagebuecher.users_id = ?");
+				$selectRtbIdFromPictureId->execute(array($pictureId, $userId));
+				$rtbId = $selectRtbIdFromPictureId->fetchAll(\PDO::FETCH_ASSOC);
+			} else {
+				$isRtb = true;
+			}
+			if(!empty($rtbId)){
+				$rtbId = $rtbId[0]['id'];
+				if(isOwner($db, $userId, $rtbId)){
+					// Löscht die Datei
+					unlink($fullPath);
+					// Löschen aus der Datenbank
+					if(!$isRtb){
+						$deletePictureFromEintraege = $db->prepare("DELETE FROM eintraege_bilder WHERE bild_id = ?");
+						$deletePictureFromEintraege->execute(array($pictureId));
+					}
+					$deletePictureFromBilder = $db->prepare("DELETE FROM bilder WHERE id = ?");
+					$deletePictureFromBilder->execute(array($pictureId));
+					$result = array(
+						'status' => 'OK',
+						'picNum' => 0
+					);
+				} else {
+					$result = array(
+						'status' => 'ERROR'
+					);
+				}
+			}
+		}
+		return $result;
 	}
 ?>
