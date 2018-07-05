@@ -139,7 +139,7 @@ ul{
 	}
 
 	.uk-navbar-item {
-		padding: 7px;
+		padding: 5px;
 	}
 
 	.nav_username {
@@ -148,10 +148,6 @@ ul{
 
 	.journuit {
 		display:none;
-	}
-
-	.uk-navbar-right .uk-navbar-item {
-		padding: 10px;
 	}
 
 	.uk-navbar-right img {

@@ -213,8 +213,9 @@
 
 						$datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
 						$uhrzeit = str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5));
+						$roundedUhrzeit = round((int) $uhrzeit / 5) * 5;
 
-						if(!checkEntryTime($db, $rtbId, $datum, $uhrzeit)){
+						if(!checkEntryTime($db, $rtbId, $datum, $roundedUhrzeit)){
 							array_push($errors, 'Es ist bereits ein Eintrag mit dieser Uhrzeit vorhanden.');
 						}
 
@@ -272,7 +273,7 @@
 
 						if(empty($errors)){
 							$insertEintrag = $db->prepare("INSERT INTO eintraege(reisetagebuch_id, titel, text, datum, uhrzeit, standort_id, entwurf, zusammenfassung, public) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
-							$insertEintrag->execute(array($rtbId, htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['eintrag']), $datum, $uhrzeit, htmlspecialchars($_POST['standort']), $entwurf, $zusammenfassung, $public));
+							$insertEintrag->execute(array($rtbId, htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['eintrag']), $datum, $roundedUhrzeit, htmlspecialchars($_POST['standort']), $entwurf, $zusammenfassung, $public));
 							$eintragId = $db->lastInsertId();
 							for($i = 1; $i <= $insertedPicsCount; $i++){
 								insertEintragBild($db, $username, $eintragId, $_POST['picture'.$i.'Id'], $_POST['bild'.$i.'unterschrift']);
@@ -563,8 +564,17 @@
 											$i = 1;
 											foreach($bilder as $bild){
 												echo '<div class="uk-inline uk-dark" id="picture'.$i.'Div"><button class="uk-position-top-right uk-icon-button deletePicture" type="button" uk-icon="icon: close"></button><img class="eintragBild uk-margin-small-bottom uk-border-rounded" src="/users/'.$rtbCreator.'/'.$bild['id'].'.'.$bild['file_ext'].'"></div>';
+												echo "<input id=\"picture".$i."Id\" name=\"picture".$i."Id\" type=\"hidden\" value=\"".$bild['id']."\">";
+												echo "<input id=\"file".$i."_ext\" name=\"file".$i."_ext\" type=\"hidden\" value=\"".$bild['file_ext']."\">";
+												echo "<input id=\"bild".$i."unterschrift\" name=\"bild".$i."unterschrift\" type=\"hidden\" value=\"\">";
 												$i++;
 											}
+										}
+
+										for($i = $anzahlBilder + 1; $i <= 3; $i++){
+											echo "<input id=\"picture".$i."Id\" name=\"picture".$i."Id\" type=\"hidden\" value=\"\">";
+											echo "<input id=\"file".$i."_ext\" name=\"file".$i."_ext\" type=\"hidden\" value=\"\">";
+											echo "<input id=\"bild".$i."unterschrift\" name=\"bild".$i."unterschrift\" type=\"hidden\" value=\"\">";
 										}
 										?>
 									</div>
@@ -578,14 +588,6 @@
 										?>
 										<label>Öffentlich <input name="public" class="uk-checkbox" type="checkbox" value="<?=$eintrag[0]['public'];?>" <?=$checked;?>></label>
 									</div>
-
-									<?php
-									for($i = $anzahlBilder + 1; $i <= 3; $i++){
-										echo "<input id=\"picture".$i."Id\" name=\"picture".$i."Id\" type=\"hidden\" value=\"\">";
-										echo "<input id=\"file".$i."_ext\" name=\"file".$i."_ext\" type=\"hidden\" value=\"\">";
-										echo "<input id=\"bild".$i."unterschrift\" name=\"bild".$i."unterschrift\" type=\"hidden\" value=\"\">";
-									}
-									?>
 
 									<input id="rtbUrl" name="rtb" type="hidden" value="<?=$rtbUrl;?>">
 
@@ -918,13 +920,23 @@
 						},
 						success : function(response) {
 							var response = JSON.parse(response);
+							console.log(response);
 							if(response.status == 'OK'){
-								pictureDiv.remove();
 								if(response.picNum != 0){
 									$('#picture'+response.picNum+'Id').val('');
 									$('#file'+response.picNum+'_ext').val('');
 									$('#bild'+response.picNum+'unterschrift').val('');
 								}
+
+								for($i = 0; $i <= 3; $i++){
+									$next = $i+1;
+									$('#picture'+$i+'Id').val($('#picture'+$next+'Id').val());
+									$('#file'+$i+'_ext').val($('#file'+$next+'_ext').val());
+									$('#bild'+$i+'unterschrift').val($('#bild'+$next+'unterschrift').val());
+									$('#picture'+$i+'Div').remove();
+								}
+
+								$('#pictures').append(response.pictureDiv);
 							} else if(response.status == 'ERROR'){
 								$('#picturesError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>Das Bild konnte nicht entfernt werden.</p></div>');
 							}

@@ -3,8 +3,17 @@
 	require $_SERVER['DOCUMENT_ROOT'].'/include/functions.php';
 
 	if(isset($_POST['rtb'])){
-		$rtbId = getRtbIdFromUrl($db, htmlspecialchars($_POST['rtb']));
+		$rtbId = getRtbIdFromUrl($db, $_POST['rtb']);
 		if(isOwner($db, $userId, $rtbId)){
+			$selectEintraege = $db->prepare("SELECT id FROM eintraege WHERE reisetagebuch_id = ?");
+			$selectEintraege->execute(array($rtbId));
+			$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
+
+			if(!empty($eintraege)){
+				foreach($eintraege as $eintrag){
+					deleteEintrag($db, $_POST['rtb'], $eintrag['id'], $username, $userId);
+				}
+			}
 			$selectTitelbild = $db->prepare("SELECT bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) WHERE reisetagebuecher.id = ?");
 			$selectTitelbild->execute(array($rtbId));
 			$titelbild = $selectTitelbild->fetchAll(\PDO::FETCH_ASSOC);

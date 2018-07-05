@@ -144,6 +144,7 @@
 	}
 
 	function getRtbIdFromUrl($db, $rtbUrl){
+		$rtbUrl = htmlspecialchars($rtbUrl);
 		$selectRtbIdFromURL = $db->prepare("SELECT id FROM reisetagebuecher WHERE url = ?");
 		$selectRtbIdFromURL->execute(array($rtbUrl));
 		$rtbId = $selectRtbIdFromURL->fetchAll(\PDO::FETCH_ASSOC);
@@ -279,6 +280,38 @@
 					);
 				}
 			}
+		}
+		return $result;
+	}
+
+	function deleteEintrag($db, $rtbUrl, $eintragId, $username, $userId){
+		$rtbId = getRtbIdFromUrl($db, htmlspecialchars($rtbUrl));
+		$eintragId = htmlspecialchars($eintragId);
+		if(isOwner($db, $userId, $rtbId)){
+			$selectBilder = $db->prepare("SELECT bilder.id, bilder.file_ext FROM eintraege_bilder LEFT JOIN bilder ON (bilder.id = eintraege_bilder.bild_id) WHERE eintrag_id = ?");
+			$selectBilder->execute(array($eintragId));
+			$bilder = $selectBilder->fetchAll(\PDO::FETCH_ASSOC);
+			if(!empty($bilder)){
+				foreach($bilder as $bild){
+					$picture = "/".$bild['id'].".".$bild['file_ext'];
+					removePicture($db, $picture, $username, $userId);
+				}
+			}
+			$deleteEintrag = $db->prepare("DELETE FROM eintraege WHERE id = ? AND reisetagebuch_id = ?");
+			$deleteEintrag->execute(array($eintragId, $rtbId));
+			if($deleteEintrag){
+				$result = array(
+					'status' => 'OK'
+				);
+			} else {
+				$result = array(
+					'status' => 'ERROR'
+				);
+			}
+		} else {
+			$result = array(
+				'status' => 'ERROR'
+			);
 		}
 		return $result;
 	}

@@ -78,7 +78,6 @@ UIkit.upload('#standortBildUpload', {
 	load: function () {
 	},
 	error: function () {
-		console.log('test');
 	},
 	complete: function () {
 	},
