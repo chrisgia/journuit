@@ -214,6 +214,7 @@
 						$datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
 						$uhrzeit = str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5));
 						$roundedUhrzeit = round((int) $uhrzeit / 5) * 5;
+						$roundedUhrzeit = str_pad($roundedUhrzeit, 4, '0', STR_PAD_LEFT);
 
 						if(!checkEntryTime($db, $rtbId, $datum, $roundedUhrzeit)){
 							array_push($errors, 'Es ist bereits ein Eintrag mit dieser Uhrzeit vorhanden.');
@@ -302,8 +303,13 @@
 						<?php
 						if(isOwner($db, $userId, $rtbId)){
 							?>
+
+							<div class="uk-margin uk-text-center">
+								<a class="uk-icon-link uk-margin-left" uk-icon="icon: arrow-left; ratio: 1.2" href="reisetagebuecher.php?rtb=<?=$rtbUrl;?>">Zurück zum Reisetagebuch</a>
+							</div>
+
 							<div class="uk-text-center uk-text-lead" id="rtbTitel">
-								<a class="uk-link-reset" href="reisetagebuecher.php?rtb=<?=$rtbUrl;?>"><?=$rtbTitel;?></a> <span class="uk-text-small">von <?=$username;?></span>
+								<a class="uk-link-reset" href="reisetagebuecher.php?rtb=<?=$rtbUrl;?>"><?=$rtbTitel;?> <span class="uk-text-small">von <?=$username;?></span></a>
 							</div>
 
 							<div class="uk-margin uk-text-center">
@@ -382,9 +388,13 @@
 							}
 
 						} else { ?>
+
+							<div class="uk-margin uk-text-center">
+								<a class="uk-icon-link uk-margin-left" uk-icon="icon: arrow-left; ratio: 1.2" href="reisetagebuecher.php?rtb=<?=$rtbUrl;?>">Zurück zum Reisetagebuch</a>
+							</div>
 							
-							<div>
-								<div class="uk-text-center uk-text-lead" id="rtbTitel"><?=$rtbTitel;?> <span class="uk-text-small">von <?=$rtbCreator;?></span></div>
+							<div class="uk-text-center uk-text-lead" id="rtbTitel">
+								<a class="uk-link-reset" href="reisetagebuecher.php?rtb=<?=$rtbUrl;?>"><?=$rtbTitel;?> <span class="uk-text-small">von <?=$rtbCreator;?></span></a>
 							</div>
 
 							<div class="uk-margin uk-text-center">
@@ -474,6 +484,11 @@
 					if(isset($rtbId) && isOwner($db, $userId, $rtbId) && !empty($eintrag)){
 						?>
 						<div class="uk-margin-top uk-margin-bottom">
+
+							<div class="uk-text-center">
+								<a class="uk-icon-link uk-margin-left" uk-icon="icon: arrow-left; ratio: 1.2" href="eintraege.php?rtb=<?=$rtbUrl;?>&datum=<?=$eintrag[0]['datum'];?>">Zurück zum Eintrag</a>
+							</div>
+
 							<h1 class="uk-text-center">Eintrag bearbeiten</h1>
 							<hr class="uk-width-1-1">
 
@@ -613,10 +628,12 @@
 						$errors = array();
 
 						$datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
-						$uhrzeit = str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5));
+						$uhrzeit = str_pad(str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5)), 4, '0', STR_PAD_LEFT);
+						$roundedUhrzeit = round((int) $uhrzeit / 5) * 5;
+						$roundedUhrzeit = str_pad($roundedUhrzeit, 4, '0', STR_PAD_LEFT);
 
-						if($uhrzeit != $eintrag[0]['uhrzeit']){
-							if(!checkEntryTime($db, $rtbId, $datum, $uhrzeit)){
+						if($roundedUhrzeit != $eintrag[0]['uhrzeit']){
+							if(!checkEntryTime($db, $rtbId, $datum, $roundedUhrzeit)){
 								array_push($errors, 'Es ist bereits ein Eintrag mit dieser Uhrzeit vorhanden.');
 							}
 						}
@@ -646,7 +663,7 @@
 							htmlspecialchars($_POST['titel']), 
 							htmlspecialchars($_POST['eintrag']),
 							$datum,
-							$uhrzeit,
+							$roundedUhrzeit,
 							htmlspecialchars($_POST['standort']), 
 							$zusammenfassung, 
 							$public,
@@ -692,10 +709,6 @@
 						// Falls der Benutzer davor Bilder hochgeladen, aber nicht abgespeichert hat, werden diese gelöscht.
 						cleanFolder($username);
 					}
-				break;
-
-				case 'loeschen':
-
 				break;
 
 				default:
@@ -835,7 +848,6 @@
 							uhrzeit : hours+''+minutes
 						},
 						success : function(response) {
-							console.log(response);
 							if(response != 'OK'){
 								$('#uhrzeitError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>'+response+'</p></div>');
 							} else {
@@ -920,7 +932,6 @@
 						},
 						success : function(response) {
 							var response = JSON.parse(response);
-							console.log(response);
 							if(response.status == 'OK'){
 								if(response.picNum != 0){
 									$('#picture'+response.picNum+'Id').val('');
@@ -928,6 +939,7 @@
 									$('#bild'+response.picNum+'unterschrift').val('');
 								}
 
+								// Die IDs rearrangieren und die Bilder-divs löschen
 								for($i = 0; $i <= 3; $i++){
 									$next = $i+1;
 									$('#picture'+$i+'Id').val($('#picture'+$next+'Id').val());
@@ -936,6 +948,7 @@
 									$('#picture'+$i+'Div').remove();
 								}
 
+								// Die Bilder werden mit den neuen Werten wieder reingepackt
 								$('#pictures').append(response.pictureDiv);
 							} else if(response.status == 'ERROR'){
 								$('#picturesError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>Das Bild konnte nicht entfernt werden.</p></div>');

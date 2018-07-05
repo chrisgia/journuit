@@ -11,8 +11,8 @@
 			?>
 			<div class="uk-navbar-item">
 				<ul class="uk-navbar-nav">
-					<li class="nav_username" uk-tooltip="title: Mein Profil; pos: bottom">
-						<a class="uk-link-heading" href="/pages/profile.php">
+					<li class="nav_username">
+						<a class="uk-link-heading" href="/">
 							<span>
 								<?php echo $username." (".$fullname.".)";?>
 							</span>

@@ -77,8 +77,8 @@
                 } else {
                     ?>
                     <div class="uk-margin-top uk-text-center">
-                        <span>Sie haben noch kein Standort angelegt.</span><br/>
-                        <button class="uk-button uk-button-text uk-text-uppercase"><a class="uk-heading uk-link-reset" href="standorte.php?view=neu">Neuer Standort anlegen</a></button>
+                        <span>Sie haben noch keinen Standort erstellt.</span><br/>
+                        <button class="uk-button uk-button-text uk-text-uppercase"><a class="uk-heading uk-link-reset" href="standorte.php?view=neu">Neuer Standort erstellen</a></button>
                     </div>
                 <?php
                 }
@@ -187,13 +187,17 @@
                                         $file_ext = $standort[0]['file_ext'];
                                         echo '<img class="standortbild" src="/users/'.$username.'/'.$pictureId.'.'.$file_ext.'">';
                                     } else {
-                                        echo '<img class="standortbild" src="/pictures/no-picture_small.png">';
+                                        echo '<img class="standortbild" src="/pictures/no-picture_small.jpg">';
                                     } 
                                     ?>
                                 </div>
 
                                 <div id="standortErrors">
                                     <!-- Hier erscheinen die Fehler beim Erstellen eines Standortes -->
+                                </div>
+
+                                <div class="uk-margin">
+                                    <button type="button" id="deleteStandort<?=$standortId;?>" class="uk-icon-link delete" uk-icon="icon: trash;"><span class="red uk-text-uppercase">Standort löschen</span></button>
                                 </div>
 
                             </fieldset>
@@ -286,7 +290,7 @@
                             if(!empty($standort[0]['bild_id'])){
                                 echo '<img data-src="../users/'.$username.'/'.$standort[0]['bild_id'].'.'.$standort[0]['file_ext'].'" uk-img class="uk-border-rounded">'; 
                             } else {
-                                echo '<img class="uk-border-rounded" data-src="/pictures/no-picture_small.png" uk-img>';
+                                echo '<img class="uk-border-rounded" data-src="/pictures/no-picture_small.jpg" uk-img>';
                             } 
                             ?>
                         </div>
@@ -367,6 +371,29 @@
                             $('#standortErrors').empty().append(response.data);
                         }
                     }
+                });
+            });
+
+            $(document.body).on('click', '.delete', function(){
+                var standortId = this.id.replace("deleteStandort", "");
+                UIkit.modal.confirm('Wollen Sie diesen Standort wirklich löschen ?').then(function() {
+                    $.ajax({
+                        url : '/ajax/deleteStandort.php',
+                        type : 'POST',
+                        data : {
+                            standortId: standortId
+                        },
+                        success : function(response) {
+                            var response = JSON.parse(response);
+                            if(response.status == 'OK'){
+                                window.location.href="standorte.php?view=meine";
+                            } else if(response.status == 'ERROR'){
+                                UIkit.notification({message: 'Dieser Standort konnte nicht entfernt werden.', status: 'danger'});
+                            }
+                        }
+                    });
+                }, function() {
+                    // Wenn der Benutzer auf "Cancel" drückt...
                 });
             });
         </script>

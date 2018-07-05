@@ -80,7 +80,7 @@
 									if(!empty($reisetagebuch['bild_id'])){
 										echo '<img class="titelbild" src="/users/'.$username.'/'.$reisetagebuch['bild_id'].'.'.$reisetagebuch['file_ext'].'">';
 									} else {
-										echo '<img class="titelbild" src="/pictures/no-picture.png">';
+										echo '<img class="titelbild" src="/pictures/no-picture.jpg">';
 									} 
 								?>
 								<div class="uk-overlay uk-overlay-default uk-position-bottom">
@@ -221,7 +221,7 @@
 							</form>
 						</div>
 						<div><a href="" class="uk-icon-link uk-float-right" uk-icon="icon: social; ratio: 1.5"></a></div>
-						<div><a href="" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right"></a></div>
+						<div><a href="landkarte.php?rtb=<?=$rtbUrl;?>" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right"></a></div>
 						<div class="uk-text-center uk-text-lead" id="rtbTitel"><?=$reisetagebuchDaten[0]['titel'];?> <span class="uk-text-small">von <?=$username;?></span></div>
 					</div>
 
@@ -230,7 +230,7 @@
 						if(!empty($reisetagebuchDaten[0]['bild_id'])){
 							echo '<img data-src="../users/'.$username.'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img class="uk-border-rounded">'; 
 						} else {
-							echo '<img class="uk-border-rounded" data-src="/pictures/no-picture.png" uk-img>';
+							echo '<img class="uk-border-rounded" data-src="/pictures/no-picture.jpg" uk-img>';
 						} 
 						?>
 					</div>					
@@ -313,7 +313,7 @@
 					?>
 					<div>
 						<div><a href="" class="uk-icon-link uk-float-right" uk-icon="icon: social; ratio: 1.5"></a></div>
-						<div><a href="" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right"></a></div>
+						<div><a href="landkarte.php?rtb=<?=$rtbUrl;?>" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right"></a></div>
 						<div class="uk-text-center uk-text-lead" id="rtbTitel"><?=$reisetagebuchDaten[0]['titel'];?> <span class="uk-text-small">von <?=$reisetagebuchDaten[0]['username'];?></span></div>
 					</div>
 
@@ -322,7 +322,7 @@
 						if(!empty($reisetagebuchDaten[0]['bild_id'])){
 							echo '<img class="uk-border-rounded" data-src="../users/'.$reisetagebuchDaten[0]['username'].'/'.$reisetagebuchDaten[0]['bild_id'].'.'.$reisetagebuchDaten[0]['file_ext'].'" uk-img>'; 
 						} else {
-							echo '<img class="uk-border-rounded" data-src="/pictures/no-picture.png" uk-img>';
+							echo '<img class="uk-border-rounded" data-src="/pictures/no-picture.jpg" uk-img>';
 						} 
 						?>
 					</div>					
@@ -395,7 +395,7 @@
 								$file_ext = $reisetagebuchDaten[0]['file_ext'];
 								echo '<img class="titelbild uk-border-rounded" src="/users/'.$username.'/'.$pictureId.'.'.$file_ext.'">';
 							} else {
-								echo '<img class="titelbild uk-border-rounded" src="/pictures/no-picture.png">';
+								echo '<img class="titelbild uk-border-rounded" src="/pictures/no-picture.jpg">';
 							} 
 						?>
 						</div>

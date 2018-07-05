@@ -15,7 +15,7 @@
 
 <!-- JavaScript Bibliotheken -->
 <!-- Google Maps API -->
-<script type="text/javascript" src='http://maps.google.com/maps/api/js?key=AIzaSyBorwcLkiG4pMmrgLLRlPltsxFSe4__1kU&libraries=places'></script>
+<script type="text/javascript" defer src='http://maps.google.com/maps/api/js?key=AIzaSyBorwcLkiG4pMmrgLLRlPltsxFSe4__1kU&callback=initMap&libraries=places'></script>
 <!-- locationpicker -->
 <script src="/js/locationpicker.jquery.min.js"></script> 
 <!-- flatpickr -->

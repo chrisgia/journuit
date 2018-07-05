@@ -246,11 +246,23 @@
 				);
 			}
 		} else {
-			//Checken ob es sich um ein Titelbild handelt
+			
 			$isRtb = false;
+			$isStandort = false;
+
+			//Checken ob es sich um ein Titelbild handelt
 			$selectRtbId = $db->prepare("SELECT id FROM reisetagebuecher WHERE bild_id = ? AND users_id = ?");
 			$selectRtbId->execute(array($pictureId, $userId));
 			$rtbId = $selectRtbId->fetchAll(\PDO::FETCH_ASSOC);
+
+			//Checken ob es sich um ein Standortbild handelt
+			$selectStandortId = $db->prepare("SELECT id FROM standorte WHERE bild_id = ? AND users_id = ?");
+			$selectStandortId->execute(array($pictureId, $userId));
+			$standortId = $selectStandortId->fetchAll(\PDO::FETCH_ASSOC);
+			if(!empty($standortId)){
+				$isStandort = true;
+			}
+
 			if(empty($rtbId)){
 				$selectRtbIdFromPictureId = $db->prepare("SELECT reisetagebuecher.id FROM reisetagebuecher JOIN eintraege ON (eintraege.reisetagebuch_id = reisetagebuecher.id) JOIN eintraege_bilder ON (eintraege.id = eintraege_bilder.eintrag_id) WHERE eintraege_bilder.bild_id = ? AND reisetagebuecher.users_id = ?");
 				$selectRtbIdFromPictureId->execute(array($pictureId, $userId));
@@ -258,27 +270,26 @@
 			} else {
 				$isRtb = true;
 			}
-			if(!empty($rtbId)){
-				$rtbId = $rtbId[0]['id'];
-				if(isOwner($db, $userId, $rtbId)){
-					// Löscht die Datei
-					unlink($fullPath);
-					// Löschen aus der Datenbank
-					if(!$isRtb){
-						$deletePictureFromEintraege = $db->prepare("DELETE FROM eintraege_bilder WHERE bild_id = ?");
-						$deletePictureFromEintraege->execute(array($pictureId));
-					}
-					$deletePictureFromBilder = $db->prepare("DELETE FROM bilder WHERE id = ?");
-					$deletePictureFromBilder->execute(array($pictureId));
-					$result = array(
-						'status' => 'OK',
-						'picNum' => 0
-					);
-				} else {
-					$result = array(
-						'status' => 'ERROR'
-					);
+
+			if(!empty($rtbId) || $isStandort){
+				// Löscht die Datei
+				unlink($fullPath);
+				// Löschen aus der Datenbank
+				if(!$isRtb){
+					$deletePictureFromEintraege = $db->prepare("DELETE FROM eintraege_bilder WHERE bild_id = ?");
+					$deletePictureFromEintraege->execute(array($pictureId));
 				}
+				$deletePictureFromBilder = $db->prepare("DELETE FROM bilder WHERE id = ?");
+				$deletePictureFromBilder->execute(array($pictureId));
+				
+				$result = array(
+					'status' => 'OK',
+					'picNum' => 0
+				);
+			} else {
+				$result = array(
+					'status' => 'ERROR'
+				);
 			}
 		}
 		return $result;
