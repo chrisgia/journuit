@@ -319,7 +319,7 @@
 							<div class="uk-margin uk-text-center">
 								<form method="POST" action="eintraege.php?view=neu&datum=<?=$eintragsdatum;?>">
 									<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
-									<button class="uk-button uk-button-text"><i uk-icon="plus"></i></button>
+									<button class="uk-button uk-button-text" uk-tooltip="title: Neuer Eintrag; pos: bottom"><i uk-icon="plus"></i></button>
 								</form>
 							</div>
 							<hr class="uk-width-1-1">  
@@ -330,12 +330,13 @@
 								$eintragId = htmlspecialchars($eintrag['id']);
 
 								if(isset($eintrag['standort_id'])){
-									$selectStandort = $db->prepare("SELECT name FROM standorte WHERE id = ?");
+									$selectStandort = $db->prepare("SELECT id, name FROM standorte WHERE id = ?");
 									$standortId = htmlspecialchars($eintrag['standort_id']);
 									$selectStandort->execute(array($standortId));
 									$standort = $selectStandort->fetchAll(\PDO::FETCH_ASSOC);
 									if(!empty($standort)){
 										$standortName = $standort[0]['name'];
+										$standortId = $standort[0]['id'];
 									} 
 								}
 
@@ -357,16 +358,20 @@
 										?>
 									</span>
 									<span class="uk-float-right">
-										<i uk-icon="icon: location"></i> 
-										<i>
-											<?php 
-											if($eintrag['zusammenfassung'] != 1){
-												echo $standortName;
-											}
-											?>
-										</i>
+										<?php 
+										if($eintrag['zusammenfassung'] != 1){
+											echo '<a href="standorte.php?id='.$standortId.'" class="uk-link-reset standortRechts"><i uk-icon="icon: location"></i> <i>'.$standortName.'</i></a>';
+										}
+										?>
 										<a href="eintraege.php?view=bearbeiten&rtb=<?=$rtbUrl;?>&id=<?=$eintragId;?>" class="uk-icon-link uk-margin-left" uk-icon="icon: file-edit; ratio: 1.2"></a>
 										<button id="deleteEintrag<?=$eintragId;?>" class="uk-icon-link uk-margin-left delete" uk-icon="icon: trash; ratio: 1.2"></button>
+									</span>
+									<span class="standortLinks uk-float-left">
+										<?php 
+										if($eintrag['zusammenfassung'] != 1){
+											echo '<a href="standorte.php?id='.$standortId.'" class="uk-link-reset"><i uk-icon="icon: location"></i> <i>'.$standortName.'</i></a>';
+										}
+										?>
 									</span>
 								</div>
 								<br/>
@@ -426,15 +431,19 @@
 											?> 
 											<span class="uk-text-lead"><?=$eintrag['titel'];?></span> 
 										</span>
-										<span class="uk-float-right">
-											<i uk-icon="icon: location"></i>
-											<i>
+										<span class="uk-float-right standortRechts">
 											<?php 
 											if($eintrag['zusammenfassung'] != 1){
-												echo $standortName;
+												echo '<a href="standorte.php?id='.$standortId.'" class="uk-link-reset"><i uk-icon="icon: location"></i> <i>'.$standortName.'</i></a>';
 											}
 											?>
-											</i>
+										</span>
+										<span class="uk-float-left standortLinks">
+										<?php 
+										if($eintrag['zusammenfassung'] != 1){
+											echo '<a href="standorte.php?id='.$standortId.'" class="uk-link-reset"><i uk-icon="icon: location"></i> <i>'.$standortName.'</i></a>';
+										}
+										?>
 										</span>
 									</div>
 									<br/>
@@ -719,7 +728,7 @@
 		</div>
 		<script src="/js/standortScript.js"></script>
 		<script>
-			var username = "<?php echo $username; ?>";
+			<?php if(isset($username)){echo "var username = '$username';";} ?>
 			var rtb = "<?php echo $rtbUrl; ?>";
 
 			$(document.body).on('click', '.delete', function(){

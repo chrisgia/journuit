@@ -127,6 +127,10 @@ textarea {
 	height: 400px;
 }
 
+.standortLinks{
+	display: none;
+}
+
 /* Zentriert das Bullet von Listen */
 ul{
 	list-style-position: inside;
@@ -218,5 +222,14 @@ ul{
 
 	#lat, #lon {
 		width: 30vw;
+	}
+
+	.standortRechts{
+		display: none;
+	}
+
+	.standortLinks{
+		display: inline-block;
+		clear: left;
 	}
 } 

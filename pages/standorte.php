@@ -60,7 +60,7 @@
                     </div>
 
                     <div class="uk-text-center uk-margin-medium-bottom">
-                        <a href="standorte.php?view=neu" class="uk-button-text"><i uk-icon="plus"></i></button>
+                        <a href="standorte.php?view=neu" class="uk-button-text" uk-tooltip="title: Neuer Standort; pos: bottom"><i uk-icon="plus"></i></button>
                     </div>
                     <?php
                     foreach($standorte as $standort){
