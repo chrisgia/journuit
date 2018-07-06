@@ -36,7 +36,7 @@
 				<table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
 					<thead>
 						<tr>
-							<th class="uk-text-center">Einträge (<?=sizeof($standorte);?>)</th>
+							<th class="uk-text-center">Orte (<?=sizeof($standorte);?>)</th>
 							<th class="uk-text-right">Datum</th>
 						</tr>
 					</thead>
@@ -51,9 +51,7 @@
 						<tr class="eintragBox" id="eintrag<?=$count;?>">
 							<td>
 							<span class="uk-text-bold uk-h3 uk-margin-right"><?=$count;?> </span>
-							<i>
-							<?=$standort['titel'];?>
-							</i>	
+							<?=$standort['name'];?>	(<?=$standort['titel'];?>)
 							</td>
 							<td class="uk-text-right">
 								<?=$formatiertesDatum.' '.$uhrzeit;?>
