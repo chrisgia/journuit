@@ -72,10 +72,6 @@
 					</div>
 
 					<div class="uk-margin-bottom">
-						<a href="standorte.php?view=neu" class="uk-heading uk-link-reset uk-text-uppercase">Neuer Ort erstellen</a>
-					</div>
-
-					<div>	
 						<a href="reisetagebuecher.php?rtb=<?=$rtbUrl;?>" class="uk-link-reset">Zurück zum Reisetagebuch</a>
 					</div>
 				</div>
@@ -114,40 +110,25 @@
 	        		createdMarker.setIcon('https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_grey'+(i+1)+'.png');
 			    }
 
-			    //Die Map wird dort zentriert wo die Marker liegen
+			    // Die Map wird dort zentriert wo die Marker liegen
 			    eintraegeMap.fitBounds(bounds);
 
-			    //***********ROUTING****************//
- 
-	            //Intialize the Path Array
+			    // Linien zwischen den Standorten
 	            var path = new google.maps.MVCArray();
-	 
-	            //Intialize the Direction Service
-	            var service = new google.maps.DirectionsService();
-	 
-	            //Set the Path Stroke Color
 	            var poly = new google.maps.Polyline({ map: eintraegeMap, strokeColor: '#000000' });
 	 
-	            //Loop and Draw Path Route between the Points on MAP
 	            for (var i = 0; i < orte.length; i++) {
 	                if ((i + 1) < orte.length) {
 	                    var src = new google.maps.LatLng(orte[i]['lat'], orte[i]['lon']);
 	                    var des = new google.maps.LatLng(orte[i+1]['lat'], orte[i+1]['lon']);
 	                    path.push(src);
 	                    poly.setPath(path);
-	                    service.route({
-	                        origin: src,
-	                        destination: des,
-	                        travelMode: google.maps.DirectionsTravelMode.DRIVING
-	                    }, function (result, status) {
-	                        if (status == google.maps.DirectionsStatus.OK) {
-	                            for (var i = 0, len = result.routes[0].overview_path.length; i < len; i++) {
-	                                path.push(result.routes[0].overview_path[i]);
-	                            }
-	                        }
-	                    });
 	                }
 	            }
+	            // Die letzte Linie hinzufügen
+	            var src = new google.maps.LatLng(orte[orte.length - 1]['lat'], orte[orte.length - 1]['lon']);
+	            path.push(src);
+	            poly.setPath(path);
 			}
 
 			function createMarker(ort){
