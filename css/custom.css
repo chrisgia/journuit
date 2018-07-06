@@ -121,6 +121,12 @@ textarea {
 	color: red;
 }
 
+#landkarte{
+	margin: 0 auto 0 auto;
+	width: 900px;
+	height: 400px;
+}
+
 /* Zentriert das Bullet von Listen */
 ul{
 	list-style-position: inside;
@@ -130,6 +136,10 @@ ul{
 	.eintrag {
 		width: 50%;
 		margin: auto;
+	}
+
+	#landkarte{
+		max-width: 80vw;
 	}
 }
 
@@ -190,7 +200,7 @@ ul{
 		font-size: 1.2em;
 	}
 
-	#pickerMap{
+	#pickerMap, #landkarte{
 		margin: 0;
 		width: 95vw;
 		height: 40vh;
