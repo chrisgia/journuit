@@ -77,7 +77,7 @@
 			$picNumber = '';
 		}
 		$tempPath = "../users/$username/tmp".$picNumber."_".$id.".".$file_ext;
-		// Falls der Benutzer im Formular eine eigene pictureId übergibt
+
 		if(file_exists($tempPath)){
 			$fullPath = "../users/$username/".$id.".".$file_ext;
 			rename($tempPath, $fullPath);
@@ -90,10 +90,10 @@
 				$insertPictureData = $db->prepare("INSERT INTO bilder(id, file_ext) VALUES(?, ?)");
 				$result = $insertPictureData->execute(array(htmlspecialchars($id), htmlspecialchars($file_ext)));
 			}
-			return $result;
 		} else {
-			return false;
+			$result = false;
 		}
+		return $result;
 	}
 
 	function updateBild($db, $username, $previousId, $id, $previous_file_ext, $file_ext){

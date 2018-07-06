@@ -248,27 +248,15 @@
 
 						$insertedPicsCount = 0;
 
-						if($_POST['picture1Id'] != "" && empty($errors)){
-							if(!insertBild($db, $username, $_POST['picture1Id'], $_POST['file1_ext'], 1)) {
-								array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
-							} else {
-								$insertedPicsCount++;
-							}
-						}
-
-						if($_POST['picture2Id'] != "" && empty($errors)){
-							if(!insertBild($db, $username, $_POST['picture2Id'], $_POST['file2_ext'], 2)) {
-								array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
-							} else {
-								$insertedPicsCount++;
-							}
-						}
-
-						if($_POST['picture3Id'] != "" && empty($errors)){
-							if(!insertBild($db, $username, $_POST['picture3Id'], $_POST['file3_ext'], 3)) {
-								array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
-							} else {
-								$insertedPicsCount++;
+						if(empty($errors)){
+							for($i = 1; $i <= 3; $i++){
+								if(isset($_POST['picture'.$i.'Id']) && $_POST['picture'.$i.'Id'] != "" && empty($errors)){
+									if(!insertBild($db, $username, $_POST['picture'.$i.'Id'], $_POST['file'.$i.'_ext'], $i)) {
+										array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
+									} else {
+										$insertedPicsCount++;
+									}
+								}
 							}
 						}
 
@@ -281,6 +269,7 @@
 							}
 							echo "<script>window.location.href = 'reisetagebuecher.php?rtb=".$rtbUrl."&eintragErfolgreich=true';</script>";
 						} else {
+							cleanFolder($username);
 							echo "<div class=\"uk-text-center\">";
 								echo "<ul>";
 								foreach($errors as $error){
@@ -680,21 +669,13 @@
 							$rtbId
 						);
 
-						if(isset($_POST['picture1Id']) && $_POST['picture1Id'] != "" && empty($errors)){
-							if(!insertBild($db, $username, $_POST['picture1Id'], $_POST['file1_ext'], 1)) {
-								array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
-							}
-						}
-
-						if(isset($_POST['picture2Id']) && $_POST['picture2Id'] != "" && empty($errors)){
-							if(!insertBild($db, $username, $_POST['picture2Id'], $_POST['file2_ext'], 2)) {
-								array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
-							}
-						}
-
-						if(isset($_POST['picture3Id']) && $_POST['picture3Id'] != "" && empty($errors)){
-							if(!insertBild($db, $username, $_POST['picture3Id'], $_POST['file3_ext'], 3)) {
-								array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
+						if(empty($errors)){
+							for($i = $anzahlBilder + 1; $i <= 3; $i++){
+								if(isset($_POST['picture'.$i.'Id']) && $_POST['picture'.$i.'Id'] != "" && empty($errors)){
+									if(!insertBild($db, $username, $_POST['picture'.$i.'Id'], $_POST['file'.$i.'_ext'], $i)) {
+										array_push($errors, 'Ein Bild konnte nicht eingefügt werden.');
+									}
+								}
 							}
 						}
 
@@ -706,6 +687,7 @@
 							}
 							echo "<script>window.location.href = 'reisetagebuecher.php?rtb=".$rtbUrl."&eintragErfolgreich=true';</script>";
 						} else {
+							cleanFolder($username);
 							echo "<div class=\"uk-text-center\">";
 								echo "<ul>";
 								foreach($errors as $error){

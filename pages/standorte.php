@@ -101,6 +101,11 @@
                     if(!empty($standort)){
                     ?>
                     <div class="uk-flex uk-flex-column uk-flex-center uk-flex-middle">
+
+                        <div class="uk-margin uk-text-center">
+                            <a class="uk-icon-link uk-margin-left" uk-icon="icon: arrow-left; ratio: 1.2" href="standorte.php?view=meine">Zurück zu deinen Orten</a>
+                        </div>
+
                         <h2 class="uk-text-center uk-margin-top"><?=$standort[0]['name'];?></h2>
                         <hr class="uk-width-1-1">
 
@@ -282,6 +287,11 @@
                 ?>
                 <div class="uk-flex uk-flex-center uk-flex-column uk-flex-middle">
                     <div class="uk-margin-top uk-margin-bottom">
+
+                        <div class="uk-text-center">
+                            <a class="uk-icon-link uk-margin-left" uk-icon="icon: arrow-left; ratio: 1.2" href="standorte.php?view=meine">Zurück zu deinen Orten</a>
+                        </div>
+
                         <div class="uk-text-center uk-text-lead uk-h2"><?=$standort[0]['name'];?></div>
                         <div class="uk-text-center uk-text-lead"><?=$standort[0]['beschreibung'];?></div>
 
