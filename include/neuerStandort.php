@@ -32,8 +32,6 @@
 				<span class="uk-text-middle">Standort per Bild (via Drag & Drop oder </span>
 				<div uk-form-custom>
 					<input type="file" name="files">
-					<!-- Dateigröße auf 5MB limitieren -->
-					<input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
 					<span class="uk-link">direkter Auswahl</span>)
 				</div>
 			</div>
@@ -60,8 +58,6 @@
 				<span class="uk-text-middle">Standortbild (via Drag & Drop oder </span>
 				<div uk-form-custom>
 					<input type="file" name="files">
-					<!-- Dateigröße auf 5MB limitieren -->
-					<input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
 					<span class="uk-link">direkter Auswahl</span>)
 				</div>
 			</div>

@@ -43,7 +43,7 @@
 			<?php 
 			if(isset($rtbUrl) && !empty($rtbUrl)){
 				$rtbId = getRtbIdFromUrl($db, $rtbUrl);
-				$selectReisetagebuchDaten = $db->prepare("SELECT reisetagebuecher.id, users.username, titel, beschreibung, public, erstellt_am, bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) JOIN users ON (users_id = users.id) WHERE reisetagebuecher.id = ?");
+				$selectReisetagebuchDaten = $db->prepare("SELECT reisetagebuecher.id, users.username, titel, url, beschreibung, public, erstellt_am, bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) JOIN users ON (users_id = users.id) WHERE reisetagebuecher.id = ?");
 				$selectReisetagebuchDaten->execute(array($rtbId));
 				$reisetagebuchDaten = $selectReisetagebuchDaten->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -138,8 +138,6 @@
 								<span class="uk-text-middle">Titelbild hochladen (per Drag & Drop oder </span>
 								<div uk-form-custom>
 									<input type="file" name="files">
-									<!-- Dateigröße auf 5MB limitieren -->
-									<input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
 									<span class="uk-link">direkter Auswahl</span>)
 								</div>
 							</div>
@@ -205,6 +203,23 @@
 			case 'reisetagebuch':
 			
 			?>
+			<div id="shareModal" uk-modal>
+			    <div class="uk-modal-dialog">
+			    	<div class="uk-modal-body">
+				        <h2 class="uk-modal-title">"<?=$reisetagebuchDaten[0]['titel'];?>" teilen</h2>
+				        <a class="uk-icon-button shareIcon" uk-icon="icon: copy; ratio: 2" uk-tooltip="title: Link kopieren; pos: bottom" id="copyUrl"></a>
+						<a class="uk-icon-button shareIcon" uk-icon="icon: mail; ratio: 2" uk-tooltip="title: E-Mail; pos: bottom" id="email"></a>
+						<a class="uk-icon-button shareIcon" uk-tooltip="title: PDF erstellen; pos: bottom" id="pdf"><i class="far fa-file-pdf fa-2x"></i></a>
+						<a class="uk-icon-button shareIcon" uk-icon="icon: facebook; ratio: 2" uk-tooltip="title: Auf Facebook teilen; pos: bottom" id="facebook"></a>
+						<a class="uk-icon-button shareIcon" uk-icon="icon: whatsapp; ratio: 2" uk-tooltip="title: Auf Whatsapp teilen; pos: bottom" id="whatsapp"></a>
+						<a class="uk-icon-button shareIcon" uk-icon="icon: twitter; ratio: 2" uk-tooltip="title: Tweeten; pos: bottom" id="twitter"></a>
+					</div>
+					<div class="uk-modal-footer uk-text-right">
+			            <button class="uk-button uk-button-default uk-modal-close" type="button">Schließen</button>
+			        </div>
+			    </div>
+			</div>
+
 			<div class="uk-flex uk-flex-center uk-flex-column uk-flex-middle">
 				<div class="uk-margin-top uk-margin-bottom">
 				<?php 
@@ -220,7 +235,7 @@
 								<button class="uk-icon-link uk-float-left" name="reisetagebuch-bearbeiten" uk-icon="icon: file-edit; ratio: 1.5"></button>
 							</form>
 						</div>
-						<div><a href="" class="uk-icon-link uk-float-right" uk-icon="icon: social; ratio: 1.5"></a></div>
+						<div><button id="share" class="uk-icon-link uk-float-right" name="share" uk-icon="icon: social; ratio: 1.5"></button></div>
 						<div><a href="landkarte.php?rtb=<?=$rtbUrl;?>" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right"></a></div>
 						<div class="uk-text-center uk-text-lead" id="rtbTitel"><?=$reisetagebuchDaten[0]['titel'];?> <span class="uk-text-small">von <?=$username;?></span></div>
 					</div>
@@ -312,7 +327,7 @@
 				} else {
 					?>
 					<div>
-						<div><a href="" class="uk-icon-link uk-float-right" uk-icon="icon: social; ratio: 1.5"></a></div>
+						<div><button id="share" class="uk-icon-link uk-float-right" name="share" uk-icon="icon: social; ratio: 1.5"></button></div>
 						<div><a href="landkarte.php?rtb=<?=$rtbUrl;?>" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right"></a></div>
 						<div class="uk-text-center uk-text-lead" id="rtbTitel"><?=$reisetagebuchDaten[0]['titel'];?> <span class="uk-text-small">von <?=$reisetagebuchDaten[0]['username'];?></span></div>
 					</div>
@@ -409,8 +424,6 @@
 										<span class="uk-text-middle">Titelbild ersetzen (per Drag & Drop oder </span>
 										<div uk-form-custom>
 											<input type="file" name="files">
-											<!-- Dateigröße auf 5MB limitieren -->
-											<input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
 											<span class="uk-link">direkter Auswahl</span>)
 										</div>
 									</div>
@@ -532,7 +545,14 @@
 		?>
 		<script>
 			var bar = document.getElementById('js-progressbar');
-			var username = "<?php echo $username; ?>";
+			<?php 
+				if(isset($username)){
+					echo 'var username = "'.$username.'";'; 
+				}
+				if(isset($rtbUrl)){
+					echo 'var rtb = "'.$rtbUrl.'";'; 
+				}
+			?>
 
 			// Skript zum uploaden von Bildern
 			UIkit.upload('.js-upload', {
@@ -540,18 +560,16 @@
 				url: '/include/upload.php',
 				multiple: false,
 				mime: 'image/*',
+				maxSize: 5000,
 				method: 'POST',
 
-				beforeSend: function () {
-				},
 				beforeAll: function () {
+					$('.js-upload').hide();
 				},
-				load: function () {
-				},
-				error: function () {
-					console.log('test');
-				},
-				complete: function () {
+
+				fail: function (errorMsg) {
+					UIkit.notification.closeAll();
+					UIkit.notification({message: errorMsg, status: 'danger'});
 				},
 
 				loadStart: function (e) {
@@ -580,7 +598,9 @@
 					$('#pictureId').val(infos.pictureId);
 					$('#file_ext').val(infos.file_ext);
 					$('#titelbild').empty().append('<div class="uk-animation-fade"><img class="uk-border-rounded" data-src="'+fullPath+'" uk-img></div>');
+					UIkit.notification.closeAll();
 					UIkit.notification({message: 'Ihr Titelbild wurde erfolgreich hochgeladen.', status: 'success'});
+					$('.js-upload').show();
 					$('#loading').attr('hidden', 'hidden');
 				}
 			});
@@ -607,6 +627,56 @@
 					// Wenn der Benutzer auf "Cancel" drückt...
 				});
 			});
+
+			$(document.body).on('click', '#share', function(){
+				$.ajax({
+					url : '/ajax/getLinkQrCode.php',
+					type : 'POST',
+					data : {
+						url: rtb
+					},
+					success : function(response) {
+						$('#shareModal').find('.uk-modal-body').append(response);
+					}
+				});
+				UIkit.modal('#shareModal').show();
+			});
+
+			$(document.body).on('click', '.shareIcon', function(){
+				var action = this.id;
+				var url = window.location.href;
+				var body = 'Ich habe ein interessantes Reisetagebuch auf journuit gefunden. Schau es dir mal an : '+url+' !';
+
+				if(action == 'copyUrl'){
+					var urlInput = document.createElement('input');
+				    
+					document.body.appendChild(urlInput);
+					urlInput.value = url;
+					urlInput.select();
+					document.execCommand('copy');
+					document.body.removeChild(urlInput);
+					UIkit.notification.closeAll()
+					UIkit.notification({message: 'Der Link wurde kopiert!', status: 'success', pos: 'bottom-center'});
+				}
+
+				if(action == 'email'){
+					var subject = '<?=$reisetagebuchDaten[0]['titel'].', von '.$reisetagebuchDaten[0]['username'];?>';
+					window.location.href = "mailto:?subject="+subject+"&body="+body;
+				}
+
+				if(action == 'facebook'){
+					window.open("https://www.facebook.com/sharer/sharer.php?u="+url);
+				}
+
+				if(action == 'whatsapp'){
+					window.open("https://wa.me/?text="+body);
+				}
+
+				if(action == 'twitter'){
+					window.open("https://twitter.com/intent/tweet?text="+body);
+				}
+			});
+
 		</script>
 	</body>
 </html>

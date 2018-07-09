@@ -3,9 +3,7 @@ require $_SERVER['DOCUMENT_ROOT'].'/include/db_connect.php';
 require $_SERVER['DOCUMENT_ROOT'].'/include/functions.php';
 
 if(isset($_FILES['files'])){
-	$error = false;
-	// TODO : Filesize und Type checken
-
+	$infos = array();
 	// Dateiinformationen
 	$file_name = $_FILES['files']['name'][0];
 	$file_size = $_FILES['files']['size'][0];
@@ -13,6 +11,21 @@ if(isset($_FILES['files'])){
 	$file_ext = substr($file_name, strpos($file_name, ".") + 1);
 	$pictureId = uniqueDbId($db, 'bilder', 'id');
 	$filename = "tmp_".$pictureId.".".$file_ext;
+
+	// Checken ob die Datei ein Bild ist
+	if(!exif_imagetype($file_tmp)) {
+		$infos = array(
+			'status' => 'ERROR',
+			'msg' => 'Diese Datei wird nicht unterstützt.'
+		);
+	}
+
+	if((int) $file_size > 5242880){
+		$infos = array(
+			'status' => 'ERROR',
+			'msg' => 'Die Datei ist zu groß. (maximal 5MB)'
+		);
+	}
 
 	$mask = "../users/$username/tmp_*.*";
 
@@ -42,7 +55,10 @@ if(isset($_FILES['files'])){
 		}
 
 		if($fieldToFill > 3){
-			$error = true;
+				$infos = array(
+					'status' => 'ERROR',
+					'msg' => 'Die maximale Anzahl (3) an Bildern wurde schon erreicht. Sie können andere Bilder ersetzen indem Sie diese davor löschen.'
+				);
 		}
 
 		$filename = "tmp".$fieldToFill."_".$pictureId.".".$file_ext;
@@ -52,7 +68,7 @@ if(isset($_FILES['files'])){
 		array_map('unlink', glob($mask));
 	}
 
-	if(!$error){
+	if(empty($infos)){
 		$fullPath = "../users/$username/".$filename;
 
 		// Das Bild wird mittels TinyPNG API kompressiert
@@ -84,10 +100,6 @@ if(isset($_FILES['files'])){
 			'pictureId' => $pictureId, 
 			'file_ext' => $file_ext,
 			'fieldToFill' => $fieldToFill
-		);
-	} else {
-		$infos = array(
-			'status' => 'ERROR'
 		);
 	}
 

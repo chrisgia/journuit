@@ -152,8 +152,6 @@
 											<span class="uk-text-middle">Bilder hochladen (max. 3, per Drag & Drop oder </span>
 											<div uk-form-custom>
 												<input type="file" name="files">
-												<!-- Dateigröße auf 5MB limitieren -->
-												<input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
 												<span class="uk-link">direkter Auswahl</span>)
 											</div>
 										</div>
@@ -550,8 +548,6 @@
 											<span class="uk-text-middle">Bilder hochladen (max. 3, per Drag & Drop oder </span>
 											<div uk-form-custom>
 												<input type="file" name="files">
-												<!-- Dateigröße auf 5MB limitieren -->
-												<input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
 												<span class="uk-link">direkter Auswahl</span>)
 											</div>
 										</div>
@@ -856,24 +852,22 @@
 
 				url: '/include/upload.php',
 				mime: 'image/*',
+				maxSize: 5000,
 				method: 'POST',
 				params: {
 					multiple: true,
 					anzahlBilder: anzahlBilder
 				},
 
-				beforeSend: function () {
-				},
 				beforeAll: function () {
+					$('#eintragsBildUpload').hide();
 					if($('#picture3Id').val() != ''){
 						$('#picturesError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>Die maximale Anzahl (3) an Bildern wurde schon erreicht. Sie können andere Bilder ersetzen indem Sie diese davor löschen.</p></div>');
 					}
 				},
-				load: function () {
-				},
-				error: function () {
-				},
-				complete: function () {
+
+				fail: function (errorMsg) {
+					UIkit.notification({message: errorMsg, status: 'danger'});
 				},
 
 				loadStart: function (e) {
@@ -905,8 +899,9 @@
 						$('#pictures').append('<div class="uk-animation-fade uk-inline uk-dark" id="picture'+infos.fieldToFill+'Div"><button class="uk-position-top-right uk-icon-button deletePicture" type="button" uk-icon="icon: close"></button><img class="uk-border-rounded eintragBild" data-src="'+fullPath+'" src="'+fullPath+'" uk-img></div>');
 						UIkit.notification({message: 'Ihr Eintragsbild wurde erfolgreich hochgeladen.', status: 'success'});
 					} else {
-						$('#picturesError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>Die maximale Anzahl (3) an Bildern wurde schon erreicht. Sie können andere Bilder ersetzen indem Sie diese davor löschen.</p></div>');
+						$('#picturesError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>'+infos.msg+'</p></div>');
 					}
+					$('#eintragsBildUpload').show();
 					$('#loading2').attr('hidden', 'hidden');
 				}
 			});

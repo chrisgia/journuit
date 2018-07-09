@@ -6,18 +6,15 @@ UIkit.upload('#standortVonBild', {
 	url: '/include/standortVonUpload.php',
 	multiple: false,
 	mime: 'image/*',
+	maxSize: 5000,
 	method: 'POST',
 
-	beforeSend: function () {
-	},
 	beforeAll: function () {
+		$('#standortVonBild').hide();
 	},
-	load: function () {
-	},
-	error: function () {
-		console.log('test');
-	},
-	complete: function () {
+
+	fail: function (errorMsg) {
+		UIkit.notification({message: errorMsg, status: 'danger'});
 	},
 
 	loadStart: function (e) {
@@ -53,7 +50,8 @@ UIkit.upload('#standortVonBild', {
 				},
 				radius: null
 			});
-		}				   
+		}
+		$('#standortVonBild').show();				   
 	}
 });
 
@@ -65,21 +63,19 @@ UIkit.upload('#standortBildUpload', {
 	url: '/include/upload.php',
 	multiple: false,
 	mime: 'image/*',
+	maxSize: 5000,
 	method: 'POST',
 	params: {
 		width: 300,
 		height: 300
 	},
 
-	beforeSend: function () {
-	},
 	beforeAll: function () {
+		$('#standortBildUpload').hide();
 	},
-	load: function () {
-	},
-	error: function () {
-	},
-	complete: function () {
+
+	fail: function (errorMsg) {
+		UIkit.notification({message: errorMsg, status: 'danger'});
 	},
 
 	loadStart: function (e) {
@@ -110,5 +106,6 @@ UIkit.upload('#standortBildUpload', {
 		$('#standortBild').empty().append('<div class="uk-animation-fade"><img class="uk-border-rounded" data-src="'+fullPath+'" uk-img></div>');
 		UIkit.notification({message: 'Ihr Standortbild wurde erfolgreich hochgeladen.', status: 'success'});
 		$('#loading1').attr('hidden', 'hidden');
+		$('#standortBildUpload').show();
 	}
 });

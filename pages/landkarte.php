@@ -115,7 +115,12 @@
 
 			    // Linien zwischen den Standorten
 	            var path = new google.maps.MVCArray();
-	            var poly = new google.maps.Polyline({ map: eintraegeMap, strokeColor: '#000000' });
+	            var poly = new google.maps.Polyline({
+	            	map: eintraegeMap, 
+	            	strokeColor: '#000000',
+	            	strokeOpacity: 1,
+          			strokeWeight: 3
+	            });
 	 
 	            for (var i = 0; i < orte.length; i++) {
 	                if ((i + 1) < orte.length) {
