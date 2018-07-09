@@ -207,12 +207,17 @@
 			    <div class="uk-modal-dialog">
 			    	<div class="uk-modal-body">
 				        <h2 class="uk-modal-title">"<?=$reisetagebuchDaten[0]['titel'];?>" teilen</h2>
+
 				        <a class="uk-icon-button shareIcon" uk-icon="icon: copy; ratio: 2" uk-tooltip="title: Link kopieren; pos: bottom" id="copyUrl"></a>
 						<a class="uk-icon-button shareIcon" uk-icon="icon: mail; ratio: 2" uk-tooltip="title: E-Mail; pos: bottom" id="email"></a>
 						<a class="uk-icon-button shareIcon" uk-tooltip="title: PDF erstellen; pos: bottom" id="pdf"><i class="far fa-file-pdf fa-2x"></i></a>
 						<a class="uk-icon-button shareIcon" uk-icon="icon: facebook; ratio: 2" uk-tooltip="title: Auf Facebook teilen; pos: bottom" id="facebook"></a>
 						<a class="uk-icon-button shareIcon" uk-icon="icon: whatsapp; ratio: 2" uk-tooltip="title: Auf Whatsapp teilen; pos: bottom" id="whatsapp"></a>
 						<a class="uk-icon-button shareIcon" uk-icon="icon: twitter; ratio: 2" uk-tooltip="title: Tweeten; pos: bottom" id="twitter"></a>
+
+						<div id="linkQrCode" class="uk-margin-medium-top">
+							<!-- Hier wird der QR-Code mit dem Link des Reisetagebuchs angezeigt -->
+						</div>
 					</div>
 					<div class="uk-modal-footer uk-text-right">
 			            <button class="uk-button uk-button-default uk-modal-close" type="button">Schließen</button>
@@ -636,47 +641,52 @@
 						url: rtb
 					},
 					success : function(response) {
-						$('#shareModal').find('.uk-modal-body').append(response);
+						$('#linkQrCode').empty().append(response);
 					}
 				});
 				UIkit.modal('#shareModal').show();
 			});
 
-			$(document.body).on('click', '.shareIcon', function(){
-				var action = this.id;
-				var url = window.location.href;
-				var body = 'Ich habe ein interessantes Reisetagebuch auf journuit gefunden. Schau es dir mal an : '+url+' !';
+			<?php
+			if(isset($rtbUrl)){
+				?>
+				$(document.body).on('click', '.shareIcon', function(){
+					var action = this.id;
+					var url = window.location.href;
+					var body = 'Ich habe ein interessantes Reisetagebuch auf journuit gefunden. Schau es dir mal an : '+url+' !';
 
-				if(action == 'copyUrl'){
-					var urlInput = document.createElement('input');
-				    
-					document.body.appendChild(urlInput);
-					urlInput.value = url;
-					urlInput.select();
-					document.execCommand('copy');
-					document.body.removeChild(urlInput);
-					UIkit.notification.closeAll()
-					UIkit.notification({message: 'Der Link wurde kopiert!', status: 'success', pos: 'bottom-center'});
-				}
+					if(action == 'copyUrl'){
+						var urlInput = document.createElement('input');
+					    
+						document.body.appendChild(urlInput);
+						urlInput.value = url;
+						urlInput.select();
+						document.execCommand('copy');
+						document.body.removeChild(urlInput);
+						UIkit.notification.closeAll()
+						UIkit.notification({message: 'Der Link wurde kopiert!', status: 'success', pos: 'bottom-center'});
+					}
 
-				if(action == 'email'){
-					var subject = '<?=$reisetagebuchDaten[0]['titel'].', von '.$reisetagebuchDaten[0]['username'];?>';
-					window.location.href = "mailto:?subject="+subject+"&body="+body;
-				}
+					if(action == 'email'){
+						var subject = '<?=$reisetagebuchDaten[0]['titel'].', von '.$reisetagebuchDaten[0]['username'];?>';
+						window.location.href = "mailto:?subject="+subject+"&body="+body;
+					}
 
-				if(action == 'facebook'){
-					window.open("https://www.facebook.com/sharer/sharer.php?u="+url);
-				}
+					if(action == 'facebook'){
+						window.open("https://www.facebook.com/sharer/sharer.php?u="+url);
+					}
 
-				if(action == 'whatsapp'){
-					window.open("https://wa.me/?text="+body);
-				}
+					if(action == 'whatsapp'){
+						window.open("https://wa.me/?text="+body);
+					}
 
-				if(action == 'twitter'){
-					window.open("https://twitter.com/intent/tweet?text="+body);
-				}
-			});
-
+					if(action == 'twitter'){
+						window.open("https://twitter.com/intent/tweet?text="+body);
+					}
+				});
+				<?php
+			}
+			?>
 		</script>
 	</body>
 </html>
