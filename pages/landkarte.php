@@ -20,7 +20,7 @@
 		<?php require $_SERVER['DOCUMENT_ROOT']."/include/navbar.php";?>
 		<div class="uk-container uk-container-large">
 		<?php
-			$selectStandorte = $db->prepare("SELECT standorte.name, standorte.lat, standorte.lon, standorte.bild_id, bilder.file_ext, eintraege.titel, eintraege.datum, eintraege.uhrzeit FROM eintraege LEFT JOIN standorte ON (eintraege.standort_id = standorte.id) LEFT JOIN bilder ON (standorte.bild_id = bilder.id) WHERE eintraege.reisetagebuch_id = ? ORDER BY eintraege.datum, eintraege.uhrzeit ASC");
+			$selectStandorte = $db->prepare("SELECT standorte.name, standorte.lat, standorte.lon, standorte.bild_id, bilder.file_ext, eintraege.titel, eintraege.datum, eintraege.uhrzeit FROM eintraege JOIN standorte ON (eintraege.standort_id = standorte.id) LEFT JOIN bilder ON (standorte.bild_id = bilder.id) WHERE eintraege.reisetagebuch_id = ? ORDER BY eintraege.datum, eintraege.uhrzeit ASC");
 			$selectStandorte->execute(array($rtbId));
 			$standorte = $selectStandorte->fetchAll(\PDO::FETCH_ASSOC);
 			if(!empty($standorte)){
