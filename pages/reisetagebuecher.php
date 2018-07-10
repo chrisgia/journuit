@@ -212,7 +212,7 @@
 						<a class="uk-icon-button shareIcon" uk-icon="icon: mail; ratio: 2" uk-tooltip="title: E-Mail; pos: bottom" id="email"></a>
 						<a class="uk-icon-button shareIcon" uk-tooltip="title: PDF erstellen; pos: bottom" id="pdf"><i class="far fa-file-pdf fa-2x"></i></a>
 						<a class="uk-icon-button shareIcon" uk-icon="icon: facebook; ratio: 2" uk-tooltip="title: Auf Facebook teilen; pos: bottom" id="facebook"></a>
-						<a class="uk-icon-button shareIcon" uk-icon="icon: whatsapp; ratio: 2" uk-tooltip="title: Auf Whatsapp teilen; pos: bottom" id="whatsapp"></a>
+						<a class="uk-icon-button shareIcon" uk-icon="icon: whatsapp; ratio: 2" uk-tooltip="title: Mit WhatsApp teilen; pos: bottom" id="whatsapp"></a>
 						<a class="uk-icon-button shareIcon" uk-icon="icon: twitter; ratio: 2" uk-tooltip="title: Tweeten; pos: bottom" id="twitter"></a>
 
 						<div id="linkQrCode" class="uk-margin-medium-top">
@@ -562,7 +562,7 @@
 			// Skript zum uploaden von Bildern
 			UIkit.upload('.js-upload', {
 
-				url: '/include/upload.php',
+				url: '/ajax/upload.php',
 				multiple: false,
 				mime: 'image/*',
 				maxSize: 5000,
@@ -682,6 +682,20 @@
 
 					if(action == 'twitter'){
 						window.open("https://twitter.com/intent/tweet?text="+body);
+					}
+
+					if(action == 'pdf'){
+						var rtbCreator = '<?=$reisetagebuchDaten[0]['username'];?>';
+						var rtbTitel = '<?=$reisetagebuchDaten[0]['titel'];?>';
+						// PDF erstellen
+						$.ajax({
+							url : '/ajax/getPdf.php',
+							type : 'POST',
+							data : {
+								rtb: rtb
+							}
+						});
+						window.open('../users/'+username+'/'+rtbCreator+'_'+rtbTitel+'.pdf');
 					}
 				});
 				<?php

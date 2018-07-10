@@ -3,7 +3,7 @@ var bar1 = document.getElementById('js-progressbar');
 // Skript zum ermitteln des Standorts von einem Bild
 UIkit.upload('#standortVonBild', {
 
-	url: '/include/standortVonUpload.php',
+	url: '/ajax/standortVonUpload.php',
 	multiple: false,
 	mime: 'image/*',
 	maxSize: 5000,
@@ -60,7 +60,7 @@ var bar2 = document.getElementById('js-progressbar2');
 // Skript zum uploaden vom Standortbild
 UIkit.upload('#standortBildUpload', {
 
-	url: '/include/upload.php',
+	url: '/ajax/upload.php',
 	multiple: false,
 	mime: 'image/*',
 	maxSize: 5000,

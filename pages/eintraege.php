@@ -850,7 +850,7 @@
 			// Skript zum uploaden von Bildern zu einem Eintrag
 			UIkit.upload('#eintragsBildUpload', {
 
-				url: '/include/upload.php',
+				url: '/ajax/upload.php',
 				mime: 'image/*',
 				maxSize: 5000,
 				method: 'POST',
