@@ -20,7 +20,7 @@
 		<?php require $_SERVER['DOCUMENT_ROOT']."/include/navbar.php";?>
 		<div class="uk-container uk-container-large">
 		<?php
-			$selectStandorte = $db->prepare("SELECT standorte.name, standorte.lat, standorte.lon, standorte.bild_id, bilder.file_ext, eintraege.titel, eintraege.datum, eintraege.uhrzeit FROM eintraege JOIN standorte ON (eintraege.standort_id = standorte.id) LEFT JOIN bilder ON (standorte.bild_id = bilder.id) WHERE eintraege.reisetagebuch_id = ? ORDER BY eintraege.datum, eintraege.uhrzeit ASC");
+			$selectStandorte = $db->prepare("SELECT DISTINCT standorte.id, standorte.name, standorte.lat, standorte.lon, standorte.bild_id, bilder.file_ext FROM standorte JOIN eintraege ON (eintraege.standort_id = standorte.id) LEFT JOIN bilder ON (standorte.bild_id = bilder.id) WHERE eintraege.reisetagebuch_id = ? ORDER BY eintraege.datum, eintraege.uhrzeit ASC");
 			$selectStandorte->execute(array($rtbId));
 			$standorte = $selectStandorte->fetchAll(\PDO::FETCH_ASSOC);
 			if(!empty($standorte)){
@@ -43,22 +43,37 @@
 					<tbody>
 
 					<?php
-					$count = 1;
+					$standortCount = 1;
 					foreach($standorte as $standort){
-						$formatiertesDatum = strftime("%e. %B %Y", strtotime($standort['datum']));
-						$uhrzeit = substr_replace($standort['uhrzeit'], ':', 2, 0);
+						$selectEintraege = $db->prepare("SELECT titel, datum, uhrzeit FROM eintraege WHERE standort_id = ?");
+						$selectEintraege->execute(array($standort['id']));
+						$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
+
+						$dateString = '';
+						$eintraegeString = '';
+						$eintragCount = 1;
+						foreach($eintraege as $eintrag){
+							$formatiertesDatum = strftime("%e. %B %Y", strtotime($eintrag['datum']));
+							$uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
+							$dateString .= $formatiertesDatum.' '.$uhrzeit.'<br/>';
+							$eintraegeString .= $eintrag['titel'];
+							if($eintragCount != sizeof($eintraege)){
+								$eintraegeString .= ', ';
+							}
+							$eintragCount++;
+						}
 						?>
-						<tr class="eintragBox" id="eintrag<?=$count;?>">
+						<tr class="standortBox" id="standort<?=$standortCount;?>">
 							<td>
-							<span class="uk-text-bold uk-h3 uk-margin-right"><?=$count;?> </span>
-							<?=$standort['name'];?>	(<?=$standort['titel'];?>)
+							<span class="uk-text-bold uk-h3 uk-margin-right"><?=$standortCount;?> </span>
+							<?=$standort['name'];?>	(<?=$eintraegeString;?>)
 							</td>
 							<td class="uk-text-right">
-								<?=$formatiertesDatum.' '.$uhrzeit;?>
+								<?=$dateString;?>
 							</td>
 						</tr>
-					<?php
-					$count++;
+						<?php
+						$standortCount++;
 					}
 					?>
 					</tbody>
@@ -156,8 +171,8 @@
 		    	return marker;
 			}
 
-			$('.eintragBox').on('click', function(){
-				var markerId = this.id.replace("eintrag", "") - 1;
+			$('.standortBox').on('click', function(){
+				var markerId = this.id.replace("standort", "") - 1;
 				var markerInstance = markers[markerId];
 				eintraegeMap.setCenter(markerInstance.getPosition());
 				eintraegeMap.setZoom(12);

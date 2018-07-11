@@ -186,6 +186,8 @@
 					$uniqueUrl = uniqueDbId($db, 'reisetagebuecher', 'url');
 					$insertReisetagebuch = $db->prepare("INSERT INTO reisetagebuecher(users_id, titel, beschreibung, url, public, bild_id) VALUES(?, ?, ?, ?, ?, ?)");
 					$insertReisetagebuch->execute(array(htmlspecialchars($userId), htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['beschreibung']), $uniqueUrl, $public, htmlspecialchars($_POST['pictureId'])));
+					$root = filter_input(INPUT_SERVER, 'DOCUMENT_ROOT');
+					mkdir($root."/files/$uniqueUrl/", 0755, true);
 					echo "<script>window.location.href = 'reisetagebuecher.php?view=meine&success=true';</script>";
 				} else {
 					echo "<ul>";
@@ -633,6 +635,7 @@
 				});
 			});
 
+			// Erstellt QR Code und PDF-Datei bereits beim Klicken auf das Share Icon
 			$(document.body).on('click', '#share', function(){
 				$.ajax({
 					url : '/ajax/getLinkQrCode.php',
@@ -642,6 +645,14 @@
 					},
 					success : function(response) {
 						$('#linkQrCode').empty().append(response);
+					}
+				});
+				// PDF erstellen
+				$.ajax({
+					url : '/ajax/getPdf.php',
+					type : 'POST',
+					data : {
+						rtb: rtb
 					}
 				});
 				UIkit.modal('#shareModal').show();
@@ -687,15 +698,7 @@
 					if(action == 'pdf'){
 						var rtbCreator = '<?=$reisetagebuchDaten[0]['username'];?>';
 						var rtbTitel = '<?=$reisetagebuchDaten[0]['titel'];?>';
-						// PDF erstellen
-						$.ajax({
-							url : '/ajax/getPdf.php',
-							type : 'POST',
-							data : {
-								rtb: rtb
-							}
-						});
-						window.open('../users/'+username+'/'+rtbCreator+'_'+rtbTitel+'.pdf');
+						window.open('../files/'+rtb+'/'+rtbCreator+'_'+rtbTitel+'.pdf');
 					}
 				});
 				<?php

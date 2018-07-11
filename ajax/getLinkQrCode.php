@@ -5,7 +5,7 @@
 
 	if(isset($_POST['url'])){
 		$url = 'http://www.landausflugsplaner.de/pages/reisetagebuecher.php?rtb='.htmlspecialchars($_POST['url']);
-		$qrCodePicPath = "../users/$username/linkQrCode.png";
+		$qrCodePicPath = "../files/".htmlspecialchars($_POST['url'])."/linkQrCode.png";
 
 		QRCode::png($url, $qrCodePicPath,'M', 4, 2);
 		echo "<img class=\"uk-align-center\" src=\"".$qrCodePicPath."\">"; 

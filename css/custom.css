@@ -110,6 +110,10 @@ textarea {
 	cursor: pointer;
 }
 
+.standortBox{
+	cursor: pointer;
+}
+
 .newRtbLink{
 	font-size: 1.5em;
 }

@@ -209,6 +209,14 @@
 					if(isset($_POST['standort'], $_POST['dateTime'], $_POST['titel'], $_POST['eintrag'])){
 						$errors = array();
 
+						if (isset($_POST['zusammenfassung']) && ($_POST['zusammenfassung'] == "1")) {
+							$zusammenfassung = 1;
+							$_POST['standort'] = null;
+							$_POST['dateTime'] = null;
+						} else {
+							$zusammenfassung = 0;
+						}
+						
 						$datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
 						$uhrzeit = str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5));
 						$roundedUhrzeit = round((int) $uhrzeit / 5) * 5;
@@ -224,12 +232,6 @@
 
 						if (ctype_space(htmlspecialchars($_POST['eintrag'])) || empty($_POST['eintrag'])) {
 							array_push($errors, 'Der Eintrag darf nicht leer sein.');
-						}
-
-						if (isset($_POST['zusammenfassung']) && ($_POST['zusammenfassung'] == "1")) {
-							$zusammenfassung = 1;
-						} else {
-							$zusammenfassung = 0;
 						}
 
 						if (isset($_POST['public']) && ($_POST['public'] == "1")) {
