@@ -312,10 +312,10 @@
 							<hr class="uk-width-1-1">  
 							<?php 
 							foreach($eintraege as $eintrag) {
-								// Gespeicherte Standorte des Benutzers 
+								// Standort des Eintrages auswählen
 								$standortName = '?';
 								$eintragId = htmlspecialchars($eintrag['id']);
-
+								
 								if(isset($eintrag['standort_id'])){
 									$selectStandort = $db->prepare("SELECT id, name FROM standorte WHERE id = ?");
 									$standortId = htmlspecialchars($eintrag['standort_id']);
@@ -362,7 +362,7 @@
 									</span>
 								</div>
 								<br/>
-								<div class="uk-margin-top eintragText">
+								<div class="uk-margin-top uk-text-break eintragText">
 									<p><?=$eintrag['text'];?></p>
 								</div>
 								<?php
@@ -399,7 +399,7 @@
 							foreach($eintraege as $eintrag) {
 								$standortName = '?';
 								if($eintrag['public'] == 1){
-									// Gespeicherte Standorte des Benutzers 
+									// Standort des Eintrages auswählen
 									$selectStandort = $db->prepare("SELECT name FROM standorte WHERE id = ?");
 									$standortId = htmlspecialchars($eintrag['standort_id']);
 									$selectStandort->execute(array($standortId));
@@ -434,7 +434,7 @@
 										</span>
 									</div>
 									<br/>
-									<div class="uk-margin-top eintragText">
+									<div class="uk-margin-top uk-text-break eintragText">
 										<p><?=$eintrag['text'];?></p>
 									</div>
 									<?php
