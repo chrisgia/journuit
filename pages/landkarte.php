@@ -128,6 +128,12 @@
 			    // Die Map wird dort zentriert wo die Marker liegen
 			    eintraegeMap.fitBounds(bounds);
 
+			    // Fix damit die Map nach dem "fitBounds" nicht zu nahr ist
+			    var listener = google.maps.event.addListener(eintraegeMap, "idle", function() { 
+					if (eintraegeMap.getZoom() > 16) eintraegeMap.setZoom(16); 
+					google.maps.event.removeListener(listener); 
+				});
+
 			    // Linien zwischen den Standorten
 	            var path = new google.maps.MVCArray();
 	            var poly = new google.maps.Polyline({
@@ -165,7 +171,7 @@
 	            marker.addListener('click', function() {
 	            	//Schliessen von offenen infoWindows damit immer nur eins aufbleibt
 		        	eintraegeMap.setCenter(this.getPosition());
-					eintraegeMap.setZoom(12);
+					eintraegeMap.setZoom(18);
 		    	});
 		    	
 		    	return marker;
@@ -175,7 +181,7 @@
 				var markerId = this.id.replace("standort", "") - 1;
 				var markerInstance = markers[markerId];
 				eintraegeMap.setCenter(markerInstance.getPosition());
-				eintraegeMap.setZoom(12);
+				eintraegeMap.setZoom(18);
 			});
 		</script>
 	</body>

@@ -70,7 +70,7 @@
                         }
                         ?>
                         <div class="uk-text-center uk-margin-small-bottom">
-                            <span><a class="uk-link-text" href="standorte.php?id=<?=$standort['id'];?>"><?=$standort['name'];?> (<i><?=$standortBeschreibung?></i>)</a> <a class="uk-icon-link" uk-icon="icon: file-edit" href="standorte.php?view=bearbeiten&id=<?=$standort['id'];?>"></a></span>
+                            <span><a class="uk-link-text" href="standorte.php?id=<?=$standort['id'];?>"><?=$standort['name'];?> (<i><?=$standortBeschreibung?></i>)</a> <a class="uk-icon-link" uk-icon="icon: file-edit" href="standorte.php?view=bearbeiten&id=<?=$standort['id'];?>" uk-tooltip="title: Ort bearbeiten; pos: bottom"></a></span>
                         </div>
                     <?php
                     }

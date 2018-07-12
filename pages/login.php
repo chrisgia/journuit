@@ -50,8 +50,6 @@
 				</div>
 				<?php
 					if(isset($_POST['login'])){
-						error_reporting(E_ALL);
-						ini_set('display_errors', '1');
 						try {
 							$error = "";
 							$auth->login(htmlspecialchars($_POST['email']), htmlspecialchars($_POST['passwort']));

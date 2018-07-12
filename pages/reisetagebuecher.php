@@ -233,17 +233,24 @@
 				$selectDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ? AND entwurf = 0 ORDER BY datum DESC");
 				$selectDates->execute(array($rtbId));
 				$dates = $selectDates->fetchAll(\PDO::FETCH_ASSOC);
+				$disabled = '';
+				$tooltipText = 'Teilen';
+				if($reisetagebuchDaten[0]['public'] != 1){
+					$disabled = 'disabled';
+					$tooltipText = 'Das Reisetagebuch muss Öffentlich sein, um geteilt zu werden.';
+				}
 				if(isOwner($db, $userId, $rtbId)){
 				?>
 					<div>
 						<div>
 							<form method="POST" action="reisetagebuecher.php?view=bearbeiten">
 								<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
-								<button class="uk-icon-link uk-float-left" name="reisetagebuch-bearbeiten" uk-icon="icon: file-edit; ratio: 1.5"></button>
+								<button class="uk-icon-link uk-float-left" name="reisetagebuch-bearbeiten" uk-icon="icon: file-edit; ratio: 1.5" uk-tooltip="title: Reisetagebuch bearbeiten; pos: bottom"></button>
 							</form>
 						</div>
-						<div><button id="share" class="uk-icon-link uk-float-right" name="share" uk-icon="icon: social; ratio: 1.5"></button></div>
-						<div><a href="landkarte.php?rtb=<?=$rtbUrl;?>" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right"></a></div>
+
+						<div><button id="share" class="uk-icon-link uk-float-right" name="share" uk-icon="icon: social; ratio: 1.5" <?=$disabled;?> uk-tooltip="title: <?=$tooltipText;?>; pos: bottom"></button></div>
+						<div><a href="landkarte.php?rtb=<?=$rtbUrl;?>" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right" uk-tooltip="title: Landkarte; pos: bottom"></a></div>
 						<div class="uk-text-center uk-text-lead" id="rtbTitel"><?=$reisetagebuchDaten[0]['titel'];?> <span class="uk-text-small">von <?=$username;?></span></div>
 					</div>
 
@@ -334,8 +341,8 @@
 				} else {
 					?>
 					<div>
-						<div><button id="share" class="uk-icon-link uk-float-right" name="share" uk-icon="icon: social; ratio: 1.5"></button></div>
-						<div><a href="landkarte.php?rtb=<?=$rtbUrl;?>" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right"></a></div>
+						<div><button id="share" class="uk-icon-link uk-float-right" name="share" uk-icon="icon: social; ratio: 1.5" <?=$disabled;?> uk-tooltip="title: <?=$tooltipText;?>; pos: bottom"></button></div>
+						<div><a href="landkarte.php?rtb=<?=$rtbUrl;?>" class="uk-icon-link uk-float-right far fa-map fa-big uk-margin-small-right" uk-tooltip="title: Landkarte; pos: bottom"></a></div>
 						<div class="uk-text-center uk-text-lead" id="rtbTitel"><?=$reisetagebuchDaten[0]['titel'];?> <span class="uk-text-small">von <?=$reisetagebuchDaten[0]['username'];?></span></div>
 					</div>
 
@@ -546,9 +553,9 @@
 		</div>
 		<?php 
 			// Success Benachrichtigungen 
-			if(isset($_GET['login'])){echo "<script>UIkit.notification({message: 'Sie sind angemeldet.', status: 'success', pos: 'top-right'});</script>";}
-			if(isset($_GET['success'])){echo "<script>UIkit.notification({message: 'Ihr Reisetagebuch wurde erfolgreich gespeichert.', status: 'success', pos: 'top-right'});</script>";}
-			if(isset($_GET['eintragErfolgreich'])){echo "<script>UIkit.notification({message: 'Ihr Eintrag wurde erfolgreich gespeichert.', status: 'success', pos: 'top-right'});</script>";}
+			if(isset($_GET['login'])){echo "<script>UIkit.notification({message: 'Sie sind angemeldet.', status: 'success', pos: 'bottom-center'});</script>";}
+			if(isset($_GET['success'])){echo "<script>UIkit.notification({message: 'Ihr Reisetagebuch wurde erfolgreich gespeichert.', status: 'success', pos: 'bottom-center'});</script>";}
+			if(isset($_GET['eintragErfolgreich'])){echo "<script>UIkit.notification({message: 'Ihr Eintrag wurde erfolgreich gespeichert.', status: 'success', pos: 'bottom-center'});</script>";}
 		?>
 		<script>
 			var bar = document.getElementById('js-progressbar');
@@ -698,7 +705,8 @@
 					if(action == 'pdf'){
 						var rtbCreator = '<?=$reisetagebuchDaten[0]['username'];?>';
 						var rtbTitel = '<?=$reisetagebuchDaten[0]['titel'];?>';
-						window.open('../files/'+rtb+'/'+rtbCreator+'_'+rtbTitel+'.pdf');
+						var formatierterRtbTitel = rtbTitel.replace(/[èéêë]/g, "e").replace(/[ç]/g, "c").replace(/[àâä]/g, "a").replace(/[ïî]/g, "i").replace(/[ûùü]/g, "u").replace(/[ôöó]/g, "o");
+						window.open('../files/'+rtb+'/'+rtbCreator+'_'+formatierterRtbTitel+'.pdf');
 					}
 				});
 				<?php

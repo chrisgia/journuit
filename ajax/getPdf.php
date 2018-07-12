@@ -19,6 +19,7 @@
 
 			$rtbCreator = $reisetagebuch[0]['username'];
 			$rtbTitel = iconv("UTF-8", "Windows-1252//TRANSLIT", $reisetagebuch[0]['titel']);
+			$rtbBeschreibung = iconv("UTF-8", "Windows-1252//TRANSLIT", $reisetagebuch[0]['beschreibung']);
 
 			// Anzahl an Einträgen
 			$selectAnzahlEintraege = $db->prepare("SELECT COUNT(id) AS anzahl FROM eintraege WHERE reisetagebuch_id = ? AND entwurf = 0");
@@ -49,8 +50,8 @@
 			$reisetagebuchPdf = new PDF("P", "mm", "A4"); // L=Querformat(Landscape), P=Hochformat(Portrait)
 			$reisetagebuchPdf->SetAuthor($fullname);
 			$reisetagebuchPdf->SetCreator('journuit - FPDF');
-			$reisetagebuchPdf->SetTitle($reisetagebuch[0]['titel']);
-			$reisetagebuchPdf->SetSubject($reisetagebuch[0]['beschreibung']);
+			$reisetagebuchPdf->SetTitle($rtbTitel);
+			$reisetagebuchPdf->SetSubject($rtbBeschreibung);
 			$reisetagebuchPdf->AliasNbPages();
 
 			// Linien Weiß
@@ -82,7 +83,7 @@
 
 			$reisetagebuchPdf->SetFontSize(13);
 			$reisetagebuchPdf->SetFont('', '');
-			$reisetagebuchPdf->MultiCell($reisetagebuchPdf->GetPageWidth() - 30, 10, $reisetagebuch[0]['beschreibung'], 0, 1);
+			$reisetagebuchPdf->MultiCell($reisetagebuchPdf->GetPageWidth() - 30, 10, iconv("UTF-8", "Windows-1252//TRANSLIT", $reisetagebuch[0]['beschreibung']), 0, 1);
 
 			$reisetagebuchPdf->SetFontSize(12);
 			$reisetagebuchPdf->SetFont('', 'I');
@@ -128,16 +129,16 @@
 							$reisetagebuchPdf->Cell(15, 10, $uhrzeit, 0, 0);
 						}
 						$reisetagebuchPdf->SetFont('', 'B');
-						$reisetagebuchPdf->Cell(0, 10, $eintrag['titel'], 0, 0);
+						$reisetagebuchPdf->Cell(0, 10, iconv("UTF-8", "Windows-1252//TRANSLIT", $eintrag['titel']), 0, 0);
 						if($eintrag['zusammenfassung'] != 1){
 							$reisetagebuchPdf->SetFont('', 'I');
 							$reisetagebuchPdf->SetX(($reisetagebuchPdf->GetPageWidth() - $reisetagebuchPdf->GetStringWidth($standortName)) - 10);
-							$reisetagebuchPdf->Cell(0, 10, $standortName, 0, 1);
+							$reisetagebuchPdf->Cell(0, 10, iconv("UTF-8", "Windows-1252//TRANSLIT", $standortName), 0, 1);
 						} else {
 							$reisetagebuchPdf->Ln(10);
 						}
 						$reisetagebuchPdf->SetFont('', '');
-						$reisetagebuchPdf->MultiCell($reisetagebuchPdf->GetPageWidth() - 30, 5, $eintrag['text'], 0, 1);
+						$reisetagebuchPdf->MultiCell($reisetagebuchPdf->GetPageWidth() - 30, 5, iconv("UTF-8", "Windows-1252//TRANSLIT", $eintrag['text']), 0, 1);
 						$reisetagebuchPdf->Ln(5);
 						foreach($bilder as $bild){
 							$reisetagebuchPdf->Image('../users/'.$reisetagebuch[0]['username'].'/'.$bild['id'].'.'.$bild['file_ext'], null, null, -150, -150, $bild['file_ext'], '../../users/'.$reisetagebuch[0]['username'].'/'.$bild['id'].'.'.$bild['file_ext']);
@@ -154,8 +155,8 @@
 					}
 				}
 			}
-			
-			$reisetagebuchPdf->Output('../files/'.$rtbUrl.'/'.$rtbCreator.'_'.$rtbTitel.'.pdf', 'F');
+
+			$reisetagebuchPdf->Output('../files/'.$rtbUrl.'/'.$rtbCreator.'_'.normalize($reisetagebuch[0]['titel']).'.pdf', 'F');
 		}
 	}
 ?>

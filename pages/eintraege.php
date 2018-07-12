@@ -352,8 +352,8 @@
 											echo '<a href="standorte.php?id='.$standortId.'" class="uk-link-reset standortRechts"><i uk-icon="icon: location"></i> <i>'.$standortName.'</i></a>';
 										}
 										?>
-										<a href="eintraege.php?view=bearbeiten&rtb=<?=$rtbUrl;?>&id=<?=$eintragId;?>" class="uk-icon-link uk-margin-left" uk-icon="icon: file-edit; ratio: 1.2"></a>
-										<button id="deleteEintrag<?=$eintragId;?>" class="uk-icon-link uk-margin-left delete" uk-icon="icon: trash; ratio: 1.2"></button>
+										<a href="eintraege.php?view=bearbeiten&rtb=<?=$rtbUrl;?>&id=<?=$eintragId;?>" class="uk-icon-link uk-margin-left" uk-icon="icon: file-edit; ratio: 1.2" uk-tooltip="title: Eintrag bearbeiten; pos: bottom"></a>
+										<button id="deleteEintrag<?=$eintragId;?>" class="uk-icon-link uk-margin-left delete" uk-icon="icon: trash; ratio: 1.2" uk-tooltip="title: Eintrag löschen; pos: bottom"></button>
 									</span>
 									<span class="standortLinks uk-float-left">
 										<?php 
