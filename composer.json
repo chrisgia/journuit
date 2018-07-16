@@ -4,6 +4,7 @@
 		"tinify/tinify": "^1.5",
 		"phpmailer/phpmailer": "^6.0",
 		"dompdf/dompdf": "^0.8.2",
-		"botman/botman": "^2.3"
+		"botman/botman": "^2.3",
+		"botman/driver-facebook": "^1.8"
 	}
 }

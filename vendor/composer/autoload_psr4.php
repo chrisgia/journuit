@@ -31,5 +31,6 @@ return array(
     'Delight\\Cookie\\' => array($vendorDir . '/delight-im/cookie/src'),
     'Delight\\Base64\\' => array($vendorDir . '/delight-im/base64/src'),
     'Delight\\Auth\\' => array($vendorDir . '/delight-im/auth/src'),
+    'BotMan\\Drivers\\Facebook\\' => array($vendorDir . '/botman/driver-facebook/src'),
     'BotMan\\BotMan\\' => array($vendorDir . '/botman/botman/src'),
 );

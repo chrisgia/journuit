@@ -70,6 +70,7 @@ class ComposerStaticInit898a78978526e8870be19e88a4212f6a
         ),
         'B' => 
         array (
+            'BotMan\\Drivers\\Facebook\\' => 24,
             'BotMan\\BotMan\\' => 14,
         ),
     );
@@ -174,6 +175,10 @@ class ComposerStaticInit898a78978526e8870be19e88a4212f6a
         'Delight\\Auth\\' => 
         array (
             0 => __DIR__ . '/..' . '/delight-im/auth/src',
+        ),
+        'BotMan\\Drivers\\Facebook\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/botman/driver-facebook/src',
         ),
         'BotMan\\BotMan\\' => 
         array (
