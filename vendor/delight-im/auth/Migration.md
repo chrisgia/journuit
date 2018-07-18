@@ -19,24 +19,24 @@ Update your version of this library using Composer and its `composer update` or 
 
    * The MySQL database schema has changed. Use the statement below to update your database:
 
-	 ```sql
-	 ALTER TABLE users
-		 ADD COLUMN `force_logout` mediumint(7) unsigned NOT NULL DEFAULT '0' AFTER `last_login`;
-	 ```
+     ```sql
+     ALTER TABLE users
+         ADD COLUMN `force_logout` mediumint(7) unsigned NOT NULL DEFAULT '0' AFTER `last_login`;
+     ```
 
    * The PostgreSQL database schema has changed. Use the statement below to update your database:
 
-	 ```sql
-	 ALTER TABLE users
-		 ADD COLUMN "force_logout" INTEGER NOT NULL DEFAULT '0' CHECK ("force_logout" >= 0);
-	 ```
+     ```sql
+     ALTER TABLE users
+         ADD COLUMN "force_logout" INTEGER NOT NULL DEFAULT '0' CHECK ("force_logout" >= 0);
+     ```
 
    * The SQLite database schema has changed. Use the statement below to update your database:
 
-	 ```sql
-	 ALTER TABLE users
-		 ADD COLUMN "force_logout" INTEGER NOT NULL CHECK ("force_logout" >= 0) DEFAULT "0";
-	 ```
+     ```sql
+     ALTER TABLE users
+         ADD COLUMN "force_logout" INTEGER NOT NULL CHECK ("force_logout" >= 0) DEFAULT "0";
+     ```
 
  * The method `logOutAndDestroySession` has been removed from class `Auth`. Instead, call the two separate methods `logOut` and `destroySession` from class `Auth` one after another for the same effect.
 
@@ -54,9 +54,9 @@ Update your version of this library using Composer and its `composer update` or 
 
    * The directive `session.cookie_domain` is set to an empty value. It may have been set directly in your [PHP configuration](http://php.net/manual/en/configuration.file.php) (`php.ini`), via the `\ini_set` method or via the `\session_set_cookie_params` method. You can check the value of that directive by executing the following statement somewhere in your application:
 
-	 ```php
-	 \var_dump(\ini_get('session.cookie_domain'));
-	 ```
+     ```php
+     \var_dump(\ini_get('session.cookie_domain'));
+     ```
 
    * Your application is accessed via a registered or registrable *domain name*, either by yourself during development and testing or by your visitors and users in production. That means your application is *not*, or *not only*, accessed via `localhost` or via an IP address.
 
@@ -64,11 +64,11 @@ Update your version of this library using Composer and its `composer update` or 
 
    * Restore the old behavior by placing the following statement as early as possible in your application, and before you create the `Auth` instance:
 
-	 ```php
-	 \ini_set('session.cookie_domain', \preg_replace('/^www\./', '', $_SERVER['HTTP_HOST']));
-	 ```
+     ```php
+     \ini_set('session.cookie_domain', \preg_replace('/^www\./', '', $_SERVER['HTTP_HOST']));
+     ```
 
-	 You may also evaluate the complete second parameter and put its value directly into your [PHP configuration](http://php.net/manual/en/configuration.file.php) (`php.ini`).
+     You may also evaluate the complete second parameter and put its value directly into your [PHP configuration](http://php.net/manual/en/configuration.file.php) (`php.ini`).
 
    * Use the new domain scope for your application. To do so, you only need to [rename the cookies](README.md#renaming-the-librarys-cookies) used by this library in order to prevent conflicts with old cookies that have been created previously. Renaming the cookies is critically important here. We recommend a versioned name such as `session_v1` for the session cookie.
 
@@ -76,9 +76,9 @@ Update your version of this library using Composer and its `composer update` or 
 
    * The directive `session.cookie_domain` is set to a value that starts with the `www` subdomain. It may have been set directly in your [PHP configuration](http://php.net/manual/en/configuration.file.php) (`php.ini`), via the `\ini_set` method or via the `\session_set_cookie_params` method. You can check the value of that directive by executing the following statement somewhere in your application:
 
-	 ```php
-	 \var_dump(\ini_get('session.cookie_domain'));
-	 ```
+     ```php
+     \var_dump(\ini_get('session.cookie_domain'));
+     ```
 
    * Your application is accessed via a registered or registrable *domain name*, either by yourself during development and testing or by your visitors and users in production. That means your application is *not*, or *not only*, accessed via `localhost` or via an IP address.
 
@@ -98,63 +98,63 @@ Update your version of this library using Composer and its `composer update` or 
 
    * The MySQL database schema has changed. Use the statements below to update your database:
 
-	 ```sql
-	 ALTER TABLE users
-		 ADD COLUMN roles_mask INT(10) UNSIGNED NOT NULL DEFAULT 0 AFTER verified,
-		 ADD COLUMN resettable TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 AFTER verified;
+     ```sql
+     ALTER TABLE users
+         ADD COLUMN roles_mask INT(10) UNSIGNED NOT NULL DEFAULT 0 AFTER verified,
+         ADD COLUMN resettable TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 AFTER verified;
 
-	 ALTER TABLE users_confirmations
-		 ADD COLUMN user_id INT(10) UNSIGNED NULL DEFAULT NULL AFTER id;
+     ALTER TABLE users_confirmations
+         ADD COLUMN user_id INT(10) UNSIGNED NULL DEFAULT NULL AFTER id;
 
-	 UPDATE users_confirmations SET user_id = (
-		 SELECT id FROM users WHERE email = users_confirmations.email
-	 ) WHERE user_id IS NULL;
+     UPDATE users_confirmations SET user_id = (
+         SELECT id FROM users WHERE email = users_confirmations.email
+     ) WHERE user_id IS NULL;
 
-	 ALTER TABLE users_confirmations
-		 CHANGE COLUMN user_id user_id INT(10) UNSIGNED NOT NULL;
+     ALTER TABLE users_confirmations
+         CHANGE COLUMN user_id user_id INT(10) UNSIGNED NOT NULL;
 
-	 ALTER TABLE users_confirmations
-		 ADD INDEX user_id (user_id ASC);
+     ALTER TABLE users_confirmations
+         ADD INDEX user_id (user_id ASC);
 
-	 DROP TABLE users_throttling;
+     DROP TABLE users_throttling;
 
-	 CREATE TABLE users_throttling (
-		 bucket varchar(44) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
-		 tokens float unsigned NOT NULL,
-		 replenished_at int(10) unsigned NOT NULL,
-		 expires_at int(10) unsigned NOT NULL,
-		 PRIMARY KEY (bucket),
-		 KEY expires_at (expires_at)
-	 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-	 ```
+     CREATE TABLE users_throttling (
+         bucket varchar(44) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
+         tokens float unsigned NOT NULL,
+         replenished_at int(10) unsigned NOT NULL,
+         expires_at int(10) unsigned NOT NULL,
+         PRIMARY KEY (bucket),
+         KEY expires_at (expires_at)
+     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+     ```
 
    * The SQLite database schema has changed. Use the statements below to update your database:
 
-	 ```sql
-	 ALTER TABLE users
-		 ADD COLUMN "roles_mask" INTEGER NOT NULL CHECK ("roles_mask" >= 0) DEFAULT "0",
-		 ADD COLUMN "resettable" INTEGER NOT NULL CHECK ("resettable" >= 0) DEFAULT "1";
+     ```sql
+     ALTER TABLE users
+         ADD COLUMN "roles_mask" INTEGER NOT NULL CHECK ("roles_mask" >= 0) DEFAULT "0",
+         ADD COLUMN "resettable" INTEGER NOT NULL CHECK ("resettable" >= 0) DEFAULT "1";
 
-	 ALTER TABLE users_confirmations
-		 ADD COLUMN "user_id" INTEGER CHECK ("user_id" >= 0);
+     ALTER TABLE users_confirmations
+         ADD COLUMN "user_id" INTEGER CHECK ("user_id" >= 0);
 
-	 UPDATE users_confirmations SET user_id = (
-		 SELECT id FROM users WHERE email = users_confirmations.email
-	 ) WHERE user_id IS NULL;
+     UPDATE users_confirmations SET user_id = (
+         SELECT id FROM users WHERE email = users_confirmations.email
+     ) WHERE user_id IS NULL;
 
-	 CREATE INDEX "users_confirmations.user_id" ON "users_confirmations" ("user_id");
+     CREATE INDEX "users_confirmations.user_id" ON "users_confirmations" ("user_id");
 
-	 DROP TABLE users_throttling;
+     DROP TABLE users_throttling;
 
-	 CREATE TABLE "users_throttling" (
-		 "bucket" VARCHAR(44) PRIMARY KEY NOT NULL,
-		 "tokens" REAL NOT NULL CHECK ("tokens" >= 0),
-		 "replenished_at" INTEGER NOT NULL CHECK ("replenished_at" >= 0),
-		 "expires_at" INTEGER NOT NULL CHECK ("expires_at" >= 0)
-	 );
+     CREATE TABLE "users_throttling" (
+         "bucket" VARCHAR(44) PRIMARY KEY NOT NULL,
+         "tokens" REAL NOT NULL CHECK ("tokens" >= 0),
+         "replenished_at" INTEGER NOT NULL CHECK ("replenished_at" >= 0),
+         "expires_at" INTEGER NOT NULL CHECK ("expires_at" >= 0)
+     );
 
-	 CREATE INDEX "users_throttling.expires_at" ON "users_throttling" ("expires_at");
-	 ```
+     CREATE INDEX "users_throttling.expires_at" ON "users_throttling" ("expires_at");
+     ```
 
  * The method `setThrottlingOptions` has been removed.
 

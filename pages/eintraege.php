@@ -136,6 +136,17 @@
 												<!-- Hier wird ein Fehler angezeigt, wenn es Bereits einen Eintrag mit der ausgewählten Uhrzeit gibt -->
 											</div>
 										</div>
+										<div class="uk-inline uk-margin-small-top" id="uebergang">
+											<span uk-icon="icon: plus"></span>
+											<select id="uebergangsstunden" class="uk-select uk-form-width-small" name="uebergangsstunden">
+												<?php
+												for($i = 0; $i <= 7; $i++){
+													echo "<option value=\"".$i."\">".$i." Stunden</option>";
+												}
+												?>
+											</select>
+											(in den nächsten Tag)
+										</div>
 									</div>
 
 									<div class="uk-margin">
@@ -218,7 +229,16 @@
 						}
 						
 						$datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
-						$uhrzeit = str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5));
+						
+						if(isset($_POST['uebergangsstunden']) && $_POST['uebergangsstunden'] > 0){
+							$uebergangsstunden = (int) htmlspecialchars($_POST['uebergangsstunden']);
+							$stunden = 24 + $uebergangsstunden;
+							$minuten = substr(htmlspecialchars($_POST['dateTime']), 14, 2);
+							$uhrzeit = $stunden.''.$minuten;
+						} else {
+							$uhrzeit = str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5));
+						}
+
 						$roundedUhrzeit = round((int) $uhrzeit / 5) * 5;
 						$roundedUhrzeit = str_pad($roundedUhrzeit, 4, '0', STR_PAD_LEFT);
 
@@ -334,8 +354,13 @@
 									<span class="uk-float-left">
 										<?php
 										if($eintrag['zusammenfassung'] != 1){
-											$uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
-											echo $uhrzeit.", ";
+											if($eintrag['uhrzeit'] > 2400){
+												$uhrzeit = substr_replace(str_pad($eintrag['uhrzeit'] - 2400, 4, '0', STR_PAD_LEFT), ':', 2, 0);
+												echo "<span uk-icon=\"icon: future\" uk-tooltip=\"title: Geht in den nächsten Tag; pos:bottom\">+".$uhrzeit." </span>, ";
+											} else {
+												$uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
+												echo "<span uk-icon=\"icon: clock\">".$uhrzeit." </span>, ";
+											}
 										}
 										?> 
 										<span class="uk-text-lead"><?=$eintrag['titel'];?></span> 
@@ -414,8 +439,13 @@
 										<span class="uk-float-left">
 											<?php
 											if($eintrag['zusammenfassung'] != 1){
-												$uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
-												echo $uhrzeit.", ";
+												if($eintrag['uhrzeit'] > 24){
+													echo "+".$uhrzeit.", ";
+													$uhrzeit = substr_replace($eintrag['uhrzeit'] - 24, ':', 2, 0);
+												} else {
+													$uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
+													echo $uhrzeit.", ";
+												}
 											}
 											?> 
 											<span class="uk-text-lead"><?=$eintrag['titel'];?></span> 
@@ -534,6 +564,17 @@
 												<!-- Hier wird ein Fehler angezeigt, wenn es Bereits einen Eintrag mit der ausgewählten Uhrzeit gibt -->
 											</div>
 										</div>
+										<div class="uk-inline uk-margin-small-top" id="uebergang">
+											<span uk-icon="icon: plus"></span>
+											<select id="uebergangsstunden" class="uk-select uk-form-width-small" name="uebergangsstunden">
+												<?php
+												for($i = 0; $i <= 7; $i++){
+													echo "<option value=\"".$i."\">".$i." Stunden</option>";
+												}
+												?>
+											</select>
+											(in den nächsten Tag)
+										</div>
 									</div>
 
 									<div class="uk-margin">
@@ -624,6 +665,16 @@
 						$errors = array();
 
 						$datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
+
+						if(isset($_POST['uebergangsstunden']) && $_POST['uebergangsstunden'] > 0){
+							$uebergangsstunden = (int) htmlspecialchars($_POST['uebergangsstunden']);
+							$stunden = 24 + $uebergangsstunden;
+							$minuten = substr(htmlspecialchars($_POST['dateTime']), 14, 2);
+							$uhrzeit = $stunden.''.$minuten;
+						} else {
+							$uhrzeit = str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5));
+						}
+
 						$uhrzeit = str_pad(str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5)), 4, '0', STR_PAD_LEFT);
 						$roundedUhrzeit = round((int) $uhrzeit / 5) * 5;
 						$roundedUhrzeit = str_pad($roundedUhrzeit, 4, '0', STR_PAD_LEFT);
@@ -807,6 +858,7 @@
 				}	
 			});
 
+			$('#uebergang').hide();
 			// Einstellungen des Datepickers
 			$(".flatpickr").flatpickr({
 				enableTime: true,
@@ -844,6 +896,15 @@
 							}
 						}
 					});
+				},
+				onChange: function(dateStr, instance){
+					var hours = instance.substring(11, 13);
+					if(hours == '00'){
+						$('#uebergang').show();
+					} else {
+						$('#uebergang').hide();
+						$("#uebergangsstunden").val('0');
+					}
 				}			  
 			});
 

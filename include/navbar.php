@@ -24,7 +24,7 @@
 				</ul>
 			</div>
 			<div class="uk-navbar-item">
-				<img src="http://landausflugsplaner.de/pictures/dot.png" alt="dot" uk-img">
+				<img src="/pictures/dot.png" alt="dot" uk-img">
 			</div>
 			<div class="uk-navbar-item" uk-tooltip="title: Meine Reisetagebücher; pos: bottom">
 				<ul class="uk-navbar-nav">
@@ -49,7 +49,7 @@
 				</ul>
 			</div>
 			<div class="uk-navbar-item" id="dot">
-				<img src="http://landausflugsplaner.de/pictures/dot.png" alt="dot" uk-img">
+				<img src="/pictures/dot.png" alt="dot" uk-img">
 			</div>
 			<div class="uk-navbar-item">
 				<ul class="uk-navbar-nav">

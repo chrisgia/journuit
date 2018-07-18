@@ -109,5 +109,6 @@ return [
     */
     'whitelisted_domains' => [
         'https://petersfancyapparel.com',
+        'https://journuit.euresa-reisen.de',
     ],
 ];

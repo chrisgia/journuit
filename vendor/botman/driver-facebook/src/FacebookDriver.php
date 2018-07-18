@@ -104,8 +104,9 @@ class FacebookDriver extends HttpDriver implements VerifiesService
      * @param Request $request
      * @return null|Response
      */
+
     public function verifyRequest(Request $request)
-    {
+    {   
         if ($request->get('hub_mode') === 'subscribe' && $request->get('hub_verify_token') === $this->config->get('verification')) {
             return Response::create($request->get('hub_challenge'))->send();
         }
