@@ -887,35 +887,34 @@
 				}	
 			});
 
-
 			$('#uebergang').hide();
+			// Zeigt das Übergangs-Selectfeld beim Seitenaufruf an, wenn nötig 
 			<?php 
 			if(isset($eintrag[0]['uhrzeit']) && $eintrag[0]['uhrzeit'] > 2400){ ?>
 				$('#uebergang').show();
 			<?php
 			} 
 			?>
+			var date, hours, minutes;
 			// Einstellungen des Datepickers
 			$(".flatpickr").flatpickr({
 				enableTime: true,
 				altInput: true,
 				altFormat: "j. F Y H:i",
 				dateFormat: "Y-m-d H:i",
-				/*minTime: "16:00",
-				maxTime: "22:00",*/
 				time_24hr: true,
 				minuteIncrement: 5,
 				onValueUpdate: function(dateStr, instance){
-					var date = instance.substring(0, 10);
-					var hours = instance.substring(11, 13);
-					var minutes = instance.substring(14);
+					date = instance.substring(0, 10);
+					hours = instance.substring(11, 13);
+					minutes = instance.substring(14);
 					var roundedMinutes = minutes - (minutes % 5);
 					this.setDate(date+' '+hours+':'+roundedMinutes);
 				}, 
 				onClose: function(dateStr, instance){
-					var date = instance.substring(0, 10);
-					var hours = instance.substring(11, 13);
-					var minutes = instance.substring(14);
+					date = instance.substring(0, 10);
+					hours = instance.substring(11, 13);
+					minutes = instance.substring(14);
 					$.ajax({
 						url : '/ajax/checkEntryTime.php',
 						type : 'POST',
@@ -934,7 +933,7 @@
 					});
 				},
 				onChange: function(dateStr, instance){
-					var hours = instance.substring(11, 13);
+					hours = instance.substring(11, 13);
 					if(hours == '00'){
 						$('#uebergang').show();
 					} else {
@@ -942,6 +941,27 @@
 						$("#uebergangsstunden").val('0');
 					}
 				}			  
+			});
+
+			$("#uebergangsstunden").on('change', function(){
+				hours = 24 + parseInt($('#uebergangsstunden').val());
+				console.log(hours);
+				$.ajax({
+					url : '/ajax/checkEntryTime.php',
+					type : 'POST',
+					data : {
+						rtb : rtb,
+						datum : date,
+						uhrzeit : hours+''+minutes
+					},
+					success : function(response) {
+						if(response != 'OK'){
+							$('#uhrzeitError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>'+response+'</p></div>');
+						} else {
+							$('#uhrzeitError').empty();
+						}
+					}
+				});
 			});
 
 			var bar3 = document.getElementById('js-progressbar3');

@@ -37,7 +37,7 @@
 					<thead>
 						<tr>
 							<th class="uk-text-center uk-width-small">Orte (<?=sizeof($standorte);?>)</th>
-							<th class="uk-text-right uk-width-expand">Datum</th>
+							<th class="uk-text-center uk-width-expand">Einträge</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -49,18 +49,9 @@
 						$selectEintraege->execute(array($standort['id']));
 						$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
 
-						$dateString = '';
 						$eintraegeString = '';
 						$eintragCount = 1;
 						foreach($eintraege as $eintrag){
-							$formatiertesDatum = strftime("%e. %B %Y", strtotime($eintrag['datum']));
-							if($eintrag['uhrzeit'] > 2400){
-								$uhrzeit = substr_replace(str_pad($eintrag['uhrzeit'] - 2400, 4, '0', STR_PAD_LEFT), ':', 2, 0);
-								$dateString .= $formatiertesDatum.' 24:00 +'.$uhrzeit.'<br/>';
-							} else {
-								$uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
-								$dateString .= $formatiertesDatum.' '.$uhrzeit.'<br/>';
-							}
 							$eintraegeString .= $eintrag['titel'];
 							if($eintragCount != sizeof($eintraege)){
 								$eintraegeString .= ', ';
@@ -70,11 +61,11 @@
 						?>
 						<tr class="standortBox" id="standort<?=$standortCount;?>">
 							<td class="uk-width-small">
-							<span class="uk-text-bold uk-h3 uk-margin-right"><?=$standortCount;?> </span>
-							<?=$standort['name'];?>	(<?=$eintraegeString;?>)
+								<span class="uk-text-bold uk-h3 uk-margin-right"><?=$standortCount;?> </span>
+								<?=$standort['name'];?>
 							</td>
-							<td class="uk-text-right uk-width-expand">
-								<?=$dateString;?>
+							<td class="uk-text-center uk-width-expand">
+								<?=$eintraegeString;?>
 							</td>
 						</tr>
 						<?php
