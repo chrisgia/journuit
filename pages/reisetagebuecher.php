@@ -361,7 +361,7 @@
 										<th>Datum</th>
 										<th>Uhrzeit</th>
 										<th>Standort</th>
-										<th>Bearbeiten</th>
+										<th><!-- Bearbeiten --></th>
 									</tr>
 								</thead>
 								<tbody>

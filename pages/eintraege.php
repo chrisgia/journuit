@@ -888,14 +888,21 @@
 			});
 
 			$('#uebergang').hide();
+
+			var initialTime;
 			// Zeigt das Übergangs-Selectfeld beim Seitenaufruf an, wenn nötig 
 			<?php 
-			if(isset($eintrag[0]['uhrzeit']) && $eintrag[0]['uhrzeit'] > 2400){ ?>
-				$('#uebergang').show();
-			<?php
-			} 
+			if(isset($eintrag, $eintrag[0]['uhrzeit'])){
+				echo "initialTime = '".$eintrag[0]['uhrzeit']."';";
+				
+				if($eintrag[0]['uhrzeit'] > 2400){ 
+					echo "$('#uebergang').show();";
+				}
+			}
 			?>
+
 			var date, hours, minutes;
+
 			// Einstellungen des Datepickers
 			$(".flatpickr").flatpickr({
 				enableTime: true,
@@ -914,7 +921,50 @@
 				onClose: function(dateStr, instance){
 					date = instance.substring(0, 10);
 					hours = instance.substring(11, 13);
+					if(hours == '00'){
+						hours = 24 + parseInt($("#uebergangsstunden").val());
+					}
 					minutes = instance.substring(14);
+					var uhrzeit = hours+''+minutes;
+					console.log(uhrzeit);
+					if(uhrzeit != initialTime){
+						$.ajax({
+							url : '/ajax/checkEntryTime.php',
+							type : 'POST',
+							data : {
+								rtb : rtb,
+								datum : date,
+								uhrzeit : uhrzeit
+							},
+							success : function(response) {
+								if(response != 'OK'){
+									$('#uhrzeitError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>'+response+'</p></div>');
+								} else {
+									$('#uhrzeitError').empty();
+								}
+							}
+						});
+					} else {
+						$('#uhrzeitError').empty();
+					}
+				},
+				onChange: function(dateStr, instance){
+					hours = instance.substring(11, 13);
+					if(hours == '00'){
+						$('#uebergang').show();
+					} else {
+						$('#uebergang').hide();
+						$("#uebergangsstunden").val('0');
+					}
+				}			  
+			});
+
+			$("#uebergangsstunden").on('change', function(){
+				date = $(".flatpickr").val().substring(0, 10);
+				hours = 24 + parseInt($('#uebergangsstunden').val());
+				minutes = $(".flatpickr").val().substring(14);
+				var uhrzeit = hours+''+minutes;
+				if(uhrzeit != initialTime){
 					$.ajax({
 						url : '/ajax/checkEntryTime.php',
 						type : 'POST',
@@ -931,37 +981,9 @@
 							}
 						}
 					});
-				},
-				onChange: function(dateStr, instance){
-					hours = instance.substring(11, 13);
-					if(hours == '00'){
-						$('#uebergang').show();
-					} else {
-						$('#uebergang').hide();
-						$("#uebergangsstunden").val('0');
-					}
-				}			  
-			});
-
-			$("#uebergangsstunden").on('change', function(){
-				hours = 24 + parseInt($('#uebergangsstunden').val());
-				console.log(hours);
-				$.ajax({
-					url : '/ajax/checkEntryTime.php',
-					type : 'POST',
-					data : {
-						rtb : rtb,
-						datum : date,
-						uhrzeit : hours+''+minutes
-					},
-					success : function(response) {
-						if(response != 'OK'){
-							$('#uhrzeitError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>'+response+'</p></div>');
-						} else {
-							$('#uhrzeitError').empty();
-						}
-					}
-				});
+				} else {
+					$('#uhrzeitError').empty();
+				}
 			});
 
 			var bar3 = document.getElementById('js-progressbar3');

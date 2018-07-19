@@ -20,9 +20,11 @@
 		<?php require $_SERVER['DOCUMENT_ROOT']."/include/navbar.php";?>
 		<div class="uk-container uk-container-large">
 		<?php
-			$selectStandorte = $db->prepare("SELECT DISTINCT standorte.id, standorte.name, standorte.lat, standorte.lon, standorte.bild_id, bilder.file_ext FROM standorte JOIN eintraege ON (eintraege.standort_id = standorte.id) LEFT JOIN bilder ON (standorte.bild_id = bilder.id) WHERE eintraege.reisetagebuch_id = ? ORDER BY eintraege.datum, eintraege.uhrzeit ASC");
+			$selectStandorte = $db->prepare("SELECT DISTINCT standorte.id, standorte.name, standorte.lat, standorte.lon, standorte.bild_id, bilder.file_ext FROM standorte JOIN eintraege ON (eintraege.standort_id = standorte.id) LEFT JOIN bilder ON (standorte.bild_id = bilder.id) WHERE eintraege.reisetagebuch_id = ? AND eintraege.entwurf = 0 AND eintraege.zusammenfassung = 0 ORDER BY eintraege.datum, eintraege.uhrzeit ASC");
 			$selectStandorte->execute(array($rtbId));
 			$standorte = $selectStandorte->fetchAll(\PDO::FETCH_ASSOC);
+
+			$standortEintraege = array();
 			if(!empty($standorte)){
 				?>
 				<div class="uk-margin-top uk-margin-bottom uk-text-center">
@@ -45,13 +47,20 @@
 					<?php
 					$standortCount = 1;
 					foreach($standorte as $standort){
-						$selectEintraege = $db->prepare("SELECT titel, datum, uhrzeit FROM eintraege WHERE standort_id = ?");
+						$selectEintraege = $db->prepare("SELECT titel, datum, uhrzeit, public FROM eintraege WHERE standort_id = ?");
 						$selectEintraege->execute(array($standort['id']));
 						$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
 
 						$eintraegeString = '';
 						$eintragCount = 1;
 						foreach($eintraege as $eintrag){
+							// Füllt Array um später infoWindow zu erstellen
+							$standortEintraege[$standort['id']][$eintragCount]['titel'] = $eintrag['titel'];
+							$standortEintraege[$standort['id']][$eintragCount]['datum'] = $eintrag['datum'];
+							$standortEintraege[$standort['id']][$eintragCount]['uhrzeit'] = $eintrag['uhrzeit'];
+							$standortEintraege[$standort['id']][$eintragCount]['public'] = $eintrag['public'];
+
+
 							$eintraegeString .= $eintrag['titel'];
 							if($eintragCount != sizeof($eintraege)){
 								$eintraegeString .= ', ';
@@ -95,6 +104,7 @@
 	    	var currentInfoWindow = null; 
 	    	<?php 
 	    	echo "var orte = ".json_encode($standorte).";"; 
+	    	echo "var standortEintraege = ".json_encode($standortEintraege).";";
 	    	?>
 	    	var markers = Array();
 
@@ -157,6 +167,24 @@
 				var ortLat = ort['lat'];
 	    		var ortLon = ort['lon'];
 	    		var ortname = ort['name'];
+	    		var ortid = ort['id'];
+
+	    		var infoContent = "<div class=\"uk-animation-fade\"><span class=\"uk-text-large uk-text-primary\">"+ortname+"</span><hr/>";
+		    	infoContent += "<ul class=\"uk-list\">";
+
+				console.log('ortid: '+ortid);
+				console.log(standortEintraege);
+				console.log(standortEintraege[ortid].length);
+
+		    	for(var i = 1; i < standortEintraege[ortid].length + 1; i++){
+		        	infoContent += '<li>'+standortEintraege[ortid][i]['titel']+'</li>';
+		        }
+		        infoContent += "</ul>";
+		        infoContent += "</div>";
+
+	        	var infowindow = new google.maps.InfoWindow({
+	        		content: infoContent
+		        });
 
 	            var marker = new google.maps.Marker({
 	                map     : eintraegeMap,
@@ -166,6 +194,12 @@
 
 	            marker.addListener('click', function() {
 	            	//Schliessen von offenen infoWindows damit immer nur eins aufbleibt
+	            	if (currentInfoWindow != null) {
+				        currentInfoWindow.close(); 
+				    }  
+		        	infowindow.open(eintraegeMap, marker);
+		        	currentInfoWindow = infowindow;
+
 		        	eintraegeMap.setCenter(this.getPosition());
 					eintraegeMap.setZoom(18);
 		    	});
