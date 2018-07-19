@@ -230,7 +230,7 @@
 			<div class="uk-flex uk-flex-center uk-flex-column uk-flex-middle">
 				<div class="uk-margin-top uk-margin-bottom">
 				<?php 
-				$selectEintragDates = $db->prepare("SELECT DISTINCT datum, public FROM eintraege WHERE reisetagebuch_id = ? AND entwurf = 0 ORDER BY datum DESC");
+				$selectEintragDates = $db->prepare("SELECT datum, SUM(public) AS publicSum FROM eintraege WHERE reisetagebuch_id = ? AND entwurf = 0 GROUP BY datum ORDER BY datum DESC");
 				$selectEintragDates->execute(array($rtbId));
 				$eintragDates = $selectEintragDates->fetchAll(\PDO::FETCH_ASSOC);
 				$disabled = '';
@@ -240,9 +240,9 @@
 					$tooltipText = 'Das Reisetagebuch muss öffentlich sein, um geteilt zu werden.';
 				}
 				if(isOwner($db, $userId, $rtbId)){
-					$selectEntwurfDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ? AND entwurf = 1 ORDER BY datum DESC");
-					$selectEntwurfDates->execute(array($rtbId));
-					$entwurfDates = $selectEntwurfDates->fetchAll(\PDO::FETCH_ASSOC);
+					$selectEntwuerfe = $db->prepare("SELECT eintraege.id, eintraege.titel, eintraege.datum, eintraege.uhrzeit, eintraege.zusammenfassung, standorte.name AS standortName FROM eintraege JOIN standorte ON (eintraege.standort_id = standorte.id) WHERE eintraege.reisetagebuch_id = ? AND eintraege.entwurf = 1");
+					$selectEntwuerfe->execute(array($rtbId));
+					$entwuerfe = $selectEntwuerfe->fetchAll(\PDO::FETCH_ASSOC);
 				?>
 					<div>
 						<div>
@@ -352,55 +352,53 @@
 						</li>
 						<li>
 						<?php
-						if(!empty($entwurfDates)){
+						if(!empty($entwuerfe)){
 							?>
 							<table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
 								<thead>
 									<tr>
-										<th class="uk-text-center">Entwürfe (<?=sizeof($entwurfDates);?>)</th>
-										<th class="uk-text-right">Anzahl</th>
+										<th>Titel</th>
+										<th>Datum</th>
+										<th>Uhrzeit</th>
+										<th>Standort</th>
+										<th>Bearbeiten</th>
 									</tr>
 								</thead>
 								<tbody>
 									<?php
-									foreach($entwurfDates as $datum){
-										$selectEntwuerfe = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND entwurf = 1");
-										$selectEntwuerfe->execute(array($rtbId, $datum['datum']));
-										$entwuerfe = $selectEntwuerfe->fetchAll(\PDO::FETCH_ASSOC);
-
-										$formatiertesDatum = strftime("%e. %B %Y", strtotime($datum['datum']));
+									
+									foreach($entwuerfe as $entwurf){
+										$formatiertesDatum = strftime("%e. %B %Y", strtotime($entwurf['datum']));
 										?>
-										<tr class="eintragBox" onclick="document.location='eintraege.php?rtb=<?=$rtbUrl;?>&datum=<?=$datum['datum'];?>'">
+										<tr>
+											<td class="uk-text-bold"><?=$entwurf['titel'];?></td>
+											<td><?=$formatiertesDatum;?></td>
 											<td>
-											<span class="uk-text-bold"><?=$formatiertesDatum;?> </span>
-											<i>
 											<?php
-											$anzahlEntwuerfe = sizeof($entwuerfe);
-											for($i = 0; $i <= $anzahlEntwuerfe - 1; $i++){
-												echo $entwuerfe[$i]['titel'];
-
-												if($i < $anzahlEntwuerfe - 1){
-													echo ", ";
-												}
-
-												if($i >= 2){
-													echo "...";
-													break;
-												}
-											}
-
-											?>
-											</i>	
-											</td>
-											<td class="uk-text-right">
-												<?php 
-												echo $anzahlEntwuerfe;
-												if($anzahlEntwuerfe === 1){
-													echo " ENTWURF";
+											if($entwurf['zusammenfassung'] != 1){
+												if($entwurf['uhrzeit'] > 2400){
+													$uhrzeit = substr_replace(str_pad($entwurf['uhrzeit'] - 2400, 4, '0', STR_PAD_LEFT), ':', 2, 0);
+													echo "<span uk-icon=\"icon: future\" uk-tooltip=\"title: Geht in den nächsten Tag; pos:bottom\"></span> +".$uhrzeit." ";
 												} else {
-													echo " ENTWÜRFE"; 
+													$uhrzeit = substr_replace($entwurf['uhrzeit'], ':', 2, 0);
+													echo "<span uk-icon=\"icon: clock\"></span> ".$uhrzeit;
 												}
-												?>
+											} else {
+												echo '<i>Zusammenfassung</i>';
+											}
+											?>
+											</td>
+											<td>
+											<?php
+											if(!empty($entwurf['standortName'])){
+												echo "<i>".$entwurf['standortName']."</i>";
+											} else {
+												echo "<i>Kein Standort angegeben</i>";
+											}
+											?>
+											</td>
+											<td>
+												<a class="uk-icon-link" uk-icon="icon: file-edit" href="eintraege.php?view=bearbeiten&rtb=<?=$rtbUrl;?>&id=<?=$entwurf['id']?>"></a>
 											</td>
 										</tr>
 									<?php
@@ -448,8 +446,8 @@
 							<tbody>
 								<?php
 									foreach($eintragDates as $datum){
-										if($datum['public'] == 1){
-											$selectEintraege = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ?");
+										if($datum['publicSum'] > 0){
+											$selectEintraege = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND public = 1");
 											$selectEintraege->execute(array($rtbId, $datum['datum']));
 											$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
 

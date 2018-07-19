@@ -758,7 +758,7 @@
 						}
 
 						if(empty($errors)){
-							$updateEintrag = $db->prepare("UPDATE eintraege SET reisetagebuch_id = ?, titel = ?, text = ?, datum = ?, uhrzeit = ?, standort_id = ?, zusammenfassung = ?, public = ? WHERE id = ? AND reisetagebuch_id = ?");
+							$updateEintrag = $db->prepare("UPDATE eintraege SET reisetagebuch_id = ?, titel = ?, text = ?, datum = ?, uhrzeit = ?, standort_id = ?, entwurf = 0, zusammenfassung = ?, public = ? WHERE id = ? AND reisetagebuch_id = ?");
 							$updateEintrag->execute($updateArray);
 							for($i = $anzahlBilder + 1; $i <= 3; $i++){
 								insertEintragBild($db, $username, $eintragId, $_POST['picture'.$i.'Id'], $_POST['bild'.$i.'unterschrift']);
