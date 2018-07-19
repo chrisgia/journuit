@@ -10,6 +10,9 @@
 		$rtbUrl = htmlspecialchars($_POST['rtb']);
 		$rtbId = getRtbIdFromUrl($db, $rtbUrl);
 
+		$mask = '../files/'.$rtbUrl.'/*.pdf';
+		array_map('unlink', glob($mask));
+
 		// Reisetagebuch auswählen
 		$selectReisetagebuch = $db->prepare("SELECT reisetagebuecher.id, users.username, reisetagebuecher.users_id, titel, url, beschreibung, public, erstellt_am, bild_id, bilder.file_ext FROM reisetagebuecher LEFT JOIN bilder ON (reisetagebuecher.bild_id = bilder.id) JOIN users ON (users_id = users.id) WHERE reisetagebuecher.id = ?");
 		$selectReisetagebuch->execute(array($rtbId));
@@ -65,6 +68,9 @@
 			$reisetagebuchPdf->Text(($reisetagebuchPdf->GetPageWidth() - $reisetagebuchPdf->GetStringWidth($rtbTitel)) / 2, 15, $rtbTitel);
 			$reisetagebuchPdf->SetFontSize(14);
 			$reisetagebuchPdf->Text(($reisetagebuchPdf->GetPageWidth() / 2) + $reisetagebuchPdf->GetStringWidth($rtbTitel), 15, ', von '.$rtbCreator);
+			/*$reisetagebuchPdf->Cell($reisetagebuchPdf->GetPageWidth(), 10, $rtbTitel, 0, 2, 'C');
+			$reisetagebuchPdf->SetFontSize(14);
+			$reisetagebuchPdf->Cell($reisetagebuchPdf->GetPageWidth(), 10, 'von '.$rtbCreator, 0, 2, 'C');*/
 
 			if(!empty($reisetagebuch[0]['bild_id'])){
 				$reisetagebuchPdf->Image('../users/'.$reisetagebuch[0]['username'].'/'.$reisetagebuch[0]['bild_id'].'.'.$reisetagebuch[0]['file_ext'], 0, 30, null, null, $reisetagebuch[0]['file_ext'], '../../users/'.$reisetagebuch[0]['username'].'/'.$reisetagebuch[0]['bild_id'].'.'.$reisetagebuch[0]['file_ext']);
@@ -125,8 +131,16 @@
 						$selectBilder->execute(array($eintrag['id']));
 						$bilder = $selectBilder->fetchAll(\PDO::FETCH_ASSOC);
 						if($eintrag['zusammenfassung'] != 1){
-							$uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
-							$reisetagebuchPdf->Cell(15, 10, $uhrzeit, 0, 0);
+							if($eintrag['zusammenfassung'] != 1){
+								if($eintrag['uhrzeit'] > 2400){
+									$uhrzeit = substr_replace(str_pad($eintrag['uhrzeit'] - 2400, 4, '0', STR_PAD_LEFT), ':', 2, 0);
+									$reisetagebuchPdf->Cell($reisetagebuchPdf->GetStringWidth('24:00 +'.$uhrzeit) + 3, 10, '24:00 +'.$uhrzeit, 0, 0);
+								} else {
+									$uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
+									$reisetagebuchPdf->Cell(15, 10, $uhrzeit, 0, 0);
+								}
+							}
+							
 						}
 						$reisetagebuchPdf->SetFont('', 'B');
 						$reisetagebuchPdf->Cell(0, 10, iconv("UTF-8", "Windows-1252//TRANSLIT", $eintrag['titel']), 0, 0);

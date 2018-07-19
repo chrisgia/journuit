@@ -85,6 +85,11 @@
 					if(isset($rtbId) && isOwner($db, $userId, $rtbId)){
 						?>
 						<div class="uk-margin-top uk-margin-bottom">
+
+							<div class="uk-text-center">
+								<a class="uk-icon-link uk-margin-left" uk-icon="icon: arrow-left; ratio: 1.2" href="reisetagebuecher.php?rtb=<?=$rtbUrl;?>">Zurück zum Reisetagebuch</a>
+							</div>
+
 							<h1 class="uk-text-center">Neuer Eintrag</h1>
 							<h2 class="uk-text-center uk-margin-remove-top"><?=$rtbTitel;?></h2>
 							<hr class="uk-width-1-1">
@@ -150,7 +155,8 @@
 									</div>
 
 									<div class="uk-margin">
-										<input name="titel" class="uk-input" type="text" placeholder="Titel..." required>
+										<i><span id="char_count">25</span> verbleibend</i>
+										<input name="titel" id="titel" class="uk-input" type="text" placeholder="Titel (maximal 25 Zeichen)" onFocus="countChars('titel','char_count',25)" onKeyDown="countChars('titel','char_count',25)" onKeyUp="countChars('titel','char_count',25)" maxlength="25" required>
 									</div>
 
 									<div class="uk-margin">
@@ -248,6 +254,10 @@
 
 						if (ctype_space(htmlspecialchars($_POST['titel'])) || empty($_POST['titel'])) {
 							array_push($errors, 'Der Titel darf nicht leer sein.');
+						}
+
+						if (mb_strlen($_POST['titel']) > 25) {
+							array_push($errors, 'Der Titel darf maximal 25 Zeichen enthalten.');
 						}
 
 						if (ctype_space(htmlspecialchars($_POST['eintrag'])) || empty($_POST['eintrag'])) {
@@ -439,12 +449,12 @@
 										<span class="uk-float-left">
 											<?php
 											if($eintrag['zusammenfassung'] != 1){
-												if($eintrag['uhrzeit'] > 24){
-													echo "+".$uhrzeit.", ";
-													$uhrzeit = substr_replace($eintrag['uhrzeit'] - 24, ':', 2, 0);
+												if($eintrag['uhrzeit'] > 2400){
+													$uhrzeit = substr_replace(str_pad($eintrag['uhrzeit'] - 2400, 4, '0', STR_PAD_LEFT), ':', 2, 0);
+													echo "<span uk-icon=\"icon: future\" uk-tooltip=\"title: Geht in den nächsten Tag; pos:bottom\">+".$uhrzeit." </span>, ";
 												} else {
 													$uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
-													echo $uhrzeit.", ";
+													echo "<span uk-icon=\"icon: clock\">".$uhrzeit." </span>, ";
 												}
 											}
 											?> 
@@ -556,7 +566,13 @@
 										<div class="uk-inline" id="dateInput">
 											<span class="uk-form-icon uk-form-icon-flip" uk-icon="icon: calendar"></span>
 											<?php
-											$uhrzeit = substr_replace($eintrag[0]['uhrzeit'], ':', 2, 0);
+											if($eintrag[0]['uhrzeit'] > 2400){
+												$stunden = (int) substr($eintrag[0]['uhrzeit'], 0, 2);
+												$uebergang = $stunden - 24;
+												$uhrzeit = substr_replace(preg_replace("'".$stunden."'", '00', $eintrag[0]['uhrzeit'], 1), ':', 2, 0);
+											} else {
+												$uhrzeit = substr_replace($eintrag[0]['uhrzeit'], ':', 2, 0);
+											}
 											$dateTime = $eintrag[0]['datum']." ".$uhrzeit;
 											?>
 											<input type="text" name="dateTime" id="dateTime" value="<?=$dateTime;?>" class="uk-input uk-form-width-medium flatpickr" placeholder="Datum & Uhrzeit" required>
@@ -568,8 +584,16 @@
 											<span uk-icon="icon: plus"></span>
 											<select id="uebergangsstunden" class="uk-select uk-form-width-small" name="uebergangsstunden">
 												<?php
+												$selected = '';
 												for($i = 0; $i <= 7; $i++){
-													echo "<option value=\"".$i."\">".$i." Stunden</option>";
+													if(isset($uebergang)){
+														if($i == $uebergang){
+															$selected = 'selected';
+														} else {
+															$selected = '';
+														}
+													}
+													echo "<option value=\"".$i."\" ".$selected.">".$i." Stunden</option>";
 												}
 												?>
 											</select>
@@ -578,7 +602,8 @@
 									</div>
 
 									<div class="uk-margin">
-										<input name="titel" class="uk-input" type="text" placeholder="Titel..." value="<?=$eintrag[0]['titel'];?>" required>
+										<i><span id="char_count"><?= 25 - mb_strlen($eintrag[0]['titel']);?></span> verbleibend</i>
+										<input name="titel" id="titel" class="uk-input" type="text" placeholder="Titel (maximal 25 Zeichen)" onFocus="countChars('titel','char_count',25)" onKeyDown="countChars('titel','char_count',25)" onKeyUp="countChars('titel','char_count',25)" maxlength="25" value="<?=$eintrag[0]['titel'];?>" required>
 									</div>
 
 									<div class="uk-margin">
@@ -675,7 +700,7 @@
 							$uhrzeit = str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5));
 						}
 
-						$uhrzeit = str_pad(str_replace(':', '', substr(htmlspecialchars($_POST['dateTime']), 11, 5)), 4, '0', STR_PAD_LEFT);
+						$uhrzeit = str_pad($uhrzeit, 4, '0', STR_PAD_LEFT);
 						$roundedUhrzeit = round((int) $uhrzeit / 5) * 5;
 						$roundedUhrzeit = str_pad($roundedUhrzeit, 4, '0', STR_PAD_LEFT);
 
@@ -687,6 +712,10 @@
 
 						if (ctype_space(htmlspecialchars($_POST['titel'])) || empty($_POST['titel'])) {
 							array_push($errors, 'Der Titel darf nicht leer sein.');
+						}
+
+						if (mb_strlen($_POST['titel']) > 25) {
+							array_push($errors, 'Der Titel darf maximal 25 Zeichen enthalten.');
 						}
 
 						if (ctype_space(htmlspecialchars($_POST['eintrag'])) || empty($_POST['eintrag'])) {
@@ -858,7 +887,14 @@
 				}	
 			});
 
+
 			$('#uebergang').hide();
+			<?php 
+			if(isset($eintrag[0]['uhrzeit']) && $eintrag[0]['uhrzeit'] > 2400){ ?>
+				$('#uebergang').show();
+			<?php
+			} 
+			?>
 			// Einstellungen des Datepickers
 			$(".flatpickr").flatpickr({
 				enableTime: true,

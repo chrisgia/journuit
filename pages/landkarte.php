@@ -36,8 +36,8 @@
 				<table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
 					<thead>
 						<tr>
-							<th class="uk-text-center">Orte (<?=sizeof($standorte);?>)</th>
-							<th class="uk-text-right">Datum</th>
+							<th class="uk-text-center uk-width-small">Orte (<?=sizeof($standorte);?>)</th>
+							<th class="uk-text-right uk-width-expand">Datum</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -54,8 +54,13 @@
 						$eintragCount = 1;
 						foreach($eintraege as $eintrag){
 							$formatiertesDatum = strftime("%e. %B %Y", strtotime($eintrag['datum']));
-							$uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
-							$dateString .= $formatiertesDatum.' '.$uhrzeit.'<br/>';
+							if($eintrag['uhrzeit'] > 2400){
+								$uhrzeit = substr_replace(str_pad($eintrag['uhrzeit'] - 2400, 4, '0', STR_PAD_LEFT), ':', 2, 0);
+								$dateString .= $formatiertesDatum.' 24:00 +'.$uhrzeit.'<br/>';
+							} else {
+								$uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
+								$dateString .= $formatiertesDatum.' '.$uhrzeit.'<br/>';
+							}
 							$eintraegeString .= $eintrag['titel'];
 							if($eintragCount != sizeof($eintraege)){
 								$eintraegeString .= ', ';
@@ -64,11 +69,11 @@
 						}
 						?>
 						<tr class="standortBox" id="standort<?=$standortCount;?>">
-							<td>
+							<td class="uk-width-small">
 							<span class="uk-text-bold uk-h3 uk-margin-right"><?=$standortCount;?> </span>
 							<?=$standort['name'];?>	(<?=$eintraegeString;?>)
 							</td>
-							<td class="uk-text-right">
+							<td class="uk-text-right uk-width-expand">
 								<?=$dateString;?>
 							</td>
 						</tr>

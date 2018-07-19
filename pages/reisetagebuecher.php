@@ -85,7 +85,7 @@
 								?>
 								<div class="uk-overlay uk-overlay-default uk-position-bottom">
 									<span class="uk-h2"><?=$reisetagebuch['titel'];?></span>
-									<p><?=$reisetagebuch['beschreibung'];?></p>
+									<p class="uk-text-break"><?=$reisetagebuch['beschreibung'];?></p>
 									<span class="uk-text-small uk-float-right"><i>erstellt am <?=getMySqlDate($reisetagebuch['erstellt_am']);?></i></span><br/>
 								</div>   
 							</div>
@@ -208,7 +208,7 @@
 			<div id="shareModal" uk-modal>
 			    <div class="uk-modal-dialog">
 			    	<div class="uk-modal-body">
-				        <h2 class="uk-modal-title">"<?=$reisetagebuchDaten[0]['titel'];?>" teilen</h2>
+				        <h2 class="uk-modal-title uk-text-break">"<?=$reisetagebuchDaten[0]['titel'];?>" teilen</h2>
 
 				        <a class="uk-icon-button shareIcon" uk-icon="icon: copy; ratio: 2" uk-tooltip="title: Link kopieren; pos: bottom" id="copyUrl"></a>
 						<a class="uk-icon-button shareIcon" uk-icon="icon: mail; ratio: 2" uk-tooltip="title: E-Mail; pos: bottom" id="email"></a>
@@ -230,16 +230,19 @@
 			<div class="uk-flex uk-flex-center uk-flex-column uk-flex-middle">
 				<div class="uk-margin-top uk-margin-bottom">
 				<?php 
-				$selectDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ? AND entwurf = 0 ORDER BY datum DESC");
-				$selectDates->execute(array($rtbId));
-				$dates = $selectDates->fetchAll(\PDO::FETCH_ASSOC);
+				$selectEintragDates = $db->prepare("SELECT DISTINCT datum, public FROM eintraege WHERE reisetagebuch_id = ? AND entwurf = 0 ORDER BY datum DESC");
+				$selectEintragDates->execute(array($rtbId));
+				$eintragDates = $selectEintragDates->fetchAll(\PDO::FETCH_ASSOC);
 				$disabled = '';
 				$tooltipText = 'Teilen';
 				if($reisetagebuchDaten[0]['public'] != 1){
 					$disabled = 'disabled';
-					$tooltipText = 'Das Reisetagebuch muss Öffentlich sein, um geteilt zu werden.';
+					$tooltipText = 'Das Reisetagebuch muss öffentlich sein, um geteilt zu werden.';
 				}
 				if(isOwner($db, $userId, $rtbId)){
+					$selectEntwurfDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ? AND entwurf = 1 ORDER BY datum DESC");
+					$selectEntwurfDates->execute(array($rtbId));
+					$entwurfDates = $selectEntwurfDates->fetchAll(\PDO::FETCH_ASSOC);
 				?>
 					<div>
 						<div>
@@ -262,82 +265,160 @@
 							echo '<img class="uk-border-rounded" data-src="/pictures/no-picture.jpg" uk-img>';
 						} 
 						?>
-					</div>					
-					<?php 
+					</div>
 
-					if(!empty($dates)){
-					?>
-						<table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
-							<thead>
-								<tr>
-									<th class="uk-text-center">Einträge (<?=sizeof($dates);?>)</th>
-									<th class="uk-text-right">
-										<form method="POST" action="eintraege.php?view=neu">
-											<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
-											<button class="uk-button uk-button-text" name="neu"><i uk-icon="plus"></i> Neuer Eintrag</button>
-										</form>
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								<?php
-								foreach($dates as $datum){
-									$selectEintraege = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND entwurf = 0");
-									$selectEintraege->execute(array($rtbId, $datum['datum']));
-									$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
+					<ul class="uk-subnav uk-subnav-pill" uk-switcher>
+						<li><a href="#">Einträge</a></li>
+    					<li><a href="#">Entwürfe</a></li>
+					</ul>
 
-									$formatiertesDatum = strftime("%e. %B %Y", strtotime($datum['datum']));
-									?>
-									<tr class="eintragBox" onclick="document.location='eintraege.php?rtb=<?=$rtbUrl;?>&datum=<?=$datum['datum'];?>'">
-										<td>
-										<span class="uk-text-bold"><?=$formatiertesDatum;?> </span>
-										<i>
-										<?php
-										$anzahlEintraege = sizeof($eintraege);
-										for($i = 0; $i <= $anzahlEintraege - 1; $i++){
-											echo $eintraege[$i]['titel'];
-
-											if($i < $anzahlEintraege - 1){
-												echo ", ";
-											}
-
-											if($i >= 2){
-												echo "...";
-												break;
-											}
-										}
-
-										?>
-										</i>	
-										</td>
-										<td class="uk-text-right">
-											<?php 
-											echo $anzahlEintraege;
-											if($anzahlEintraege === 1){
-												echo " EINTRAG";
-											} else {
-												echo " EINTRÄGE"; 
-											}
-											?>
-										</td>
-									</tr>
-								<?php
-								}
-								?>
-							</tbody>
-						</table>
-					<?php
-					} else {
+					<ul class="uk-switcher">
+					    <li>
+						<?php 
+						if(!empty($eintragDates)){
 						?>
-						<div class="uk-margin-top uk-text-center">
-							<span>Sie haben zu diesem Reisetagebuch noch keinen Eintrag geschrieben.</span><br/>
-							<form method="POST" action="eintraege.php?view=neu">
-								<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
-								<button class="uk-button uk-button-text" name="neu">Neuer Eintrag</button>
-							</form>
-						</div>
+							<table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
+								<thead>
+									<tr>
+										<th class="uk-text-center">Einträge (<?=sizeof($eintragDates);?>)</th>
+										<th class="uk-text-right">
+											<form method="POST" action="eintraege.php?view=neu">
+												<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
+												<button class="uk-button uk-button-text" name="neu"><i uk-icon="plus"></i> Neuer Eintrag</button>
+											</form>
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									foreach($eintragDates as $datum){
+										$selectEintraege = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND entwurf = 0");
+										$selectEintraege->execute(array($rtbId, $datum['datum']));
+										$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
+
+										$formatiertesDatum = strftime("%e. %B %Y", strtotime($datum['datum']));
+										?>
+										<tr class="eintragBox" onclick="document.location='eintraege.php?rtb=<?=$rtbUrl;?>&datum=<?=$datum['datum'];?>'">
+											<td>
+											<span class="uk-text-bold"><?=$formatiertesDatum;?> </span>
+											<i>
+											<?php
+											$anzahlEintraege = sizeof($eintraege);
+											for($i = 0; $i <= $anzahlEintraege - 1; $i++){
+												echo $eintraege[$i]['titel'];
+
+												if($i < $anzahlEintraege - 1){
+													echo ", ";
+												}
+
+												if($i >= 2){
+													echo "...";
+													break;
+												}
+											}
+
+											?>
+											</i>	
+											</td>
+											<td class="uk-text-right">
+												<?php 
+												echo $anzahlEintraege;
+												if($anzahlEintraege === 1){
+													echo " EINTRAG";
+												} else {
+													echo " EINTRÄGE"; 
+												}
+												?>
+											</td>
+										</tr>
+									<?php
+									}
+									?>
+								</tbody>
+							</table>
+						<?php
+						} else {
+							?>
+							<div class="uk-margin-top uk-text-center">
+								<span>Sie haben zu diesem Reisetagebuch noch keinen Eintrag geschrieben.</span><br/>
+								<form method="POST" action="eintraege.php?view=neu">
+									<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
+									<button class="uk-button uk-button-text" name="neu">Neuer Eintrag</button>
+								</form>
+							</div>
+						<?php
+						}
+						?>
+						</li>
+						<li>
+						<?php
+						if(!empty($entwurfDates)){
+							?>
+							<table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
+								<thead>
+									<tr>
+										<th class="uk-text-center">Entwürfe (<?=sizeof($entwurfDates);?>)</th>
+										<th class="uk-text-right">Anzahl</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									foreach($entwurfDates as $datum){
+										$selectEntwuerfe = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND entwurf = 1");
+										$selectEntwuerfe->execute(array($rtbId, $datum['datum']));
+										$entwuerfe = $selectEntwuerfe->fetchAll(\PDO::FETCH_ASSOC);
+
+										$formatiertesDatum = strftime("%e. %B %Y", strtotime($datum['datum']));
+										?>
+										<tr class="eintragBox" onclick="document.location='eintraege.php?rtb=<?=$rtbUrl;?>&datum=<?=$datum['datum'];?>'">
+											<td>
+											<span class="uk-text-bold"><?=$formatiertesDatum;?> </span>
+											<i>
+											<?php
+											$anzahlEntwuerfe = sizeof($entwuerfe);
+											for($i = 0; $i <= $anzahlEntwuerfe - 1; $i++){
+												echo $entwuerfe[$i]['titel'];
+
+												if($i < $anzahlEntwuerfe - 1){
+													echo ", ";
+												}
+
+												if($i >= 2){
+													echo "...";
+													break;
+												}
+											}
+
+											?>
+											</i>	
+											</td>
+											<td class="uk-text-right">
+												<?php 
+												echo $anzahlEntwuerfe;
+												if($anzahlEntwuerfe === 1){
+													echo " ENTWURF";
+												} else {
+													echo " ENTWÜRFE"; 
+												}
+												?>
+											</td>
+										</tr>
+									<?php
+									}
+									?>
+								</tbody>
+							</table>
+						<?php
+						} else {
+							?>
+							<div class="uk-margin-top uk-text-center">
+								<span>Sie haben keine Entwürfe.</span><br/>
+							</div>
+						<?php
+						}
+						?>
+						</li>
 					<?php
-					}
 				} else {
 					?>
 					<div>
@@ -356,7 +437,7 @@
 						?>
 					</div>					
 					<?php 
-					if(!empty($dates)){
+					if(!empty($eintragDates)){
 					?>
 						<table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
 							<thead>
@@ -366,27 +447,29 @@
 							</thead>
 							<tbody>
 								<?php
-									foreach($dates as $datum){
-										$selectEintraege = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ?");
-										$selectEintraege->execute(array($rtbId, $datum['datum']));
-										$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
+									foreach($eintragDates as $datum){
+										if($datum['public'] == 1){
+											$selectEintraege = $db->prepare("SELECT titel FROM eintraege WHERE reisetagebuch_id = ? AND datum = ?");
+											$selectEintraege->execute(array($rtbId, $datum['datum']));
+											$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
 
-										$formatiertesDatum = strftime("%e. %B %Y", strtotime($datum['datum']));
-										?>
-										<tr class="eintragBox" onclick="document.location='eintraege.php?rtb=<?=$rtbUrl;?>&datum=<?=$datum['datum'];?>'">
-											<td>
-												<span class="uk-text-bold"><?=$formatiertesDatum;?> </span>
-												<i>
-												<?php
-												foreach($eintraege as $eintrag){
-													echo $eintrag['titel'].", ";
-												}
-												?>
-												...
-												</i>	
-											</td>
-										</tr>
+											$formatiertesDatum = strftime("%e. %B %Y", strtotime($datum['datum']));
+											?>
+											<tr class="eintragBox" onclick="document.location='eintraege.php?rtb=<?=$rtbUrl;?>&datum=<?=$datum['datum'];?>'">
+												<td>
+													<span class="uk-text-bold"><?=$formatiertesDatum;?> </span>
+													<i>
+													<?php
+													foreach($eintraege as $eintrag){
+														echo $eintrag['titel'].", ";
+													}
+													?>
+													...
+													</i>	
+												</td>
+											</tr>
 									<?php
+										}
 									}
 									?>
 							</tbody>
@@ -450,7 +533,7 @@
 								</div>
 
 								<div class="uk-margin">
-									<i><span id="char_count"><?= 26 - strlen($reisetagebuchDaten[0]['titel']);?></span> verbleibend</i>
+									<i><span id="char_count"><?= 25 - mb_strlen($reisetagebuchDaten[0]['titel']);?></span> verbleibend</i>
 									<input name="titel" id="titel" class="uk-input" type="text" placeholder="Titel (maximal 25 Zeichen)" onFocus="countChars('titel','char_count',25)" onKeyDown="countChars('titel','char_count',25)" onKeyUp="countChars('titel','char_count',25)" maxlength="25" value="<?=$reisetagebuchDaten[0]['titel'];?>" required>
 								</div>
 
