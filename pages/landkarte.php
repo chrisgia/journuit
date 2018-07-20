@@ -134,7 +134,7 @@
 			    // Die Map wird dort zentriert wo die Marker liegen
 			    eintraegeMap.fitBounds(bounds);
 
-			    // Fix damit die Map nach dem "fitBounds" nicht zu nahr ist
+			    // Fix damit die Map nach dem "fitBounds" nicht zu nahr ist wenn es nur ein Marker gibt
 			    var listener = google.maps.event.addListener(eintraegeMap, "idle", function() { 
 					if (eintraegeMap.getZoom() > 16) eintraegeMap.setZoom(16); 
 					google.maps.event.removeListener(listener); 
@@ -169,16 +169,22 @@
 	    		var ortname = ort['name'];
 	    		var ortid = ort['id'];
 
-	    		var infoContent = "<div class=\"uk-animation-fade\"><span class=\"uk-text-large uk-text-primary\">"+ortname+"</span><hr/>";
-		    	infoContent += "<ul class=\"uk-list\">";
+	    		var infoContent = "<div class=\"uk-animation-fade\"><span class=\"uk-text-primary uk-h2\">"+ortname+"</span><hr/>";
+		    	infoContent += "<ul class=\"uk-list uk-list-bullet\">";
 
-				console.log('ortid: '+ortid);
-				console.log(standortEintraege);
-				console.log(standortEintraege[ortid].length);
-
-		    	for(var i = 1; i < standortEintraege[ortid].length + 1; i++){
-		        	infoContent += '<li>'+standortEintraege[ortid][i]['titel']+'</li>';
+		    	// InfoWindow wird mit jedem Eintrag mit diesem Standort gefüllt
+		    	for(var standortEintrag in standortEintraege[ortid]){
+		        	infoContent += "<li>";
+		        	infoContent += "<span class=\"uk-h3 uk-text-lead\">"+standortEintraege[ortid][standortEintrag]['titel']+"</span>";
+		        	infoContent += "<br/>";
+		        	infoContent += standortEintraege[ortid][standortEintrag]['datum'];
+		        	infoContent += "<br/>";
+		        	var uhrzeit = standortEintraege[ortid][standortEintrag]['uhrzeit'];
+		        	uhrzeit = uhrzeit.slice(0, 2) + ':' + uhrzeit.slice(2);
+		        	infoContent += uhrzeit;
+		        	infoContent += "</li>";
 		        }
+
 		        infoContent += "</ul>";
 		        infoContent += "</div>";
 
