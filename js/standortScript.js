@@ -6,7 +6,7 @@ UIkit.upload('#standortVonBild', {
 	url: '/ajax/standortVonUpload.php',
 	multiple: false,
 	mime: 'image/*',
-	maxSize: 5000,
+	maxSize: 10000,
 	method: 'POST',
 
 	beforeAll: function () {
@@ -37,19 +37,15 @@ UIkit.upload('#standortVonBild', {
 		bar1.setAttribute('hidden', 'hidden');
 
 		var exifData = JSON.parse(data.response);
+		var locationName = '';
 		if('error' in exifData){
 			UIkit.notification({message: exifData.error, status: 'danger'});
 		} else {
 			$('#lat').val(exifData.lat);
 			$('#lon').val(exifData.lon);
 
-			$('#pickerMap').locationpicker({
-				inputBinding: {
-					latitudeInput: $('#lat'),
-					longitudeInput: $('#lon')
-				},
-				radius: null
-			});
+			// Platziert den Marker auf die neuen Werte
+			$('#pickerMap').locationpicker("location", {latitude: exifData.lat, longitude: exifData.lon});
 		}
 		$('#standortVonBild').show();				   
 	}
@@ -63,7 +59,7 @@ UIkit.upload('#standortBildUpload', {
 	url: '/ajax/upload.php',
 	multiple: false,
 	mime: 'image/*',
-	maxSize: 5000,
+	maxSize: 10000,
 	method: 'POST',
 	params: {
 		width: 300,

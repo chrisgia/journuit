@@ -993,7 +993,7 @@
 
 				url: '/ajax/upload.php',
 				mime: 'image/*',
-				maxSize: 5000,
+				maxSize: 10000,
 				method: 'POST',
 				params: {
 					multiple: true,

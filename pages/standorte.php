@@ -323,7 +323,7 @@
             var latitude = 49.609283;
             var longitude = 6.551267;
 
-            // Wenn ein vorhandener Standort angezeigt wird, nimmt die Map die lat und lon Werte an. Default werden diese auf EURESA in Saarburg gestellt
+            // Wenn ein vorhandener Standort angezeigt wird, nimmt die Map die lat und lon Werte an. Standardmäßig werden diese auf EURESA in Saarburg gestellt
             if($('#lat').val() != ''){
                 latitude = $('#lat').val();
             }

@@ -38,8 +38,8 @@
 				<table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
 					<thead>
 						<tr>
-							<th class="uk-text-center uk-width-small">Orte (<?=sizeof($standorte);?>)</th>
-							<th class="uk-text-center uk-width-expand">Einträge</th>
+							<th class="uk-text-center uk-width-medium">Orte (<?=sizeof($standorte);?>)</th>
+							<th class="uk-text-center uk-width-large">Einträge</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -54,9 +54,10 @@
 						$eintraegeString = '';
 						$eintragCount = 1;
 						foreach($eintraege as $eintrag){
+							$formatiertesDatum = strftime("%e. %B %Y", strtotime($eintrag['datum']));
 							// Füllt Array um später infoWindow zu erstellen
 							$standortEintraege[$standort['id']][$eintragCount]['titel'] = $eintrag['titel'];
-							$standortEintraege[$standort['id']][$eintragCount]['datum'] = $eintrag['datum'];
+							$standortEintraege[$standort['id']][$eintragCount]['datum'] = $formatiertesDatum;
 							$standortEintraege[$standort['id']][$eintragCount]['uhrzeit'] = $eintrag['uhrzeit'];
 							$standortEintraege[$standort['id']][$eintragCount]['public'] = $eintrag['public'];
 
@@ -69,11 +70,11 @@
 						}
 						?>
 						<tr class="standortBox" id="standort<?=$standortCount;?>">
-							<td class="uk-width-small">
+							<td class="uk-width-medium">
 								<span class="uk-text-bold uk-h3 uk-margin-right"><?=$standortCount;?> </span>
 								<?=$standort['name'];?>
 							</td>
-							<td class="uk-text-center uk-width-expand">
+							<td class="uk-text-center uk-width-large">
 								<?=$eintraegeString;?>
 							</td>
 						</tr>
@@ -180,7 +181,11 @@
 		        	infoContent += standortEintraege[ortid][standortEintrag]['datum'];
 		        	infoContent += "<br/>";
 		        	var uhrzeit = standortEintraege[ortid][standortEintrag]['uhrzeit'];
-		        	uhrzeit = uhrzeit.slice(0, 2) + ':' + uhrzeit.slice(2);
+		        	if(uhrzeit > 2400){
+		        		uhrzeit = "<span uk-icon=\"icon: future\" uk-tooltip=\"title: Geht in den nächsten Tag; pos:bottom\">+"+(uhrzeit.slice(0, 2) - 24) +':'+uhrzeit.slice(2)+" </span>";
+		        	} else {
+		        		uhrzeit = "<span uk-icon=\"icon: clock\">"+uhrzeit.slice(0, 2) + ':' + uhrzeit.slice(2)+" </span>, ";
+		        	}
 		        	infoContent += uhrzeit;
 		        	infoContent += "</li>";
 		        }

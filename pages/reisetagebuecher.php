@@ -280,7 +280,7 @@
 							<table class="uk-table uk-table-hover uk-table-justify uk-table-divider">
 								<thead>
 									<tr>
-										<th class="uk-text-center">Einträge (<?=sizeof($eintragDates);?>)</th>
+										<th class="uk-text-center">Reisetage (<?=sizeof($eintragDates);?>)</th>
 										<th class="uk-text-right">
 											<form method="POST" action="eintraege.php?view=neu">
 												<input type="text" name="rtb" value="<?=$rtbUrl;?>" hidden>
@@ -655,7 +655,7 @@
 				url: '/ajax/upload.php',
 				multiple: false,
 				mime: 'image/*',
-				maxSize: 5000,
+				maxSize: 10000,
 				method: 'POST',
 
 				beforeAll: function () {

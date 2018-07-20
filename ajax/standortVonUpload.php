@@ -19,9 +19,9 @@ if(isset($_FILES['files'])){
 		);
 	}
 
-	if((int) $file_size > 5242880){
+	if((int) $file_size > 10485760){
 		$error = array(
-			'error' => "Die Datei ist zu groß."
+			'error' => "Die Datei ist zu groß. (maximal 10MB)"
 		);
 	}
 
