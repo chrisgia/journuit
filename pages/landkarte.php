@@ -57,7 +57,8 @@
 							$formatiertesDatum = strftime("%e. %B %Y", strtotime($eintrag['datum']));
 							// Füllt Array um später infoWindow zu erstellen
 							$standortEintraege[$standort['id']][$eintragCount]['titel'] = $eintrag['titel'];
-							$standortEintraege[$standort['id']][$eintragCount]['datum'] = $formatiertesDatum;
+							$standortEintraege[$standort['id']][$eintragCount]['datum'] = $eintrag['datum'];
+							$standortEintraege[$standort['id']][$eintragCount]['formatiertesDatum'] = $formatiertesDatum;
 							$standortEintraege[$standort['id']][$eintragCount]['uhrzeit'] = $eintrag['uhrzeit'];
 							$standortEintraege[$standort['id']][$eintragCount]['public'] = $eintrag['public'];
 
@@ -120,7 +121,8 @@
 		    	var bounds = new google.maps.LatLngBounds();
 		    	//Erstellen der Mitarbeiter-Map in der passenden div
 		        eintraegeMap = new google.maps.Map(document.getElementById('landkarte'), {
-		        	mapTypeId: 'terrain'
+		        	mapTypeId: 'terrain',
+		        	disableDefaultUI: true
 		        });
 
 				//Für jeden ort wird ein Marker mit den dort wohnenden Mitarbeiter erstellt. Die "bounds" Variabel wird um die Position des Markers erweitert
@@ -171,26 +173,24 @@
 	    		var ortid = ort['id'];
 
 	    		var infoContent = "<div class=\"uk-animation-fade\"><span class=\"uk-text-primary uk-h2\">"+ortname+"</span><hr/>";
-		    	infoContent += "<ul class=\"uk-list uk-list-bullet\">";
 
 		    	// InfoWindow wird mit jedem Eintrag mit diesem Standort gefüllt
 		    	for(var standortEintrag in standortEintraege[ortid]){
-		        	infoContent += "<li>";
-		        	infoContent += "<span class=\"uk-h3 uk-text-lead\">"+standortEintraege[ortid][standortEintrag]['titel']+"</span>";
-		        	infoContent += "<br/>";
-		        	infoContent += standortEintraege[ortid][standortEintrag]['datum'];
-		        	infoContent += "<br/>";
-		        	var uhrzeit = standortEintraege[ortid][standortEintrag]['uhrzeit'];
-		        	if(uhrzeit > 2400){
-		        		uhrzeit = "<span uk-icon=\"icon: future\" uk-tooltip=\"title: Geht in den nächsten Tag; pos:bottom\">+"+(uhrzeit.slice(0, 2) - 24) +':'+uhrzeit.slice(2)+" </span>";
-		        	} else {
-		        		uhrzeit = "<span uk-icon=\"icon: clock\">"+uhrzeit.slice(0, 2) + ':' + uhrzeit.slice(2)+" </span>, ";
-		        	}
-		        	infoContent += uhrzeit;
-		        	infoContent += "</li>";
+		    		infoContent += "<div class=\"uk-margin-bottom\">";
+			        	infoContent += "<a class=\"uk-h3 uk-link-muted\" href=\"eintraege.php?rtb=<?=$rtbUrl;?>&datum="+standortEintraege[ortid][standortEintrag]['datum']+"\">"+standortEintraege[ortid][standortEintrag]['titel']+"</a>";
+			        	infoContent += "<br/>";
+			        	infoContent += standortEintraege[ortid][standortEintrag]['formatiertesDatum'];
+			        	infoContent += "<br/>";
+			        	var uhrzeit = standortEintraege[ortid][standortEintrag]['uhrzeit'];
+			        	if(uhrzeit > 2400){
+			        		uhrzeit = "<span uk-icon=\"icon: future\" uk-tooltip=\"title: Geht in den nächsten Tag; pos:bottom\">+"+(uhrzeit.slice(0, 2) - 24) +':'+uhrzeit.slice(2)+" </span>";
+			        	} else {
+			        		uhrzeit = "<span uk-icon=\"icon: clock\">"+uhrzeit.slice(0, 2) + ':' + uhrzeit.slice(2)+" </span>";
+			        	}
+			        	infoContent += uhrzeit;
+		        	infoContent += "</div>";
 		        }
 
-		        infoContent += "</ul>";
 		        infoContent += "</div>";
 
 	        	var infowindow = new google.maps.InfoWindow({

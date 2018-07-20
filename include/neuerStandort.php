@@ -43,12 +43,12 @@
 		<div class="uk-margin uk-text-center">
 			<div class="uk-inline">
 				<span class="uk-form-icon uk-form-icon-flip" uk-icon="icon: quote-right"></span>
-				<input type="text" class="uk-input uk-form-width-large" id="standortname" name="standortname" placeholder="Standortname..." required/>
+				<input type="text" class="uk-input uk-form-width-large" id="standortname" name="standortname" placeholder="Standortname (maximal 25 Zeichen)" maxLength="25" required/>
 			</div>
 		</div>
 
 		<div class="uk-margin">
-			<textarea name="beschreibung" id="standortBeschreibung" class="uk-textarea" rows="5" type="text" placeholder="Beschreibung..."></textarea>
+			<textarea name="beschreibung" id="standortBeschreibung" class="uk-textarea" rows="5" type="text" placeholder="Beschreibung (maximal 60 Zeichen)" maxLength="60"></textarea>
 		</div>
 
 		<!-- Bild für den Standort anlegen -->

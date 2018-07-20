@@ -22,7 +22,7 @@ if(isset($_SESSION['auth_logged_in']) && $_SESSION['auth_logged_in'] == true) {
 					<img data-src="pictures/devices_mockup.png" alt="devices" uk-img>
 				</div>
 				<div class="uk-flex uk-flex-middle">
-					<span id="beschreibung">Mit journuit können Sie jederzeit und von jedem Gerät aus Ihre schönsten Momente festhalten.</span>
+					<span id="erklaerung">Mit journuit können Sie jederzeit und von jedem Gerät aus Ihre schönsten Momente festhalten.</span>
 				</div>
 			</div>
 			<hr class="uk-width-1-1 uk-divider-icon">

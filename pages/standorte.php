@@ -150,12 +150,12 @@
                                 <div class="uk-margin uk-text-center">
                                     <div class="uk-inline">
                                         <span class="uk-form-icon uk-form-icon-flip" uk-icon="icon: quote-right"></span>
-                                        <input type="text" class="uk-input uk-form-width-large" id="standortname" name="name" placeholder="Standortname..." value="<?=$standort[0]['name'];?>" required/>
+                                        <input type="text" class="uk-input uk-form-width-large" id="standortname" name="name" placeholder="Standortname (maximal 25 Zeichen)" value="<?=$standort[0]['name'];?>" maxLength="25" required/>
                                     </div>
                                 </div>
 
                                 <div class="uk-margin">
-                                    <textarea name="beschreibung" id="standortBeschreibung" class="uk-textarea" rows="5" type="text" placeholder="Beschreibung..."><?=$standort[0]['beschreibung'];?></textarea>
+                                    <textarea name="beschreibung" id="standortBeschreibung" class="uk-textarea" rows="5" type="text" placeholder="Beschreibung (maximal 60 Zeichen)" maxLength="60"><?=$standort[0]['beschreibung'];?></textarea>
                                 </div>
 
                                 <!-- Bild für den Standort anlegen -->
@@ -166,7 +166,7 @@
                                         <div uk-form-custom>
                                             <input type="file" name="files">
                                             <span class="uk-link">direkter Auswahl</span>)
-                                        </div>
+                                        </div> 
                                     </div>
                                     <progress id="js-progressbar2" class="uk-progress" value="0" max="100" hidden></progress>
                                 </div>
@@ -224,7 +224,15 @@
                     $errors = array();
 
                     if (ctype_space(htmlspecialchars($_POST['name'])) || empty($_POST['name'])) {
-                        array_push($errors, 'Der Titel darf nicht leer sein.');
+                        array_push($errors, 'Der Name darf nicht leer sein.');
+                    }
+
+                    if (mb_strlen($_POST['name']) > 25) {
+                        array_push($errors, 'Der Name darf maximal 25 Zeichen enthalten.');
+                    }
+
+                    if (mb_strlen($_POST['beschreibung']) > 60) {
+                        array_push($errors, 'Die Beschreibung darf maximal 60 Zeichen enthalten.');
                     }
 
                     if (ctype_space(htmlspecialchars($_POST['lat'])) || empty($_POST['lat'])) {

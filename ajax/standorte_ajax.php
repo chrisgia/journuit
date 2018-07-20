@@ -9,6 +9,14 @@
 			array_push($errors, 'Der Name darf nicht leer sein.');
 		}
 
+		if (mb_strlen($_POST['standortname']) > 25) {
+			array_push($errors, 'Der Name darf maximal 25 Zeichen enthalten.');
+		}
+
+		if (mb_strlen($_POST['beschreibung']) > 60) {
+			array_push($errors, 'Die Beschreibung darf maximal 60 Zeichen enthalten.');
+		}
+
 		if (ctype_space(htmlspecialchars($_POST['lat'])) || empty($_POST['lat']) || ctype_space(htmlspecialchars($_POST['lon'])) || empty($_POST['lon'])) {
 			array_push($errors, 'Die Latitude und Longitude Werte dürfen nicht leer sein.');
 		}

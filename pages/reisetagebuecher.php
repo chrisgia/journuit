@@ -125,7 +125,8 @@
 						</div>
 
 						<div class="uk-margin">
-							<textarea name="beschreibung" class="uk-textarea" rows="5" type="text" placeholder="Beschreibung..." required></textarea>
+							<i><span id="char_count_2">140</span> verbleibend</i>
+							<textarea name="beschreibung" id="beschreibung" class="uk-textarea" rows="5" type="text" placeholder="Beschreibung... (maximal 140 Zeichen)" onFocus="countChars('beschreibung','char_count_2',140)" onKeyDown="countChars('beschreibung','char_count_2',140)" onKeyUp="countChars('beschreibung','char_count_2',140)" maxlength="140"></textarea>
 						</div>
 
 						<div class="uk-margin">
@@ -166,8 +167,8 @@
 					array_push($errors, 'Der Titel darf nicht leer sein.');
 				}
 
-				if (ctype_space(htmlspecialchars($_POST['beschreibung'])) || empty($_POST['beschreibung'])) {
-					array_push($errors, 'Die Beschreibung darf nicht leer sein.');
+				if (mb_strlen($_POST['beschreibung']) > 140) {
+					array_push($errors, 'Die Beschreibung darf maximal 140 Zeichen enthalten.');
 				}
 
 				if (isset($_POST['public']) && ($_POST['public'] == "1")) {
@@ -411,7 +412,7 @@
 						} else {
 							?>
 							<div class="uk-margin-top uk-text-center">
-								<span>Sie haben keine Entwürfe.</span><br/>
+								<span>Es sind keine Entwürfe vorhanden.</span><br/>
 							</div>
 						<?php
 						}
@@ -537,7 +538,8 @@
 								</div>
 
 								<div class="uk-margin">
-									<textarea name="beschreibung" class="uk-textarea" rows="5" type="text" placeholder="Beschreibung..." required><?=$reisetagebuchDaten[0]['beschreibung'];?></textarea>
+									<i><span id="char_count_2"><?= 140 - mb_strlen($reisetagebuchDaten[0]['beschreibung']);?></span> verbleibend</i>
+									<textarea name="beschreibung" id="beschreibung" class="uk-textarea" rows="5" type="text" placeholder="Beschreibung... (maximal 140 Zeichen)" onFocus="countChars('beschreibung','char_count_2',140)" onKeyDown="countChars('beschreibung','char_count_2',140)" onKeyUp="countChars('beschreibung','char_count_2',140)" maxlength="140"><?=$reisetagebuchDaten[0]['beschreibung'];?></textarea>
 								</div>
 
 								<div class="uk-margin">
@@ -574,8 +576,8 @@
 							array_push($errors, 'Der Titel darf nicht leer sein.');
 						}
 
-						if (ctype_space(htmlspecialchars($_POST['beschreibung'])) || empty($_POST['beschreibung'])) {
-							array_push($errors, 'Die Beschreibung darf nicht leer sein.');
+						if (mb_strlen($_POST['beschreibung']) > 140) {
+							array_push($errors, 'Die Beschreibung darf maximal 140 Zeichen enthalten.');
 						}
 
 						if (isset($_POST['public'])) {

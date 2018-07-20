@@ -264,6 +264,10 @@
 							array_push($errors, 'Der Eintrag darf nicht leer sein.');
 						}
 
+						if (mb_strlen($_POST['eintrag']) > 5000) {
+							array_push($errors, 'Ein Eintrag darf maximal 5000 Zeichen enthalten.');
+						}
+
 						if (isset($_POST['public']) && ($_POST['public'] == "1")) {
 							$public = 1;
 						} else {
@@ -398,7 +402,6 @@
 										?>
 									</span>
 								</div>
-								<br/>
 								<div class="uk-margin-top uk-text-break eintragText">
 									<p><?=$eintrag['text'];?></p>
 								</div>
@@ -720,6 +723,10 @@
 
 						if (ctype_space(htmlspecialchars($_POST['eintrag'])) || empty($_POST['eintrag'])) {
 							array_push($errors, 'Der Eintrag darf nicht leer sein.');
+						}
+
+						if (mb_strlen($_POST['eintrag']) > 5000) {
+							array_push($errors, 'Ein Eintrag darf maximal 5000 Zeichen enthalten.');
 						}
 
 						if (isset($_POST['zusammenfassung']) && ($_POST['zusammenfassung'] == "1")) {
