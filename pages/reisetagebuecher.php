@@ -212,7 +212,8 @@
 
 				        <a class="uk-icon-button shareIcon" uk-icon="icon: copy; ratio: 2" uk-tooltip="title: Link kopieren; pos: bottom" id="copyUrl"></a>
 						<a class="uk-icon-button shareIcon" uk-icon="icon: mail; ratio: 2" uk-tooltip="title: E-Mail; pos: bottom" id="email"></a>
-						<a class="uk-icon-button shareIcon" uk-tooltip="title: PDF erstellen; pos: bottom" id="pdf"><i class="far fa-file-pdf fa-2x"></i></a>
+						<div id="loadingPdf" uk-tooltip="title: PDF wird erstellt..; pos: bottom" uk-spinner></div>
+						<a class="uk-icon-button shareIcon" uk-tooltip="title: PDF-Datei; pos: bottom" id="pdf"><i class="far fa-file-pdf fa-2x"></i></a>
 						<a class="uk-icon-button shareIcon" uk-icon="icon: facebook; ratio: 2" uk-tooltip="title: Auf Facebook teilen; pos: bottom" id="facebook"></a>
 						<a class="uk-icon-button shareIcon" uk-icon="icon: whatsapp; ratio: 2" uk-tooltip="title: Mit WhatsApp teilen; pos: bottom" id="whatsapp"></a>
 						<a class="uk-icon-button shareIcon" uk-icon="icon: twitter; ratio: 2" uk-tooltip="title: Tweeten; pos: bottom" id="twitter"></a>
@@ -723,6 +724,8 @@
 				});
 			});
 
+			$('#pdf').hide();
+
 			// Erstellt QR Code und PDF-Datei bereits beim Klicken auf das Share Icon
 			$(document.body).on('click', '#share', function(){
 				$.ajax({
@@ -743,8 +746,16 @@
 						rtb: rtb
 					}
 				});
+
+				$(document).ajaxStop(function() {
+					$('#pdf').show();
+					$('#loadingPdf').hide();
+				});
+
 				UIkit.modal('#shareModal').show();
 			});
+
+
 
 			<?php
 			if(isset($rtbUrl)){
