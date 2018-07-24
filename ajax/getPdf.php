@@ -45,15 +45,6 @@
 				    $this->y0 = $this->GetY();
 				}
 
-				function Footer() {
-			        // Go to 1.5 cm from bottom
-				    $this->SetY(-15);
-				    // Select Arial italic 9
-				    $this->SetFont('Arial', 'I', 9);
-				    // Print centered page number
-				    $this->Cell(0, 10, "Seite ".$this->PageNo()." von {nb}", 0, 0, 'C');
-			    }
-
 				function SetCol($col) {
 				    // Set position at a given column
 				    $this->col = $col;
@@ -64,17 +55,14 @@
 
 				function AcceptPageBreak() {
 				    // Method accepting or not automatic page break
-				    if($this->col<2)
-				    {
+				    if($this->col<2) {
 				        // Go to next column
 				        $this->SetCol($this->col+1);
 				        // Set ordinate to top
 				        $this->SetY($this->y0);
 				        // Keep on page
 				        return false;
-				    }
-				    else
-				    {
+				    } else {
 				        // Go back to first column
 				        $this->SetCol(0);
 				        // Page break
@@ -97,7 +85,7 @@
 						$this->Image('../users/'.$bild, null, null, -400, -400, '', '../../users/'.$bild);
 						$this->Ln(5);
 					}
-
+					$this->SetLineWidth(0.2);
 				    $this->Line($this->GetX(), $this->GetY() + 1, $this->GetX() + 4, $this->GetY() + 1);
 				    $this->Ln();
 				}
@@ -105,8 +93,9 @@
 				function printDatum($eintragDatum) {
 				    $this->SetFont('Times','B',14);
 				    $this->MultiCell(60,5, iconv("UTF-8", "Windows-1252//TRANSLIT", $eintragDatum));
+				    $this->SetLineWidth(1);
 				    $this->Line($this->GetX(), $this->GetY() + 1, $this->GetX() + $this->GetStringWidth($eintragDatum) + 2, $this->GetY() + 1);
-				    $this->Ln(2);
+				    $this->Ln(3);
 				}
 			}
 
@@ -142,7 +131,14 @@
 				$anzahlEintraegeText = $anzahlEintraege.' '.iconv("UTF-8", "Windows-1252//TRANSLIT", 'Einträge');
 			}
 
-			$reisetagebuchPdf->SetY(170);
+			$anzahlReisetage = sizeof($dates);
+			if($anzahlReisetage == 1){
+				$anzahlReisetageText = $anzahlReisetage.' Reisetag';
+			} else {
+				$anzahlReisetageText = $anzahlReisetage.' Reisetage';
+			}
+
+			$reisetagebuchPdf->SetY(190);
 
 			$reisetagebuchPdf->SetFontSize(13);
 			$reisetagebuchPdf->SetFont('', '');
@@ -151,6 +147,7 @@
 			$reisetagebuchPdf->SetFontSize(12);
 			$reisetagebuchPdf->SetFont('', 'I');
 			$reisetagebuchPdf->Cell(0, 10, $anzahlEintraegeText.', erstellt am '.getMySqlDate($reisetagebuch[0]['erstellt_am']).'.', 0, 1);
+			$reisetagebuchPdf->Cell(0, 10, getMySqlDate($dates[0]['datum']).' - '.getMySqlDate($dates[sizeof($dates) - 1]['datum']).' ('.$anzahlReisetageText.')', 0, 1);
 			$reisetagebuchPdf->Ln(10);
 			$reisetagebuchPdf->Image('../files/'.$reisetagebuch[0]['url'].'/linkQrCode.png', ($reisetagebuchPdf->GetPageWidth() - 43) / 2, $reisetagebuchPdf->GetY(), null, null, 'png', 'http://www.landausflugsplaner.de/pages/reisetagebuecher.php?rtb='.$reisetagebuch[0]['url']);
 

@@ -532,6 +532,10 @@
 									<span>Das Bild wird verarbeitet...</span>
 								</div>
 
+								<div id="picturesError">
+									<!-- Hier erscheinen die Fehler beim hochladen von Bildern -->
+								</div>
+
 								<div class="uk-margin">
 									<i><span id="char_count"><?= 25 - mb_strlen($reisetagebuchDaten[0]['titel']);?></span> verbleibend</i>
 									<input name="titel" id="titel" class="uk-input" type="text" placeholder="Titel (maximal 25 Zeichen)" onFocus="countChars('titel','char_count',25)" onKeyDown="countChars('titel','char_count',25)" onKeyUp="countChars('titel','char_count',25)" maxlength="25" value="<?=$reisetagebuchDaten[0]['titel'];?>" required>
@@ -691,13 +695,17 @@
 					bar.setAttribute('hidden', 'hidden');
 
 					var infos = JSON.parse(data.response);
-					var fullPath = '../users/'+username+'/tmp_'+infos.pictureId+'.'+infos.file_ext;
-
-					$('#pictureId').val(infos.pictureId);
-					$('#file_ext').val(infos.file_ext);
-					$('#titelbild').empty().append('<div class="uk-animation-fade"><img class="uk-border-rounded" data-src="'+fullPath+'" uk-img></div>');
-					UIkit.notification.closeAll();
-					UIkit.notification({message: 'Ihr Titelbild wurde erfolgreich hochgeladen.', status: 'success'});
+					if(infos.status == 'OK'){
+						var fullPath = '../users/'+username+'/tmp_'+infos.pictureId+'.'+infos.file_ext;
+						$('#picturesError').empty();
+						$('#pictureId').val(infos.pictureId);
+						$('#file_ext').val(infos.file_ext);
+						$('#titelbild').empty().append('<div class="uk-animation-fade"><img class="uk-border-rounded" data-src="'+fullPath+'" uk-img></div>');
+						UIkit.notification.closeAll();
+						UIkit.notification({message: 'Ihr Titelbild wurde erfolgreich hochgeladen.', status: 'success'});
+					} else {
+						$('#picturesError').empty().append('<div class="uk-margin-top uk-alert-danger" uk-alert><p>'+infos.msg+'</p></div>');
+					}
 					$('.js-upload').show();
 					$('#loading').attr('hidden', 'hidden');
 				}
@@ -730,6 +738,7 @@
 
 			// Erstellt QR Code und PDF-Datei bereits beim Klicken auf das Share Icon
 			$(document.body).on('click', '#share', function(){
+				$('#loadingPdf').show();
 				$.ajax({
 					url : '/ajax/getLinkQrCode.php',
 					type : 'POST',

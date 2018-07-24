@@ -411,7 +411,7 @@
 								$bilder = $selectBilder->fetchAll(\PDO::FETCH_ASSOC);
 								if(!empty($bilder)){
 									foreach($bilder as $bild){
-										echo '<img class="eintragBild uk-margin-small-bottom uk-border-rounded" src="/users/'.$username.'/'.$bild['id'].'.'.$bild['file_ext'].'"><br/>';
+										echo '<div class="uk-align-center"><img class="eintragBild uk-margin-small-bottom uk-border-rounded" src="/users/'.$username.'/'.$bild['id'].'.'.$bild['file_ext'].'"></div>';
 									}
 								}
 								?>
@@ -489,7 +489,7 @@
 									$bilder = $selectBilder->fetchAll(\PDO::FETCH_ASSOC);
 									if(!empty($bilder)){
 										foreach($bilder as $bild){
-											echo '<img class="eintragBild uk-margin-small-bottom uk-border-rounded" src="/users/'.$rtbCreator.'/'.$bild['id'].'.'.$bild['file_ext'].'"><br/>';
+											echo '<div class="uk-align-center"><img class="eintragBild uk-margin-small-bottom uk-border-rounded" src="/users/'.$rtbCreator.'/'.$bild['id'].'.'.$bild['file_ext'].'"></div>';
 										}
 									}
 									?>
@@ -1042,7 +1042,7 @@
 					var infos = JSON.parse(data.response);
 					if(infos.status == 'OK'){
 						var fullPath = '../users/'+username+'/tmp'+infos.fieldToFill+'_'+infos.pictureId+'.'+infos.file_ext;
-
+						$('#picturesError').empty();
 						$('#picture'+infos.fieldToFill+'Id').val(infos.pictureId);
 						$('#file'+infos.fieldToFill+'_ext').val(infos.file_ext);
 						$('#pictures').append('<div class="uk-animation-fade uk-inline uk-dark" id="picture'+infos.fieldToFill+'Div"><button class="uk-position-top-right uk-icon-button deletePicture" type="button" uk-icon="icon: close"></button><img class="uk-border-rounded eintragBild" data-src="'+fullPath+'" src="'+fullPath+'" uk-img></div>');

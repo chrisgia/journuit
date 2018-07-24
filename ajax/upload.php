@@ -76,24 +76,23 @@ if(isset($_FILES['files'])){
 		// Man behält das Erstellungsdatum und die GPS-Daten
 		$sourcePreservedEXIF = $source->preserve("creation", "location");
 		
-		// Wenn keine Maßangaben übergeben wurden, normales Titelbild Format
+		// Wenn keine Maßangaben übergeben wurden, komprimierung
 		if(isset($_POST['width'], $_POST['height'])){
 			$width = (int)$_POST['width'];
 			$height = (int)$_POST['height'];
 		} else {
-			$width = 820;
-			$height = 462;
+			$width = 800;
+			$height = 600;
 		}
 
-		// Bildgröße anpassen
+		// Die Datei wird in das Benutzerverzeichnis verschoben
 		$resizedPicture = $sourcePreservedEXIF->resize(array(
 			"method" => "cover",
 			"width" => $width,
 			"height" => $height
 		));
-
-		// Die Datei wird in das Benutzerverzeichnis verschoben
-		$resizedPicture->toFile($fullPath);
+		
+		$resizedPicture->toFile($fullPath);$resizedPicture->toFile($fullPath);
 
 		$infos = array(
 			'status' => 'OK',
