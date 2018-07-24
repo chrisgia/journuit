@@ -49,12 +49,12 @@
 
 			$standorteSelectBox = "<option value=\"default\">Standort auswählen</option>";
 			$standorteSelectBox .= "<option value=\"neuer-standort\" class=\"uk-text-bold\">Neuer Standort</option>";
-
-			$selected = "";
-
+			
 			foreach($standorte as $standort){
 				if($standort['id'] == $insertedStandortId){
 					$selected = "selected";
+				} else {
+					$selected = "";
 				}
 				$standorteSelectBox .= "<option value=\"".$standort['id']."\" ".$selected.">".$standort['name']."</option>";
 			}

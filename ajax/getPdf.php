@@ -32,15 +32,20 @@
 			$selectDates = $db->prepare("SELECT DISTINCT datum FROM eintraege WHERE reisetagebuch_id = ? AND entwurf = 0 ORDER BY datum ASC");
 			$selectDates->execute(array($rtbId));
 			$dates = $selectDates->fetchAll(\PDO::FETCH_ASSOC);
-
+			
 			class PDF extends FPDF {
-				//Grauer Hintergrund und journuit Logo auf jeder Seite
+				protected $col = 0; // Current column
+				protected $y0;      // Ordinate of column start
+
 				function Header() {
-			    	$this->Image('../pictures/pdf-background.png', 0, 0, $this->GetPageWidth(), $this->GetPageHeight());
+					//journuit Logo auf jeder Seite
+					$this->Image('../pictures/pdf-background.png', 0, 0, $this->GetPageWidth(), $this->GetPageHeight());
 					$this->Image('../pictures/journuit-logo_big.png', $this->GetPageWidth() - 20, 3, -300, -300, 'png', 'http://www.landausflugsplaner.de');
+				    // Save ordinate
+				    $this->y0 = $this->GetY();
 				}
 
-			    function Footer() {
+				function Footer() {
 			        // Go to 1.5 cm from bottom
 				    $this->SetY(-15);
 				    // Select Arial italic 9
@@ -48,6 +53,61 @@
 				    // Print centered page number
 				    $this->Cell(0, 10, "Seite ".$this->PageNo()." von {nb}", 0, 0, 'C');
 			    }
+
+				function SetCol($col) {
+				    // Set position at a given column
+				    $this->col = $col;
+				    $x = 10+$col*65;
+				    $this->SetLeftMargin($x);
+				    $this->SetX($x);
+				}
+
+				function AcceptPageBreak() {
+				    // Method accepting or not automatic page break
+				    if($this->col<2)
+				    {
+				        // Go to next column
+				        $this->SetCol($this->col+1);
+				        // Set ordinate to top
+				        $this->SetY($this->y0);
+				        // Keep on page
+				        return false;
+				    }
+				    else
+				    {
+				        // Go back to first column
+				        $this->SetCol(0);
+				        // Page break
+				        return true;
+				    }
+				}
+
+				function printEintrag($uhrzeit, $titel, $standort, $text, $bilder) {
+				    $this->SetFont('Times', 'B', 12);
+				    $this->MultiCell(60, 5, iconv("UTF-8", "Windows-1252//TRANSLIT", $uhrzeit));
+				    $this->SetFont('', 'BI');
+				    $this->MultiCell(60, 5, iconv("UTF-8", "Windows-1252//TRANSLIT", $titel));
+				    $this->SetFont('', 'B');
+				    $this->MultiCell(60, 5, iconv("UTF-8", "Windows-1252//TRANSLIT", $standort));
+				    $this->Ln(2);
+				    $this->SetFont('', '');
+				    $this->MultiCell(60, 5, iconv("UTF-8", "Windows-1252//TRANSLIT", $text));
+				    $this->Ln(2);
+				    foreach($bilder as $bild){
+						$this->Image('../users/'.$bild, null, null, -400, -400, '', '../../users/'.$bild);
+						$this->Ln(5);
+					}
+
+				    $this->Line($this->GetX(), $this->GetY() + 1, $this->GetX() + 4, $this->GetY() + 1);
+				    $this->Ln();
+				}
+
+				function printDatum($eintragDatum) {
+				    $this->SetFont('Times','B',14);
+				    $this->MultiCell(60,5, iconv("UTF-8", "Windows-1252//TRANSLIT", $eintragDatum));
+				    $this->Line($this->GetX(), $this->GetY() + 1, $this->GetX() + $this->GetStringWidth($eintragDatum) + 2, $this->GetY() + 1);
+				    $this->Ln(2);
+				}
 			}
 
 			$reisetagebuchPdf = new PDF("P", "mm", "A4"); // L=Querformat(Landscape), P=Hochformat(Portrait)
@@ -58,7 +118,7 @@
 			$reisetagebuchPdf->AliasNbPages();
 
 			// Linien Weiß
-			$reisetagebuchPdf->SetDrawColor(255);
+			$reisetagebuchPdf->SetDrawColor(0);
 			// Seite erzeugen (sozusagen: starten)
 			$reisetagebuchPdf->AddPage();
 
@@ -68,9 +128,6 @@
 			$reisetagebuchPdf->Text(($reisetagebuchPdf->GetPageWidth() - $reisetagebuchPdf->GetStringWidth($rtbTitel)) / 2, 15, $rtbTitel);
 			$reisetagebuchPdf->SetFontSize(14);
 			$reisetagebuchPdf->Text(($reisetagebuchPdf->GetPageWidth() / 2) + $reisetagebuchPdf->GetStringWidth($rtbTitel), 15, ', von '.$rtbCreator);
-			/*$reisetagebuchPdf->Cell($reisetagebuchPdf->GetPageWidth(), 10, $rtbTitel, 0, 2, 'C');
-			$reisetagebuchPdf->SetFontSize(14);
-			$reisetagebuchPdf->Cell($reisetagebuchPdf->GetPageWidth(), 10, 'von '.$rtbCreator, 0, 2, 'C');*/
 
 			if(!empty($reisetagebuch[0]['bild_id'])){
 				$reisetagebuchPdf->Image('../users/'.$reisetagebuch[0]['username'].'/'.$reisetagebuch[0]['bild_id'].'.'.$reisetagebuch[0]['file_ext'], 0, 30, null, null, $reisetagebuch[0]['file_ext'], '../../users/'.$reisetagebuch[0]['username'].'/'.$reisetagebuch[0]['bild_id'].'.'.$reisetagebuch[0]['file_ext']);
@@ -80,9 +137,9 @@
 
 			$anzahlEintraege = $anzahlEintraege[0]['anzahl'];
 			if($anzahlEintraege == 1){
-				$eintraegeText = $anzahlEintraege.' Eintrag';
+				$anzahlEintraegeText = $anzahlEintraege.' Eintrag';
 			} else {
-				$eintraegeText = $anzahlEintraege.' '.iconv("UTF-8", "Windows-1252//TRANSLIT", 'Einträge');
+				$anzahlEintraegeText = $anzahlEintraege.' '.iconv("UTF-8", "Windows-1252//TRANSLIT", 'Einträge');
 			}
 
 			$reisetagebuchPdf->SetY(170);
@@ -93,29 +150,26 @@
 
 			$reisetagebuchPdf->SetFontSize(12);
 			$reisetagebuchPdf->SetFont('', 'I');
-			$reisetagebuchPdf->Cell(0, 10, $eintraegeText.', erstellt am '.getMySqlDate($reisetagebuch[0]['erstellt_am']).'.', 0, 1);
+			$reisetagebuchPdf->Cell(0, 10, $anzahlEintraegeText.', erstellt am '.getMySqlDate($reisetagebuch[0]['erstellt_am']).'.', 0, 1);
 			$reisetagebuchPdf->Ln(10);
 			$reisetagebuchPdf->Image('../files/'.$reisetagebuch[0]['url'].'/linkQrCode.png', ($reisetagebuchPdf->GetPageWidth() - 43) / 2, $reisetagebuchPdf->GetY(), null, null, 'png', 'http://www.landausflugsplaner.de/pages/reisetagebuecher.php?rtb='.$reisetagebuch[0]['url']);
 
 			if($anzahlEintraege > 0){
-				$reisetagebuchPdf->SetFont('', '');
 				$reisetagebuchPdf->AddPage();
 
 				foreach($dates as $datum){
-					$reisetagebuchPdf->SetFontSize(14);
+					$reisetagebuchPdf->SetFont('', 'B', 14);
 					$formatiertesDatum = strftime("%e. %B %Y", strtotime($datum['datum']));
-					$reisetagebuchPdf->Cell(0, 10, $formatiertesDatum, 0, 2, 'C');
-					$reisetagebuchPdf->Line(0, $reisetagebuchPdf->GetY(), $reisetagebuchPdf->GetPageWidth(), $reisetagebuchPdf->GetY());
-					$reisetagebuchPdf->Ln(5);
-
+					$reisetagebuchPdf->printDatum($formatiertesDatum);
 					// Einträge des Datums auwählen
 					$selectEintraege = $db->prepare("SELECT id, titel, text, uhrzeit, standort_id, zusammenfassung, public FROM eintraege WHERE reisetagebuch_id = ? AND entwurf = 0 AND datum = ? ORDER BY uhrzeit ASC");
 					$selectEintraege->execute(array($rtbId, $datum['datum']));
 					$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
 
-					$reisetagebuchPdf->SetFontSize(13);
 					$count = 1;
+					$reisetagebuchPdf->SetFont('', '', 12);
 					foreach($eintraege as $eintrag){
+						$eintragsBilder = array();
 						// Eintragsort auswählen
 						$selectStandort = $db->prepare("SELECT name FROM standorte WHERE id = ?");
 						$selectStandort->execute(array($eintrag['standort_id']));
@@ -126,6 +180,7 @@
 							$standortName = '?';
 						}
 
+						$bilder = array();
 						// Eintragsbilder auswählen			
 						$selectBilder = $db->prepare("SELECT bilder.id, bilder.file_ext FROM bilder JOIN eintraege_bilder ON (bilder.id = eintraege_bilder.bild_id) WHERE eintraege_bilder.eintrag_id = ?");
 						$selectBilder->execute(array($eintrag['id']));
@@ -134,37 +189,31 @@
 							if($eintrag['zusammenfassung'] != 1){
 								if($eintrag['uhrzeit'] > 2400){
 									$uhrzeit = substr_replace(str_pad($eintrag['uhrzeit'] - 2400, 4, '0', STR_PAD_LEFT), ':', 2, 0);
-									$reisetagebuchPdf->Cell($reisetagebuchPdf->GetStringWidth('24:00 +'.$uhrzeit) + 3, 10, '24:00 +'.$uhrzeit, 0, 0);
+									$eintragUhrzeit =  '24:00 +'.$uhrzeit."\r\n";
 								} else {
 									$uhrzeit = substr_replace($eintrag['uhrzeit'], ':', 2, 0);
-									$reisetagebuchPdf->Cell(15, 10, $uhrzeit, 0, 0);
+									$eintragUhrzeit =  $uhrzeit."\r\n";
 								}
 							}
 							
 						}
-						$reisetagebuchPdf->SetFont('', 'B');
-						$reisetagebuchPdf->Cell(0, 10, iconv("UTF-8", "Windows-1252//TRANSLIT", $eintrag['titel']), 0, 0);
+
+						$eintragTitel =  iconv("UTF-8", "Windows-1252//TRANSLIT", $eintrag['titel'])."\r\n";
 						if($eintrag['zusammenfassung'] != 1){
-							$reisetagebuchPdf->SetFont('', 'I');
-							$reisetagebuchPdf->SetX(($reisetagebuchPdf->GetPageWidth() - $reisetagebuchPdf->GetStringWidth($standortName)) - 10);
-							$reisetagebuchPdf->Cell(0, 10, iconv("UTF-8", "Windows-1252//TRANSLIT", $standortName), 0, 1);
+							$eintragStandort =  iconv("UTF-8", "Windows-1252//TRANSLIT", $standortName)."\r\n";
 						} else {
-							$reisetagebuchPdf->Ln(10);
-						}
-						$reisetagebuchPdf->SetFont('', '');
-						$reisetagebuchPdf->MultiCell($reisetagebuchPdf->GetPageWidth() - 30, 5, iconv("UTF-8", "Windows-1252//TRANSLIT", $eintrag['text']), 0, 1);
-						$reisetagebuchPdf->Ln(5);
-						foreach($bilder as $bild){
-							$reisetagebuchPdf->Image('../users/'.$reisetagebuch[0]['username'].'/'.$bild['id'].'.'.$bild['file_ext'], null, null, -150, -150, $bild['file_ext'], '../../users/'.$reisetagebuch[0]['username'].'/'.$bild['id'].'.'.$bild['file_ext']);
-							$reisetagebuchPdf->Ln(5);
+							$eintragStandort =  $standortName."\r\n";
 						}
 
-						// Linie streichen wenn es nicht der letzte Eintrag dieses Datums ist
-						if($count != sizeof($eintraege)){
-							$reisetagebuchPdf->Line($reisetagebuchPdf->GetX(), $reisetagebuchPdf->GetY(), 50, $reisetagebuchPdf->GetY());
-							$reisetagebuchPdf->Ln(5);
+						$eintragText =  iconv("UTF-8", "Windows-1252//TRANSLIT", $eintrag['text'])."\r\n";
+
+						if(!empty($bilder)){
+							foreach($bilder as $bild){
+								array_push($eintragsBilder, $reisetagebuch[0]['username'].'/'.$bild['id'].'.'.$bild['file_ext']);
+							}
 						}
 
+						$reisetagebuchPdf->printEintrag($eintragUhrzeit, $eintragTitel, $eintragStandort, $eintragText, $eintragsBilder);
 						$count++;
 					}
 				}

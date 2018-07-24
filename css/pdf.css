@@ -1,0 +1,21 @@
+#entriesTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+#entriesTable td {
+    width: 33%;
+}
+
+#entriesTable, th, td {
+	border: 1px solid black;
+}
+
+#entriesTable .center {
+	text-align: center;
+}
+
+#entriesTable .right {
+	text-align: right;
+}

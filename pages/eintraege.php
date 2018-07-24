@@ -554,10 +554,11 @@
 											<option value="default" selected>Standort auswählen</option>
 											<option value="neuer-standort" class="uk-text-bold">Neuer Standort</option>
 											<?php
-											$selected = ''; 
 											foreach($standorte as $standort){
 												if($standort['id'] == $eintrag[0]['standort_id']){
 													$selected = 'selected';
+												} else {
+													$selected = '';
 												}
 												echo "<option value=\"".$standort['id']."\"".$selected.">".$standort['name']."</option>";
 											}
