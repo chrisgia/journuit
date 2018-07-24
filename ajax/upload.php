@@ -87,7 +87,7 @@ if(isset($_FILES['files'])){
 
 		// Bildgröße anpassen
 		$resizedPicture = $sourcePreservedEXIF->resize(array(
-			"method" => "fit",
+			"method" => "cover",
 			"width" => $width,
 			"height" => $height
 		));

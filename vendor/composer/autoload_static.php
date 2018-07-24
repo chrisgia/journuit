@@ -14,8 +14,6 @@ class ComposerStaticInit898a78978526e8870be19e88a4212f6a
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         'fe62ba7e10580d903cc46d808b5961a4' => __DIR__ . '/..' . '/tightenco/collect/src/Collect/Support/helpers.php',
         'caf31cc6ec7cf2241cb6f12c226c3846' => __DIR__ . '/..' . '/tightenco/collect/src/Collect/Support/alias.php',
-        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
-        '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
         '74ed299072414d276bb7568fe71d5b0c' => __DIR__ . '/..' . '/tinify/tinify/lib/Tinify.php',
         '9635627915aaea7a98d6d14d04ca5b56' => __DIR__ . '/..' . '/tinify/tinify/lib/Tinify/Exception.php',
     );
@@ -46,7 +44,6 @@ class ComposerStaticInit898a78978526e8870be19e88a4212f6a
         ),
         'P' => 
         array (
-            'Psr\\Log\\' => 8,
             'Psr\\Container\\' => 14,
             'PHPMailer\\PHPMailer\\' => 20,
         ),
@@ -57,7 +54,6 @@ class ComposerStaticInit898a78978526e8870be19e88a4212f6a
         'M' => 
         array (
             'Mpociot\\Pipeline\\' => 17,
-            'Mpdf\\' => 5,
         ),
         'D' => 
         array (
@@ -66,7 +62,6 @@ class ComposerStaticInit898a78978526e8870be19e88a4212f6a
             'Delight\\Cookie\\' => 15,
             'Delight\\Base64\\' => 15,
             'Delight\\Auth\\' => 13,
-            'DeepCopy\\' => 9,
         ),
         'B' => 
         array (
@@ -132,10 +127,6 @@ class ComposerStaticInit898a78978526e8870be19e88a4212f6a
         array (
             0 => __DIR__ . '/..' . '/react/cache/src',
         ),
-        'Psr\\Log\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
-        ),
         'Psr\\Container\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
@@ -151,10 +142,6 @@ class ComposerStaticInit898a78978526e8870be19e88a4212f6a
         'Mpociot\\Pipeline\\' => 
         array (
             0 => __DIR__ . '/..' . '/mpociot/pipeline/src',
-        ),
-        'Mpdf\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/mpdf/mpdf/src',
         ),
         'Delight\\Http\\' => 
         array (
@@ -176,10 +163,6 @@ class ComposerStaticInit898a78978526e8870be19e88a4212f6a
         array (
             0 => __DIR__ . '/..' . '/delight-im/auth/src',
         ),
-        'DeepCopy\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
-        ),
         'BotMan\\Drivers\\Facebook\\' => 
         array (
             0 => __DIR__ . '/..' . '/botman/driver-facebook/src',
@@ -200,23 +183,12 @@ class ComposerStaticInit898a78978526e8870be19e88a4212f6a
         ),
     );
 
-    public static $classMap = array (
-        'FPDF_TPL' => __DIR__ . '/..' . '/setasign/fpdi/fpdf_tpl.php',
-        'FPDI' => __DIR__ . '/..' . '/setasign/fpdi/fpdi.php',
-        'FilterASCII85' => __DIR__ . '/..' . '/setasign/fpdi/filters/FilterASCII85.php',
-        'FilterASCIIHexDecode' => __DIR__ . '/..' . '/setasign/fpdi/filters/FilterASCIIHexDecode.php',
-        'FilterLZW' => __DIR__ . '/..' . '/setasign/fpdi/filters/FilterLZW.php',
-        'fpdi_pdf_parser' => __DIR__ . '/..' . '/setasign/fpdi/fpdi_pdf_parser.php',
-        'pdf_context' => __DIR__ . '/..' . '/setasign/fpdi/pdf_context.php',
-    );
-
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit898a78978526e8870be19e88a4212f6a::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit898a78978526e8870be19e88a4212f6a::$prefixDirsPsr4;
             $loader->prefixesPsr0 = ComposerStaticInit898a78978526e8870be19e88a4212f6a::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit898a78978526e8870be19e88a4212f6a::$classMap;
 
         }, null, ClassLoader::class);
     }
