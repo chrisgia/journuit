@@ -93,7 +93,7 @@
 				function printDatum($eintragDatum) {
 				    $this->SetFont('Times','B',14);
 				    $this->MultiCell(60,5, iconv("UTF-8", "Windows-1252//TRANSLIT", $eintragDatum));
-				    $this->SetLineWidth(1);
+				    $this->SetLineWidth(0.7);
 				    $this->Line($this->GetX(), $this->GetY() + 1, $this->GetX() + $this->GetStringWidth($eintragDatum) + 2, $this->GetY() + 1);
 				    $this->Ln(3);
 				}
@@ -167,15 +167,6 @@
 					$reisetagebuchPdf->SetFont('', '', 12);
 					foreach($eintraege as $eintrag){
 						$eintragsBilder = array();
-						// Eintragsort auswählen
-						$selectStandort = $db->prepare("SELECT name FROM standorte WHERE id = ?");
-						$selectStandort->execute(array($eintrag['standort_id']));
-						$standort = $selectStandort->fetchAll(\PDO::FETCH_ASSOC);
-						if(!empty($standort)){
-							$standortName = $standort[0]['name'];
-						} else {
-							$standortName = '?';
-						}
 
 						$bilder = array();
 						// Eintragsbilder auswählen			
@@ -195,14 +186,19 @@
 							
 						}
 
-						$eintragTitel =  iconv("UTF-8", "Windows-1252//TRANSLIT", $eintrag['titel'])."\r\n";
-						if($eintrag['zusammenfassung'] != 1){
-							$eintragStandort =  iconv("UTF-8", "Windows-1252//TRANSLIT", $standortName)."\r\n";
+						$eintragTitel =  $eintrag['titel'];
+						// Eintragsort auswählen
+						$selectStandort = $db->prepare("SELECT name FROM standorte WHERE id = ?");
+						$selectStandort->execute(array($eintrag['standort_id']));
+						$standort = $selectStandort->fetchAll(\PDO::FETCH_ASSOC);
+
+						if(!empty($standort)){
+							$standortName = $standort[0]['name'];
 						} else {
-							$eintragStandort =  $standortName."\r\n";
+							$standortName = '?';
 						}
 
-						$eintragText =  iconv("UTF-8", "Windows-1252//TRANSLIT", $eintrag['text'])."\r\n";
+						$eintragText =  $eintrag['text'];
 
 						if(!empty($bilder)){
 							foreach($bilder as $bild){
@@ -210,7 +206,7 @@
 							}
 						}
 
-						$reisetagebuchPdf->printEintrag($eintragUhrzeit, $eintragTitel, $eintragStandort, $eintragText, $eintragsBilder);
+						$reisetagebuchPdf->printEintrag($eintragUhrzeit, $eintragTitel, $standortName, $eintragText, $eintragsBilder);
 						$count++;
 					}
 				}
