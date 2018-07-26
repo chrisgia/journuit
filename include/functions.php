@@ -167,6 +167,19 @@
 		return false;
 	}
 
+	function checkZusammenfassung($db, $rtbId, $datum){
+		$zusammenfassungen = $db->prepare("SELECT SUM(zusammenfassung) AS zusammenfassungen FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND entwurf = 0");
+		$zusammenfassungen->execute(array($rtbId, htmlspecialchars($datum)));
+		$anzahlZusammenfassungen = $zusammenfassungen->fetchAll(\PDO::FETCH_ASSOC);
+		$anzahlZusammenfassungen = $anzahlZusammenfassungen[0]['zusammenfassungen'];
+
+		if($anzahlZusammenfassungen == '1'){
+			return true;
+		}
+
+		return false;
+	}
+
 	function cleanFolder($username){
 		$mask = "../users/$username/tmp*.*";
 		array_map('unlink', glob($mask));

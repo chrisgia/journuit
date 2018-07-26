@@ -64,6 +64,7 @@
 					$selectEintraege = $db->prepare("SELECT id, titel, text, uhrzeit, standort_id, zusammenfassung, public FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND entwurf = 0 ORDER BY uhrzeit ASC");
 					$selectEintraege->execute(array($rtbId, $eintragsdatum));
 					$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
+
 					$data = $eintraege;
 				}
 
@@ -105,8 +106,12 @@
 							<form id="neu" method="POST">
 								<fieldset class="uk-fieldset">
 
-									<div class="uk-margin">
+									<div class="uk-margin" id="zusammenfassungDiv">
 										<label>Zusammenfassung <input id="zusammenfassung" name="zusammenfassung" class="uk-checkbox" type="checkbox" value="1"></label>
+									</div>
+
+									<div id="zusammenfassungError">
+										<!-- Hier wird ein Fehler angezeigt, wenn es Bereits eine Zusammenfassung mit dem ausgewählten Datum gibt -->
 									</div>
 
 									<div class="uk-margin">
@@ -224,17 +229,21 @@
 
 					// Formularverarbeitung 
 					if(isset($_POST['standort'], $_POST['dateTime'], $_POST['titel'], $_POST['eintrag'])){
+
 						$errors = array();
+						$datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
 
 						if (isset($_POST['zusammenfassung']) && ($_POST['zusammenfassung'] == "1")) {
 							$zusammenfassung = 1;
 							$_POST['standort'] = null;
 							$_POST['dateTime'] = null;
+
+							if(checkZusammenfassung($db, $rtbId, $datum)){
+								array_push($errors, 'Sie haben für dieses Datum bereits eine Zusammenfassung geschrieben.');
+							}
 						} else {
 							$zusammenfassung = 0;
 						}
-						
-						$datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
 						
 						if(isset($_POST['uebergangsstunden']) && $_POST['uebergangsstunden'] > 0){
 							$uebergangsstunden = (int) htmlspecialchars($_POST['uebergangsstunden']);
@@ -522,6 +531,7 @@
 					$selectStandorte = $db->prepare("SELECT id, name FROM standorte WHERE users_id = ? ORDER BY name");
 					$selectStandorte->execute(array($userId));
 					$standorte = $selectStandorte->fetchAll(\PDO::FETCH_ASSOC);
+
 					if(isset($rtbId) && isOwner($db, $userId, $rtbId) && !empty($eintrag)){
 						?>
 						<div class="uk-margin-top uk-margin-bottom">
@@ -544,8 +554,24 @@
 							<form id="bearbeiten" method="POST">
 								<fieldset class="uk-fieldset">
 
-									<div class="uk-margin">
-										<label>Zusammenfassung <input id="zusammenfassung" name="zusammenfassung" class="uk-checkbox" type="checkbox" value="1"></label>
+									<?php
+									if(!checkZusammenfassung($db, $rtbId, $eintrag[0]['datum']) || $eintrag[0]['zusammenfassung'] == 1){
+									?>
+									<div class="uk-margin" id="zusammenfassungDiv">
+										<?php 
+										$zusammenfassungChecked = '';
+										if($eintrag[0]['zusammenfassung'] == 1){
+											$zusammenfassungChecked = 'checked';
+										}
+										?>
+										<label>Zusammenfassung <input id="zusammenfassung" name="zusammenfassung" class="uk-checkbox" type="checkbox" value="1" <?=$zusammenfassungChecked;?>></label>
+									</div>
+									<?php
+									}
+									?>
+
+									<div id="zusammenfassungError">
+										<!-- Hier wird ein Fehler angezeigt, wenn es Bereits eine Zusammenfassung mit dem ausgewählten Datum gibt -->
 									</div>
 
 									<div class="uk-margin">
@@ -732,6 +758,12 @@
 
 						if (isset($_POST['zusammenfassung']) && ($_POST['zusammenfassung'] == "1")) {
 							$zusammenfassung = 1;
+							$_POST['standort'] = null;
+							$datum = null;
+
+							if(checkZusammenfassung($db, $rtbId, $datum)){
+								array_push($errors, 'Sie haben für dieses Datum bereits eine Zusammenfassung geschrieben.');
+							}
 						} else {
 							$zusammenfassung = 0;
 						}
@@ -898,13 +930,23 @@
 			$('#uebergang').hide();
 
 			var initialTime;
+			var initialDate;
 			// Zeigt das Übergangs-Selectfeld beim Seitenaufruf an, wenn nötig 
 			<?php 
-			if(isset($eintrag, $eintrag[0]['uhrzeit'])){
-				echo "initialTime = '".$eintrag[0]['uhrzeit']."';";
-				
-				if($eintrag[0]['uhrzeit'] > 2400){ 
-					echo "$('#uebergang').show();";
+			if(isset($eintrag)){
+				if($eintrag[0]['zusammenfassung'] == 1){
+					?>
+					$('#standorte').hide();
+					$('#dateInput').hide();
+					<?php
+				}
+				if(isset($eintrag[0]['uhrzeit'])){
+					echo "initialTime = '".$eintrag[0]['uhrzeit']."';";
+					echo "initialDate = '".$eintrag[0]['datum']."';";
+					
+					if($eintrag[0]['uhrzeit'] > 2400){ 
+						echo "$('#uebergang').show();";
+					}
 				}
 			}
 			?>
@@ -934,7 +976,7 @@
 					}
 					minutes = instance.substring(14);
 					var uhrzeit = hours+''+minutes;
-					console.log(uhrzeit);
+
 					if(uhrzeit != initialTime){
 						$.ajax({
 							url : '/ajax/checkEntryTime.php',
@@ -957,12 +999,34 @@
 					}
 				},
 				onChange: function(dateStr, instance){
+					date = instance.substring(0, 10);
 					hours = instance.substring(11, 13);
 					if(hours == '00'){
 						$('#uebergang').show();
 					} else {
 						$('#uebergang').hide();
 						$("#uebergangsstunden").val('0');
+					}
+					if(date != initialDate){
+						$.ajax({
+							url : '/ajax/checkZusammenfassung.php',
+							type : 'POST',
+							data : {
+								rtb : rtb,
+								datum : date
+							},
+							success : function(response) {
+								if(response != 'OK'){
+									$('#zusammenfassungDiv').hide();
+									$('#zusammenfassungError').empty().append('<div class="uk-margin-top uk-alert-primary" uk-alert><p>'+response+'</p></div>');
+								} else {
+									$('#zusammenfassungError').empty();
+									$('#zusammenfassungDiv').show();
+								}
+							}
+						});
+					} else {
+						$('#zusammenfassungError').empty();
 					}
 				}			  
 			});
