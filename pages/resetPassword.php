@@ -21,7 +21,7 @@
 			<div class="uk-flex uk-flex-column uk-flex-center uk-flex-middle">
 				<div class="uk-margin-top">
 					<span id="journuit_big">
-						<span class="white">jour</span><span class="black">nuit</span> <img data-src="http://landausflugsplaner.de/pictures/journuit-logo_big.png" alt="journuit Logo" uk-img>
+						<span class="white">jour</span><span class="black">nuit</span> <img data-src="../pictures/journuit-logo_big.png" alt="journuit Logo" uk-img>
 					</span>
 				</div>
 
@@ -62,7 +62,7 @@
 						try {
 						    $auth->forgotPassword($_POST['email'], function ($selector, $token) use ($username, $email, $fullname, $subject) {
 
-						        $url = 'http://www.landausflugsplaner.de/pages/resetPassword.php?view=changePassword&selector='.\urlencode($selector).'&token='.\urlencode($token);
+						        $url = 'https://journuit.euresa-reisen.de/pages/resetPassword.php?view=changePassword&selector='.\urlencode($selector).'&token='.\urlencode($token);
 						        $message = 'Hallo '.$username.', <br/>bitte klicken Sie auf den folgenden Link um das Passwort für Ihr Konto bei journuit zurückzusetzen: <a href="'.$url.'">Passwort zurücksetzen</a>. <br/>Vielen Dank.';
 						        sendMail($email, $fullname, $subject, $message, $copy = false, $attachments = NULL);
 						    });

@@ -41,5 +41,7 @@
 			);
 		}
 		echo json_encode($result);
+	} else {
+		echo 'Direkter Aufruf geblockt !';
 	}
 ?>

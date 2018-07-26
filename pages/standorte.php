@@ -186,9 +186,9 @@
                                     if(!empty($standort[0]['bild_id'])){
                                         $pictureId = $standort[0]['bild_id'];
                                         $file_ext = $standort[0]['file_ext'];
-                                        echo '<img class="standortbild" src="/users/'.$username.'/'.$pictureId.'.'.$file_ext.'">';
+                                        echo '<img class="standortbild" data-src="/users/'.$username.'/'.$pictureId.'.'.$file_ext.'" uk-img>';
                                     } else {
-                                        echo '<img class="standortbild" src="/pictures/no-picture_small.jpg">';
+                                        echo '<img class="standortbild" data-src="/pictures/no-picture_small.jpg" uk-img>';
                                     } 
                                     ?>
                                 </div>
@@ -239,11 +239,9 @@
                         array_push($errors, 'Es wurde kein Standort für diese Werte gefunden.');
                     }
 
-
                     if (ctype_space(htmlspecialchars($_POST['lon'])) || empty($_POST['lon'])) {
                         array_push($errors, 'Es wurde kein Standort für diese Werte gefunden.');
                     }
-
 
                     $updateArray = array(
                         htmlspecialchars($_POST['name']), 

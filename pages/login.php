@@ -27,14 +27,14 @@
 							<div class="uk-margin">
 								<div class="uk-inline">
 									<span class="uk-form-icon" uk-icon="icon: mail"></span>
-									<input name="email" class="uk-input" type="text" placeholder="Email-Adresse..." value="<?php if(isset($_POST['email'])){echo $_POST['email'];}?>">
+									<input name="email" class="uk-input" type="text" placeholder="Email-Adresse..." value="<?php if(isset($_POST['email'])){echo $_POST['email'];}?>" required>
 								</div>
 							</div>
 
 							<div class="uk-margin">
 								<div class="uk-inline">
 									<span class="uk-form-icon" uk-icon="icon: lock"></span>
-									<input name="passwort" class="uk-input" type="password" placeholder="Passwort...">
+									<input name="passwort" class="uk-input" type="password" placeholder="Passwort..." required>
 								</div>
 							</div>
 
@@ -52,7 +52,18 @@
 					if(isset($_POST['login'])){
 						try {
 							$error = "";
-							$auth->login(htmlspecialchars($_POST['email']), htmlspecialchars($_POST['passwort']));
+
+							if(mb_strlen($_POST['email']) > 249){
+								$error = "Die E-Mail Adresse darf maximal 249 Zeichen enthalten.";
+							} 
+
+							if(mb_strlen($_POST['passwort']) > 128){
+								$error = "Das Passwort darf maximal 128 Zeichen enthalten.";
+							} 
+
+							if(empty($error)){
+								$auth->login(htmlspecialchars($_POST['email']), htmlspecialchars($_POST['passwort']));
+							}
 						}
 						catch (\Delight\Auth\InvalidEmailException $e) {
 							$error = "Die Email-Adresse ist unbekannt.";

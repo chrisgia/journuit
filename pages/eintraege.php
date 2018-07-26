@@ -411,7 +411,7 @@
 								$bilder = $selectBilder->fetchAll(\PDO::FETCH_ASSOC);
 								if(!empty($bilder)){
 									foreach($bilder as $bild){
-										echo '<div class="uk-align-center"><img class="eintragBild uk-margin-small-bottom uk-border-rounded" src="/users/'.$username.'/'.$bild['id'].'.'.$bild['file_ext'].'"></div>';
+										echo '<div class="uk-align-center"><img class="eintragBild uk-margin-small-bottom uk-border-rounded" data-src="/users/'.$username.'/'.$bild['id'].'.'.$bild['file_ext'].'" uk-img></div>';
 									}
 								}
 								?>
@@ -489,7 +489,7 @@
 									$bilder = $selectBilder->fetchAll(\PDO::FETCH_ASSOC);
 									if(!empty($bilder)){
 										foreach($bilder as $bild){
-											echo '<div class="uk-align-center"><img class="eintragBild uk-margin-small-bottom uk-border-rounded" src="/users/'.$rtbCreator.'/'.$bild['id'].'.'.$bild['file_ext'].'"></div>';
+											echo '<div class="uk-align-center"><img class="eintragBild uk-margin-small-bottom uk-border-rounded" data-src="/users/'.$rtbCreator.'/'.$bild['id'].'.'.$bild['file_ext'].'" uk-img></div>';
 										}
 									}
 									?>
@@ -644,7 +644,7 @@
 											$anzahlBilder = sizeof($bilder);
 											$i = 1;
 											foreach($bilder as $bild){
-												echo '<div class="uk-inline uk-dark" id="picture'.$i.'Div"><button class="uk-position-top-right uk-icon-button deletePicture" type="button" uk-icon="icon: close"></button><img class="eintragBild uk-margin-small-bottom uk-border-rounded" src="/users/'.$rtbCreator.'/'.$bild['id'].'.'.$bild['file_ext'].'"></div>';
+												echo '<div class="uk-inline uk-dark" id="picture'.$i.'Div"><button class="uk-position-top-right uk-icon-button deletePicture" type="button" uk-icon="icon: close"></button><img class="eintragBild uk-margin-small-bottom uk-border-rounded" data-src="/users/'.$rtbCreator.'/'.$bild['id'].'.'.$bild['file_ext'].'" uk-img></div>';
 												echo "<input id=\"picture".$i."Id\" name=\"picture".$i."Id\" type=\"hidden\" value=\"".$bild['id']."\">";
 												echo "<input id=\"file".$i."_ext\" name=\"file".$i."_ext\" type=\"hidden\" value=\"".$bild['file_ext']."\">";
 												echo "<input id=\"bild".$i."unterschrift\" name=\"bild".$i."unterschrift\" type=\"hidden\" value=\"\">";

@@ -11,5 +11,7 @@
 		} else {
 			echo 'Es ist bereits ein Eintrag mit dieser Uhrzeit vorhanden.';
 		}
+	} else {
+		echo 'Direkter Aufruf geblockt !';
 	}
 ?>

@@ -78,9 +78,9 @@
 								</div>
 								<?php 
 									if(!empty($reisetagebuch['bild_id'])){
-										echo '<img class="titelbild" src="/users/'.$username.'/'.$reisetagebuch['bild_id'].'.'.$reisetagebuch['file_ext'].'">';
+										echo '<img class="titelbild" data-src="/users/'.$username.'/'.$reisetagebuch['bild_id'].'.'.$reisetagebuch['file_ext'].'" uk-img>';
 									} else {
-										echo '<img class="titelbild" src="/pictures/no-picture.jpg">';
+										echo '<img class="titelbild" data-src="/pictures/no-picture.jpg" uk-img>';
 									} 
 								?>
 								<div class="uk-overlay uk-overlay-default uk-position-bottom">
@@ -505,9 +505,9 @@
 							if(!empty($reisetagebuchDaten[0]['bild_id'])){
 								$pictureId = $reisetagebuchDaten[0]['bild_id'];
 								$file_ext = $reisetagebuchDaten[0]['file_ext'];
-								echo '<img class="titelbild uk-border-rounded" src="/users/'.$username.'/'.$pictureId.'.'.$file_ext.'">';
+								echo '<img class="titelbild uk-border-rounded" data-src="/users/'.$username.'/'.$pictureId.'.'.$file_ext.'" uk-img>';
 							} else {
-								echo '<img class="titelbild uk-border-rounded" src="/pictures/no-picture.jpg">';
+								echo '<img class="titelbild uk-border-rounded" data-src="/pictures/no-picture.jpg" uk-img>';
 							} 
 						?>
 						</div>

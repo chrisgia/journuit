@@ -16,7 +16,7 @@
 			<div class="uk-flex uk-flex-column uk-flex-center uk-flex-middle">
 				<div class="uk-margin-top">
 					<span id="journuit_big">
-						<span class="white">jour</span><span class="black">nuit</span> <img data-src="http://landausflugsplaner.de/pictures/journuit-logo_big.png" alt="journuit Logo" uk-img>
+						<span class="white">jour</span><span class="black">nuit</span> <img data-src="../pictures/journuit-logo_big.png" alt="journuit Logo" uk-img>
 					</span>
 				</div>
 				<div class="uk-margin-top uk-margin-bottom">
@@ -26,42 +26,42 @@
 							<div class="uk-margin">
 								<div class="uk-inline">
 									<span class="uk-form-icon" uk-icon="icon: info"></span>
-									<input name="vorname" class="uk-input" type="text" placeholder="Vorname..." value="<?php if(isset($_POST['vorname'])){echo $_POST['vorname'];}?>">
+									<input name="vorname" class="uk-input" type="text" placeholder="Vorname..." value="<?php if(isset($_POST['vorname'])){echo $_POST['vorname'];}?>" required>
 								</div>
 							</div>
 
 							<div class="uk-margin">
 								<div class="uk-inline">
 									<span class="uk-form-icon" uk-icon="icon: info"></span>
-									<input name="nachname" class="uk-input" type="text" placeholder="Nachname..." value="<?php if(isset($_POST['nachname'])){echo $_POST['nachname'];}?>">
+									<input name="nachname" class="uk-input" type="text" placeholder="Nachname..." value="<?php if(isset($_POST['nachname'])){echo $_POST['nachname'];}?>" required>
 								</div>
 							</div>
 
 							<div class="uk-margin">
 								<div class="uk-inline">
 									<span class="uk-form-icon" uk-icon="icon: mail"></span>
-									<input name="email" class="uk-input" type="text" placeholder="Email-Adresse..." value="<?php if(isset($_POST['email'])){echo $_POST['email'];}?>">
+									<input name="email" class="uk-input" type="text" placeholder="Email-Adresse..." value="<?php if(isset($_POST['email'])){echo $_POST['email'];}?>" required>
 								</div>
 							</div>
 
 							<div class="uk-margin">
 								<div class="uk-inline">
 									<span class="uk-form-icon" uk-icon="icon: user"></span>
-									<input name="username" class="uk-input" type="text" placeholder="Benutzername..." value="<?php if(isset($_POST['username'])){echo $_POST['username'];}?>">
+									<input name="username" class="uk-input" type="text" placeholder="Benutzername..." value="<?php if(isset($_POST['username'])){echo $_POST['username'];}?>" required uk-tooltip="title: Buchstaben, Zahlen, - und _ erlaubt; pos: bottom">
 								</div>
 							</div>
 
 							<div class="uk-margin">
 								<div class="uk-inline">
 									<span class="uk-form-icon" uk-icon="icon: lock"></span>
-									<input name="passwort" class="uk-input" type="password" placeholder="Passwort...">
+									<input name="passwort" class="uk-input" type="password" placeholder="Passwort..." required>
 								</div>
 							</div>
 
 							<div class="uk-margin">
 								<div class="uk-inline">
 									<span class="uk-form-icon" uk-icon="icon: lock"></span>
-									<input name="passwort_confirm" class="uk-input" type="password" placeholder="Passwort wiederholen...">
+									<input name="passwort_confirm" class="uk-input" type="password" placeholder="Passwort wiederholen..." required>
 								</div>
 							</div>
 						</fieldset>
@@ -83,19 +83,44 @@
 							if(empty($vorname)){
 								$error = "Der Vorname darf nicht leer sein.";
 							} 
-							if(empty($nachname)){
-								$error = "Der Nachname darf nicht leer sein.";
-							}
+
+							if(mb_strlen($vorname) > 35){
+								$error = "Der Vorname darf maximal 35 Zeichen enthalten.";
+							} 
 
 							if(empty($nachname)){
 								$error = "Der Nachname darf nicht leer sein.";
 							}
+
+							if(mb_strlen($nachname) > 35){
+								$error = "Der Nachname darf maximal 35 Zeichen enthalten.";
+							} 
+
+							if(empty($username)){
+								$error = "Der Benutzername darf nicht leer sein.";
+							}
+
+							if(mb_strlen($username) > 100){
+								$error = "Der Benutzername darf maximal 100 Zeichen enthalten.";
+							} 
 
 							$authorizedChars = array('-', '_'); 
 
 							if(!ctype_alnum(str_replace($authorizedChars, '', $username))) { 
 								$error = "Der Benutzername darf nur alphanumerische Zeichen sowie '-' und '_' enthalten."; 
+							}
+
+							if(empty($_POST['passwort'])){
+								$error = "Es muss ein Passwort angegeben werden.";
 							} 
+
+							if(empty($_POST['passwort_confirm'])){
+								$error = "Das Passwort muss wiederholt werden.";
+							}
+
+							if(mb_strlen($_POST['passwort']) > 128){
+								$error = "Das Passwort darf maximal 128 Zeichen enthalten.";
+							}
 
 							if($_POST['passwort'] != $_POST['passwort_confirm']){
 								$error = "Die Passwörter stimmen nicht überein.";

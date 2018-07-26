@@ -40,7 +40,7 @@
 				function Header() {
 					//journuit Logo auf jeder Seite
 					$this->Image('../pictures/pdf-background.png', 0, 0, $this->GetPageWidth(), $this->GetPageHeight());
-					$this->Image('../pictures/journuit-logo_big.png', $this->GetPageWidth() - 20, 3, -300, -300, 'png', 'http://www.landausflugsplaner.de');
+					$this->Image('../pictures/journuit-logo_big.png', $this->GetPageWidth() - 20, 3, -300, -300, 'png', 'https://journuit.euresa-reisen.de');
 				    // Save ordinate
 				    $this->y0 = $this->GetY();
 				}
@@ -92,7 +92,7 @@
 
 				function printDatum($eintragDatum) {
 				    $this->SetFont('Times','B',14);
-				    $this->MultiCell(60,5, iconv("UTF-8", "Windows-1252//TRANSLIT", $eintragDatum));
+				    $this->MultiCell(60, 5, iconv("UTF-8", "Windows-1252//TRANSLIT", $eintragDatum));
 				    $this->SetLineWidth(0.7);
 				    $this->Line($this->GetX(), $this->GetY() + 1, $this->GetX() + $this->GetStringWidth($eintragDatum) + 2, $this->GetY() + 1);
 				    $this->Ln(3);
@@ -149,7 +149,7 @@
 			$reisetagebuchPdf->Cell(0, 10, $anzahlEintraegeText.', erstellt am '.getMySqlDate($reisetagebuch[0]['erstellt_am']).'.', 0, 1);
 			$reisetagebuchPdf->Cell(0, 10, getMySqlDate($dates[0]['datum']).' - '.getMySqlDate($dates[sizeof($dates) - 1]['datum']).' ('.$anzahlReisetageText.')', 0, 1);
 			$reisetagebuchPdf->Ln(10);
-			$reisetagebuchPdf->Image('../files/'.$reisetagebuch[0]['url'].'/linkQrCode.png', ($reisetagebuchPdf->GetPageWidth() - 43) / 2, $reisetagebuchPdf->GetY(), null, null, 'png', 'http://www.landausflugsplaner.de/pages/reisetagebuecher.php?rtb='.$reisetagebuch[0]['url']);
+			$reisetagebuchPdf->Image('../files/'.$reisetagebuch[0]['url'].'/linkQrCode.png', ($reisetagebuchPdf->GetPageWidth() - 43) / 2, $reisetagebuchPdf->GetY(), null, null, 'png', 'https://journuit.euresa-reisen.de/pages/reisetagebuecher.php?rtb='.$reisetagebuch[0]['url']);
 
 			if($anzahlEintraege > 0){
 				$reisetagebuchPdf->AddPage();
@@ -214,5 +214,7 @@
 
 			$reisetagebuchPdf->Output('../files/'.$rtbUrl.'/'.$rtbCreator.'_'.normalize($reisetagebuch[0]['titel']).'.pdf', 'F');
 		}
+	} else {
+		echo 'Direkter Aufruf geblockt !';
 	}
 ?>

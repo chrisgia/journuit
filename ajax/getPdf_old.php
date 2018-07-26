@@ -37,7 +37,7 @@
 				//Grauer Hintergrund und journuit Logo auf jeder Seite
 				function Header() {
 			    	$this->Image('../pictures/pdf-background.png', 0, 0, $this->GetPageWidth(), $this->GetPageHeight());
-					$this->Image('../pictures/journuit-logo_big.png', $this->GetPageWidth() - 20, 3, -300, -300, 'png', 'http://www.landausflugsplaner.de');
+					$this->Image('../pictures/journuit-logo_big.png', $this->GetPageWidth() - 20, 3, -300, -300, 'png', 'https://journuit.euresa-reisen.de');
 				}
 
 			    function Footer() {
@@ -95,7 +95,7 @@
 			$reisetagebuchPdf->SetFont('', 'I');
 			$reisetagebuchPdf->Cell(0, 10, $eintraegeText.', erstellt am '.getMySqlDate($reisetagebuch[0]['erstellt_am']).'.', 0, 1);
 			$reisetagebuchPdf->Ln(10);
-			$reisetagebuchPdf->Image('../files/'.$reisetagebuch[0]['url'].'/linkQrCode.png', ($reisetagebuchPdf->GetPageWidth() - 43) / 2, $reisetagebuchPdf->GetY(), null, null, 'png', 'http://www.landausflugsplaner.de/pages/reisetagebuecher.php?rtb='.$reisetagebuch[0]['url']);
+			$reisetagebuchPdf->Image('../files/'.$reisetagebuch[0]['url'].'/linkQrCode.png', ($reisetagebuchPdf->GetPageWidth() - 43) / 2, $reisetagebuchPdf->GetY(), null, null, 'png', 'https://journuit.euresa-reisen.de/pages/reisetagebuecher.php?rtb='.$reisetagebuch[0]['url']);
 
 			if($anzahlEintraege > 0){
 				$reisetagebuchPdf->SetFont('', '');
@@ -172,5 +172,7 @@
 
 			$reisetagebuchPdf->Output('../files/'.$rtbUrl.'/'.$rtbCreator.'_'.normalize($reisetagebuch[0]['titel']).'.pdf', 'F');
 		}
+	} else {
+		echo 'Direkter Aufruf geblockt !';
 	}
 ?>
