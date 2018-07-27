@@ -61,7 +61,7 @@
 
 				if(isset($eintragsdatum)){
 					// Die Daten des Eintrags mit dem gegebenen Datum und rtbId ausgeben
-					$selectEintraege = $db->prepare("SELECT id, titel, text, uhrzeit, standort_id, zusammenfassung, public FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND entwurf = 0 ORDER BY uhrzeit ASC");
+					$selectEintraege = $db->prepare("SELECT id, titel, text, uhrzeit, standort_id, zusammenfassung, public FROM eintraege WHERE reisetagebuch_id = ? AND datum = ? AND entwurf = 0 ORDER BY zusammenfassung, uhrzeit ASC");
 					$selectEintraege->execute(array($rtbId, $eintragsdatum));
 					$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -107,7 +107,7 @@
 								<fieldset class="uk-fieldset">
 
 									<?php 
-									if(isset($_GET['datum'])){
+									if(isset($_GET['datum']) && !checkZusammenfassung($db, $rtbId, $_GET['datum'])){
 										?>
 										<div class="uk-margin" id="zusammenfassungDiv">
 											<label>Zusammenfassung <input id="zusammenfassung" name="zusammenfassung" class="uk-checkbox" type="checkbox" value="1"></label>
@@ -235,7 +235,8 @@
 
 					// Formularverarbeitung 
 					if(isset($_POST['standort'], $_POST['dateTime'], $_POST['titel'], $_POST['eintrag'])){
-
+						error_reporting(E_ALL);
+						ini_set('display_errors', '1');
 						$errors = array();
 						$datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
 						
@@ -257,8 +258,8 @@
 
 						if (isset($_POST['zusammenfassung']) && ($_POST['zusammenfassung'] == "1")) {
 							$zusammenfassung = 1;
-							$_POST['standort'] = null;
-							$roundedUhrzeit = null;
+							$_POST['standort'] = '0';
+							$roundedUhrzeit = '0000';
 
 							if(checkZusammenfassung($db, $rtbId, $datum)){
 								array_push($errors, 'Sie haben für dieses Datum bereits eine Zusammenfassung geschrieben.');
@@ -312,6 +313,7 @@
 						if(empty($errors)){
 							$insertEintrag = $db->prepare("INSERT INTO eintraege(reisetagebuch_id, titel, text, datum, uhrzeit, standort_id, entwurf, zusammenfassung, public) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
 							$insertEintrag->execute(array($rtbId, htmlspecialchars($_POST['titel']), htmlspecialchars($_POST['eintrag']), $datum, $roundedUhrzeit, htmlspecialchars($_POST['standort']), $entwurf, $zusammenfassung, $public));
+							
 							$eintragId = $db->lastInsertId();
 							for($i = 1; $i <= $insertedPicsCount; $i++){
 								insertEintragBild($db, $username, $eintragId, $_POST['picture'.$i.'Id'], $_POST['bild'.$i.'unterschrift']);
