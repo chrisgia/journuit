@@ -106,9 +106,15 @@
 							<form id="neu" method="POST">
 								<fieldset class="uk-fieldset">
 
-									<div class="uk-margin" id="zusammenfassungDiv">
-										<label>Zusammenfassung <input id="zusammenfassung" name="zusammenfassung" class="uk-checkbox" type="checkbox" value="1"></label>
-									</div>
+									<?php 
+									if(isset($_GET['datum'])){
+										?>
+										<div class="uk-margin" id="zusammenfassungDiv">
+											<label>Zusammenfassung <input id="zusammenfassung" name="zusammenfassung" class="uk-checkbox" type="checkbox" value="1"></label>
+										</div>
+										<?php
+									}
+									?>
 
 									<div id="zusammenfassungError">
 										<!-- Hier wird ein Fehler angezeigt, wenn es Bereits eine Zusammenfassung mit dem ausgewählten Datum gibt -->
@@ -232,18 +238,6 @@
 
 						$errors = array();
 						$datum = substr(htmlspecialchars($_POST['dateTime']), 0, 10);
-
-						if (isset($_POST['zusammenfassung']) && ($_POST['zusammenfassung'] == "1")) {
-							$zusammenfassung = 1;
-							$_POST['standort'] = null;
-							$_POST['dateTime'] = null;
-
-							if(checkZusammenfassung($db, $rtbId, $datum)){
-								array_push($errors, 'Sie haben für dieses Datum bereits eine Zusammenfassung geschrieben.');
-							}
-						} else {
-							$zusammenfassung = 0;
-						}
 						
 						if(isset($_POST['uebergangsstunden']) && $_POST['uebergangsstunden'] > 0){
 							$uebergangsstunden = (int) htmlspecialchars($_POST['uebergangsstunden']);
@@ -259,6 +253,18 @@
 
 						if(!checkEntryTime($db, $rtbId, $datum, $roundedUhrzeit)){
 							array_push($errors, 'Es ist bereits ein Eintrag mit dieser Uhrzeit vorhanden.');
+						}
+
+						if (isset($_POST['zusammenfassung']) && ($_POST['zusammenfassung'] == "1")) {
+							$zusammenfassung = 1;
+							$_POST['standort'] = null;
+							$roundedUhrzeit = null;
+
+							if(checkZusammenfassung($db, $rtbId, $datum)){
+								array_push($errors, 'Sie haben für dieses Datum bereits eine Zusammenfassung geschrieben.');
+							}
+						} else {
+							$zusammenfassung = 0;
 						}
 
 						if (ctype_space(htmlspecialchars($_POST['titel'])) || empty($_POST['titel'])) {
@@ -759,7 +765,7 @@
 						if (isset($_POST['zusammenfassung']) && ($_POST['zusammenfassung'] == "1")) {
 							$zusammenfassung = 1;
 							$_POST['standort'] = null;
-							$datum = null;
+							$roundedUhrzeit = null;
 
 							if(checkZusammenfassung($db, $rtbId, $datum)){
 								array_push($errors, 'Sie haben für dieses Datum bereits eine Zusammenfassung geschrieben.');

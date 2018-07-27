@@ -47,7 +47,7 @@
 					<?php
 					$standortCount = 1;
 					foreach($standorte as $standort){
-						$selectEintraege = $db->prepare("SELECT titel, datum, uhrzeit, public FROM eintraege WHERE standort_id = ?");
+						$selectEintraege = $db->prepare("SELECT titel, datum, uhrzeit, public FROM eintraege WHERE standort_id = ? AND entwurf = 0 AND zusammenfassung = 0");
 						$selectEintraege->execute(array($standort['id']));
 						$eintraege = $selectEintraege->fetchAll(\PDO::FETCH_ASSOC);
 
